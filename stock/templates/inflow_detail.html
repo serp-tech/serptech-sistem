@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% load custom_tags %}
+
+{% block title %}Detalhes da entrada{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Detalhes da Entrada</h2>
+    <p><strong>Data:    </strong>{{object.date }}</p>
+    <p><strong>Item:    </strong>{{object.item}}</p>
+    <p><strong>Validade:    </strong>{{object.validity }}</p>
+    <p><strong>Nota Fiscal: </strong>{{object.invoice }}</p>
+    <p><strong>Pdf: </strong>{{object.invoice_pdf }}</p>
+    <p><strong>Estoque de Origem: </strong>{{object.source_stock }}</p>
+    <p><strong>Estoque Destino: </strong>{{object.target_stock }}</p>
+    <p><strong>Custo Unitario:</strong> {{object.unit_cost|format_currency_filter }}</p>
+    <p><strong>Quantidade:  </strong>{{object.quantity }}</p>
+    <p><strong>Custo Total:</strong> {{object.total_cost|format_currency_filter }}</p>
+    <p><strong>Observação: </strong>{{object.observation }}</p>
+    
+    
+    <a href="{% url 'inflow_update' object.pk %}" class="btn btn-primary">Editar</a>
+    
+    <a href="{% url 'inflow' %}" class="btn btn-primary">Voltar</a>
+    
+    <a href="{% url 'inflow_delete' object.pk %}" class="btn btn-confirm-excluir">Excluir</a>
+    
+</div>
+{% endblock %}

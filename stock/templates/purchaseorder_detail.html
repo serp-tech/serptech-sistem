@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalhes da Ordem{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Detalhes da Ordem</h2>
+    <p><strong>Data da Solicitação:</strong> {{ object.date|date:"d/m/Y" }}</p>
+    <p><strong>Data da Compra:</strong> {{ object.purchase_date|date:"d/m/Y" }}</p>
+    <p><strong>Data de Entrega:</strong> {{ object.delivery_date|date:"d/m/Y" }}</p>
+    <p><strong>Produto:</strong> {{ object.item }}</p>
+    <p><strong>Marca:</strong> {{ object.brand }}</p>
+    <p><strong>Quantidade:</strong> {{ object.quantity }}</p>
+    <p><strong>Requisitante:</strong> {{ object.requester }}</p>
+    <p><strong>Gestor:</strong> {{ object.manager }}</p>
+    <p><strong>Setor:</strong> {{ object.sector }}</p>
+    <p><strong>Especificações:</strong> {{ object.specification }}</p>
+    <p><strong>Descrição:</strong> {{ object.description }}</p>
+    <p><strong>Justificativa:</strong> {{ object.justification }}</p>
+    <p><strong>Status:</strong> {{ object.status }}</p>
+    <p><strong>Feedback:</strong> {{ object.feedback }}</p>
+
+
+        <a href="{% url 'purchase_update' object.pk %}" class="btn btn-primary">Editar</a>
+    <a href="{% url 'purchase' %}" class="btn btn-primary">Voltar</a>
+    <a href="{% url 'purchase_delete' object.pk %}" class="btn btn-danger">Excluir</a>
+    
+</div>
+
+
+
+{% endblock %}

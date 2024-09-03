@@ -1,0 +1,247 @@
+{% extends "base.html" %}
+
+{% block title %}Ordem de Compra{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Ordem de Compra</h2>
+    {% if perms.estoque.add_ordem_de_compra %}
+    <a href="{% url 'purchase_add' %}" class="btn btn-primary mb-2">Nova Ordem</a>
+    {% endif %}
+    <form method="get" action="">
+        <div class="row mb-3">
+            <div class="col-md-3 mb-2">
+                <select class="form-control" name="status">
+                    <option value="">Status</option>
+                    <option value="Aprovado" {% if request.GET.status == "Aprovado" %}selected{% endif %}>Aprovado</option>
+                    <option value="Análise" {% if request.GET.status == "Análise" %}selected{% endif %}>Análise</option>
+                    <option value="Negado" {% if request.GET.status == "Negado" %}selected{% endif %}>Negado</option>
+                </select>
+            </div>
+            <div class="col-md-3 mb-2">
+                <input type="date" class="form-control" name="data" placeholder="Data" value="{{ request.GET.data }}">
+            </div>
+            <div class="col-md-4 d-flex align-items-start">
+                <button type="submit" class="btn btn-primary me-2">
+                    <i class="bi bi-search"></i> Filtrar
+                </button>
+            </div>
+        </div>
+    </form>
+    <table class="table table-dark table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Data</th>
+                <th>Data de Compra</th>
+                <th>Data de Entrega</th>
+                <th>Item</th>
+                <th>Marca</th>
+                <th>Quantidade</th>
+                <th>Requisitante</th>
+                <th>Setor</th>
+                <th>Gestor</th>
+                <th>Status</th>
+                <th>Status da Compra</th>
+                {% if perms.estoque.detail_ordem_de_compra %}
+                <th>Ações</th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in itens %}
+            <tr>
+                <td>{{ item.id}}</td>
+                <td>{{ item.date|date:"d/m/Y" }}</td>
+                <td>{{ item.purchase_date|date:"d/m/Y" }}</td>
+                <td>{{ item.delivery_date|date:"d/m/Y" }}</td>
+                <td class="text-center">{{ item.item }}</td>
+                <td class="text-center">{{ item.brand }}</td>
+                <td class="text-center">{{ item.quantity }}</td>
+                <td>
+                    {% if item.requester %}
+                        {{ item.requester }}
+                    {% else %}
+                        {{ item.requester_name }}
+                    {% endif %}
+                  </td>
+                <td class="text-center">{{ item.sector }}</td>
+                <td class="text-center">{{ item.manager }}</td>
+                <td class="text-center">{{ item.status }}</td>
+                <td class="text-center">{{ item.purchase_status }}</td>
+                <td>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">Ações</button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item btn btn-info" href="{% url 'purchase_detail' item.pk %}">Detalhes</a></li>
+                            {% if item.status == 'Análise' %}
+                            <li><a class="dropdown-item btn btn-success" href="#" onclick="approvePurchase({{ item.pk }});" title="Aprovar">Aprovar</a></li>
+                            <li><a class="dropdown-item btn btn-danger" href="#" onclick="deniedPurchase({{ item.pk }});" title="Negar">Negar</a></li>
+                            {% endif %}
+                            {% if not item.purchase_date and  item.status == 'Aprovado' %}
+                            <li><a class="dropdown-item btn btn-primary" href="#" onclick="purchaseMade({{ item.pk }});">Comprada Efetuada</a></li>
+                            {% endif %}
+                            {% if not item.delivery_date and item.purchase_date %}
+                            <li><a class="dropdown-item btn btn-primary" href="#" onclick="deliveryPurchase({{ item.pk }});">Compra Entregue</a></li>
+                            {% endif %}
+                            <li><a class="dropdown-item btn btn-warning" href="#" onclick="reorderPurchase({{ item.pk }});">Pedir Novamente</a></li>
+
+                        </ul>
+                    </div>
+                </td>
+                
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% include 'partials/feedback_modal.html' %}
+    <script>
+        function approvePurchase(pk) {
+            const url = "{% url 'approve_purchase' '0' %}".replace('0', pk);
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Erro ao aprovar a solicitação.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error approving request:', error);
+                });
+        }
+
+        function deniedPurchase(pk) {
+    const url = "{% url 'denied_purchase' '0' %}".replace('0', pk);
+    console.log("Sending POST to:", url);
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': '{{ csrf_token }}'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("Response:", data);
+        if (data.success) {
+            document.getElementById('order-id').value = pk;
+            const feedbackModal = new bootstrap.Modal(document.getElementById('feedbackModal'));
+            feedbackModal.show();
+        } else {
+            alert('Erro ao negar a solicitação.');
+        }
+    })
+    .catch(error => {
+        console.error('Error denying request:', error);
+    });
+}
+
+function submitFeedback(event) {
+    event.preventDefault(); 
+    const form = document.getElementById('feedbackForm');
+    const formData = new FormData(form);
+
+    console.log("Submitting feedback with formData:", ...formData);
+
+    fetch("{% url 'submit_feedback' %}", {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("Feedback response:", data);
+        if (data.success) {
+            const feedbackModal = bootstrap.Modal.getInstance(document.getElementById('feedbackModal'));
+            feedbackModal.hide();
+            location.reload();
+        } else {
+            alert('Erro ao enviar feedback: ' + (data.error || 'Erro desconhecido.'));
+        }
+    })
+    .catch(error => {
+        console.error('Error submitting feedback:', error);
+    });
+}
+
+        function purchaseMade(pk) {
+            const url = "{% url 'made_purchase' '0' %}".replace('0', pk);
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Erro ao efetuar a compra.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error completing purchase:', error);
+                });
+        }
+
+        function deliveryPurchase(pk) {
+            const url = "{% url 'delivery_purchase' '0' %}".replace('0', pk);
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Erro ao efetuar a entrega.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error completing delivery:', error);
+                });
+        }
+        function reorderPurchase(pk) {
+        const url = "{% url 'reorder_purchase' '0' %}".replace('0', pk);
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': '{{ csrf_token }}'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();  // Atualiza a página para refletir a nova ordem
+        } else {
+            alert('Erro ao pedir novamente a ordem de compra.');
+        }
+    })
+    .catch(error => {
+        console.error('Error reordering request:', error);
+    });
+}
+    </script>
+    
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</div>
+{% endblock %}

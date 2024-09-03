@@ -93,6 +93,6 @@ class PurchaseOrderAdmin(admin.ModelAdmin):
 class ServiceOrderAdmin(admin.ModelAdmin):
 
     list_display = ('solicitation_date', 'unit', 'sector', 'start_date',
-                    'deleviry_forecast', 'deleviry_date', 'service', 'description',
+                    'delivery_forecast', 'delivery_date', 'service', 'description',
                     'supplier', 'status', 'feedback')
     search_fields = ('service',)

@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}Apresentação{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Apresentação</h2>
+    <a href="{%url 'presentation_add' %}" class="btn btn-primary mb-2">Novo Apresentação</a>
+    <form method="get" action="">
+        <div class="row mb-3">
+            <div class="col-md-4 mb-2">
+                <input type="text" id="name-presentation" class="form-control" name="name" placeholder="Apresentação" value="{{ request.GET.name}}">
+            </div>
+            <div class="col-md-4 d-flex align-items-start">
+                <button type="submit" class="btn btn-primary me-2">
+                    <i class="bi bi-search"></i> Filtrar
+                </button>
+            </div>
+        </div>
+    </form>
+    <table class="table table-dark table-striped">
+        <thead>
+            <tr>
+
+                <th>Apresentação</th>
+                <th>Ações</th>
+
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in itens %}
+            <tr>
+
+                <td>{{ item.name }}</td>
+                <td>
+                    <a href="{%url 'presentation_delete' item.pk %}" class="btn btn-confirm-excluir">Excluir</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<script>
+    $(function() {
+        $("#name-presentation").autocomplete({
+            source: function(request, response) {
+                $.ajax({
+                    url: "{% url 'presentation_autocomplete' %}",
+                    data: {
+                        'term': request.term
+                    },
+                    dataType: 'json',
+                    success: function(data) {
+                        response(data);
+                    }
+                });
+            },
+            minLength: 2,
+        });
+    });
+    </script>
+{% endblock %}

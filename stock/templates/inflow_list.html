@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}Lista de Entradas{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Entradas</h2>
+    
+    <div class="mb-2">
+        <a href="{% url 'inflow_add' %}" class="btn btn-primary">Novo Item</a>
+    </div>
+    <form method="get" action="">
+        <div class="row mb-3">
+            <div class="col-md-4 mb-2">
+                <input type="text" class="form-control" id="itemFilter" name="item__name" placeholder="Nome do Item" value="{{ request.GET.item__name }}">
+            </div>
+            <div class="col-md-4 mb-2">
+                <input type="date" class="form-control" name="date" placeholder="Data" value="{{ request.GET.date }}">
+            </div>
+            <div class="col-md-4 d-flex align-items-start">
+                <button type="submit" class="btn btn-primary me-2">
+                    <i class="bi bi-search"></i> Filtrar
+                </button>
+            </div>
+        </div>
+    </form>
+    
+    <div class="row">
+        <div class="col-md-12">
+            <table class="table table-dark table-striped">
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Item</th>
+                        <th>Validade</th>
+                        <th>Nota Fiscal</th>
+                        <th>Estoque Destinado</th>
+                        <th>Custo Unitario</th>
+                        <th>Quantidade</th>
+                        <th>Custo Total</th>
+                        {% if perms.estoque.detail_entrada %}
+                        <th>Ações</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in itens %}
+                    <tr>
+                        <td>{{ item.date|date:"d/m/Y" }}</td>
+                        <td class="text-center">{{ item.item }}</td>
+                        <td>{{ item.validade|date:"d/m/Y" }}</td>
+                        <td class="text-center">{{ item.invoice }}</td>
+                        <td class="text-center">{{ item.target_stock }}</td>
+                        <td class="telefone">{{ item.unit_cost }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td class="telefone">{{ item.total_cost }}</td>
+                        <td>
+                            <a href="{% url 'inflow_detail' item.pk %}" class="btn btn-sm btn-info">Detalhes</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+<script>
+$(function() {
+    $("#itemFilter").autocomplete({
+        source: function(request, response) {
+            $.ajax({
+                url: "{% url 'inflow_autocomplete' %}",
+                data: {
+                    'term': request.term
+                },
+                dataType: 'json',
+                success: function(data) {
+                    response(data);
+                }
+            });
+        },
+        minLength: 2,
+    });
+});
+</script>
+{% endblock %}

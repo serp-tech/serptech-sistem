@@ -1,0 +1,31 @@
+<!-- modals/add_item_modal.html -->
+
+<div class="modal fade" id="addItemModal" tabindex="-1" aria-labelledby="addItemModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addItemModalLabel">Adicionar Item</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="modalItem">Item</label>
+                    <select id="modalItem" class="form-control">
+                        <!-- Populate with items dynamically or statically -->
+                        {% for item in item_choices %}
+                        <option value="{{ item.pk }}">{{ item.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group mt-3">
+                    <label for="modalQuantity">Quantidade</label>
+                    <input type="number" id="modalQuantity" class="form-control" min="1">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" id="modalAddItemBtn" class="btn btn-primary">Adicionar Item</button>
+            </div>
+        </div>
+    </div>
+</div>

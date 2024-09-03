@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalhes do Item {% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Detalhes do Item</h2>
+    <p><strong>Item:</strong> {{ object.name}}</p>
+    <p><strong>Fornecedor:</strong> {{ object.supplier }}</p>
+    <p><strong>Data:</strong> {{ object.date|date:"d/m/Y" }}</p>
+    <p><strong>Forma de Apresentação:</strong> {{ object.presentation }}</p>
+    <p><strong>Descrição:</strong> {{ object.description }}</p>
+    <p><strong>Setor:</strong>  {% for sector in object.sector.all %}
+        {{ sector }}{% if not forloop.last %}, {% endif %}
+    {% endfor %}
+    </p>
+    <p><strong>Frequência Compra:</strong> {{ object.purchase_frequency}}</p>
+    <p><strong>Frequência de Saida:</strong> {{ object.outflow_frequency}}</p>
+    
+    <!-- Botões de ação -->
+    <a href="{% url 'item_update' object.pk %}" class="btn btn-primary">Editar</a>
+    <a href="{% url 'item' %}" class="btn btn-primary">Voltar</a>
+    <a href="{% url 'item_delete' object.pk %}" class="btn btn-confirm-excluir">Excluir</a>
+</div>
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}Adicionar Entrada{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Adicionar Entrada</h2>
+    <form method="post" class="form-horizontal">
+        {% csrf_token %}
+        {% for field in form %}
+        <div class="form-group row">
+            <label class="col-sm-3 col-form-label">{{ field.label }}</label>
+            <div class="col-sm-9">
+                {{ field }}
+                {% if field.help_text %}
+                <small class="form-text text-muted">{{ field.help_text }}</small>
+                {% endif %}
+                {% for error in field.errors %}
+                <div class="text-danger">{{ error }}</div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+        <div class="form-group row">
+            <div class="col-sm-12">
+                <button type="submit" class="btn btn-primary">Salvar</button>
+                <a href="{% url 'inflow' %}" class="btn btn-primary">Cancelar</a>
+            </div>
+        </div>
+    </form>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function(){
+        const unitCostInput = document.getElementById('id_unit_cost');
+        const quantityInput = document.getElementById('id_quantity');
+        const totalCostInput = document.getElementById('id_total_cost');
+
+
+        function updateTotalCost(){
+            const unitCost = parseFloat(unitCostInput.value) || 0;
+            const quantity = parseInt(quantityInput.value) || 0;
+            const totalCost = unitCost * quantity;
+            totalCostInput.value = totalCost.toFixed(2);
+        }
+
+        
+        unitCostInput.addEventListener('input', updateTotalCost);
+        quantityInput.addEventListener('input', updateTotalCost);
+        })
+</script>
+{% endblock %}
+

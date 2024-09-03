@@ -1,0 +1,36 @@
+{%block content%}
+<!DOCTYPE html>
+<html lang="pt-br">
+{%load static %}
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="{% static '/accounts/css/style_login.css' %}">
+</head>
+
+<body>
+    <div class="container">
+        <div class="card">
+            <form method="post">
+                <h2>Login</h2>
+                {% csrf_token %}
+                <table>
+                    <tr>
+                        <td><label for="username">Nome de usuário:</label></td>
+                        <td><input class="campo" type="text" id="username" name="username"></td>
+                    </tr>
+                    <tr>
+                        <td><label for="password">Senha:</label></td>
+                        <td><input class="campo" type="password" id="password" name="password"></td>
+                    </tr>
+                </table>
+                <input class='btn' type="submit" value="Entrar">
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>
+{% endblock %}

@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Lista de Ordens de Serviço{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Ordem de Serviço</h2>
+    {% if perms.estoque.add_ordem_de_servico %}
+    <a href="{% url 'service_add' %}" class="btn btn-primary mb-2">Nova Ordem</a>
+    {% endif %}
+    <form method="get" action="">
+        <div class="row mb-3">
+            <div class="col-md-4 mb-2">
+                <input type="date" class="form-control" name="data" placeholder="Data" value="{{ request.GET.data }}">
+            </div>
+            <div class="col-md-4 d-flex align-items-start">
+                <button type="submit" class="btn btn-primary me-2">
+                    <i class="bi bi-search"></i> Filtrar
+                </button>
+            </div>
+        </div>
+    </form>
+
+    <table class="table table-dark table-striped">
+        <thead>
+            <tr>
+                <th>Data de Solicitação</th>
+                <th>Serviço</th>
+                <th>Unidade</th>
+                <th>Setor</th>
+                <th>Fornecedor</th>
+                <th>Status</th>
+                <th>Data de Início</th>
+                <th>Previsão de Entrega</th>
+                <th>Data de Entrega</th>
+                <th>Ação</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in itens %}
+            <tr>
+                <td>{{ item.solicitation_date|date:"d/m/Y" }}</td>
+                <td class="text-center">{{ item.service }}</td>
+                <td class="text-center">{{ item.unit }}</td>
+                <td class="text-center">{{ item.sector }}</td>
+                <td class="text-center">{{ item.supplier }}</td>
+                <td>{{ item.status }}</td>
+                <td>{{ item.start_date|date:"d/m/Y" }}</td>
+                <td>{{ item.delivery_forecast|date:"d/m/Y" }}</td>
+                <td>{{ item.delivery_date|date:"d/m/Y" }}</td>
+                <td>
+                    <a href="{% url 'service_detail' item.pk %}" class="btn btn-sm btn-info mb-2">Detalhes</a>
+                    {% if item.status != 'Feito' %}
+                        {% if item.start_date is None %}
+                            <a href="{% url 'start_service' item.pk %}" class="btn btn btn-success mb-2">Iniciar</a>
+                        {% endif %}
+                        {% if item.start_date and item.delivery_date is None %}
+                        <a href="{% url 'finish_service' item.pk %}" class="btn btn btn-danger mb-2">Finalizar</a>
+                        {% endif %}
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

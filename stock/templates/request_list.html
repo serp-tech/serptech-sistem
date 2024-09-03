@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block title %}Lista de Requisições{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Requisições</h2>
+    {% if perms.estoque.view_requisicao_setor %}
+    <a href="{% url 'request_add' %}" class="btn btn-primary mb-2">Nova Requisição</a>
+    {% endif %}
+    <form method="get" action="">
+        <div class="row mb-3">
+            <div class="col-md-3 mb-2">
+                <select class="form-control" name="status">
+                    <option value="">Status</option>
+                    <option value="Aprovado" {% if request.GET.status == "Aprovado" %}selected{% endif %}>Aprovado</option>
+                    <option value="Análise" {% if request.GET.status == "Análise" %}selected{% endif %}>Análise</option>
+                    <option value="Negado" {% if request.GET.status == "Negado" %}selected{% endif %}>Negado</option>
+                </select>
+            </div>
+            <div class="col-md-3 mb-2">
+                <input type="date" class="form-control" name="data" placeholder="Data" value="{{ request.GET.data }}">
+            </div>
+            <div class="col-md-4 d-flex align-items-start">
+                <button type="submit" class="btn btn-primary me-2">
+                    <i class="bi bi-search"></i> Filtrar
+                </button>
+            </div>
+        </div>
+    </form>
+    <table class="table table-dark table-striped">
+        <thead>
+            <tr>
+                <th>Data</th>
+                <th>Data de aprovação</th>
+                <th>Item</th>
+                <th>Quantidade</th>
+                <th>Requisitante</th>
+                <th>Gestor</th>
+                <th>Unidade</th>
+                <th>Setor</th>
+                <th>Status</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in itens %}
+            <tr>
+                <td>{{ item.date|date:"d/m/Y" }}</td>
+                <td>{{ item.approval_date|date:"d/m/Y" }}</td>
+                <td>
+                    {% for i in item.request_item_request.all %}
+                    <div>{{ i.item }}</div>
+                    {% endfor %}
+                </td>
+                <td>
+                    {% for i in item.request_item_request.all %}
+                    <div>{{ i.quantity }}</div>
+                    {% endfor %}
+                </td>
+                <td>
+                    {% if item.requester %}
+                        {{ item.requester }}
+                    {% else %}
+                        {{ item.requester_name }}
+                    {% endif %}
+                </td>
+                <td>{{ item.manager }}</td>
+                <td>{{ item.unit }}</td>
+                <td>{{ item.sector }}</td>
+                <td>{{ item.status }}</td>
+                <td>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">Ações</button>
+                        <ul class="dropdown-menu">
+                            {% if item.status == 'Análise' %}
+                            <li>
+                                <a class="dropdown-item" href="#" onclick="approveRequest({{ item.pk }}); return false;" title="Aprovar">Aprovar</a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="#" onclick="denyRequest({{ item.pk }}); return false;" title="Negar">Negar</a>
+                            </li>
+                            {% endif %}
+                            <li>
+                                <a class="dropdown-item" href="{% url 'request_delete' item.pk %}" title="Excluir">Excluir</a>
+                            </li>
+                        </ul>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+function approveRequest(pk) {
+    const url = "{% url 'approve_request' '0' %}".replace('0', pk);
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': '{{ csrf_token }}'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert(data.message || 'Erro ao aprovar a requisição.');
+        }
+    })
+    .catch(error => {
+        console.error('Error approving request:', error);
+    });
+}
+
+function denyRequest(pk) {
+    const url = "{% url 'denied_request' '0' %}".replace('0', pk);
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': '{{ csrf_token }}'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert(data.message || 'Erro ao negar a requisição.');
+        }
+    })
+    .catch(error => {
+        console.error('Error denying request:', error);
+    });
+}
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+{% endblock %}

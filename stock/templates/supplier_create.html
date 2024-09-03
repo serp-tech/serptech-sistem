@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}{{ object.id|default:"Nova" }} Requisição{% endblock %}
+
+{% block content %}
+<div class="container d-flex justify-content-center mt-4">
+    <div class="col-md-8">
+        <h2 class="text-center">{% if object %}Editar{% else %}Criar{% endif %} Requisição</h2>
+
+        <form method="post" class="form-horizontal">
+            {% csrf_token %}
+            
+            <div class="form-group row mb-3">
+                <label class="col-sm-3 col-form-label">{{ form.requester.label }}</label>
+                <div class="col-sm-9">
+                    {{ form.requester }}
+                </div>
+            </div>
+
+            <div class="form-group row mb-3">
+                <label class="col-sm-3 col-form-label">{{ form.requester_name.label }}</label>
+                <div class="col-sm-9">
+                    {{ form.requester_name }}
+                </div>
+            </div>
+
+            <div class="form-group row mb-3">
+                <label class="col-sm-3 col-form-label">{{ form.manager.label }}</label>
+                <div class="col-sm-9">
+                    {{ form.manager }}
+                </div>
+            </div>
+
+            <div class="form-group row mb-3">
+                <label class="col-sm-3 col-form-label">{{ form.manager_name.label }}</label>
+                <div class="col-sm-9">
+                    {{ form.manager_name }}
+                </div>
+            </div>
+
+            <div class="form-group row mb-3">
+                <label class="col-sm-3 col-form-label">{{ form.unit.label }}</label>
+                <div class="col-sm-9">
+                    {{ form.unit }}
+                </div>
+            </div>
+
+            <div class="form-group row mb-3">
+                <label class="col-sm-3 col-form-label">{{ form.unit_name.label }}</label>
+                <div class="col-sm-9">
+                    {{ form.unit_name }}
+                </div>
+            </div>
+
+            <div class="form-group row mb-3">
+                <label class="col-sm-3 col-form-label">{{ form.sector.label }}</label>
+                <div class="col-sm-9">
+                    {{ form.sector }}
+                </div>
+            </div>
+
+            <div class="form-group row mb-3">
+                <label class="col-sm-3 col-form-label">{{ form.sector_name.label }}</label>
+                <div class="col-sm-9">
+                    {{ form.sector_name }}
+                </div>
+            </div>
+
+            <h3 class="mt-4 text-center">Itens</h3>
+            {{ requestitem_formset.management_form }}
+
+            {% for form in requestitem_formset %}
+                <div class="form-group row mb-3">
+                    <div class="col-sm-5">
+                        {{ form.item.label_tag }} {{ form.item }}
+                    </div>
+                    <div class="col-sm-3">
+                        {{ form.quantity.label_tag }} {{ form.quantity }}
+                    </div>
+                    <div class="col-sm-2 d-flex align-items-center">
+                        <label for="{{ form.DELETE.id_for_label }}" class="me-2">Excluir</label>
+                        {{ form.DELETE }}
+                    </div>
+                </div>
+            {% endfor %}
+
+            <div class="form-group row mt-4">
+                <div class="col-sm-12 text-center">
+                    <button type="submit" class="btn btn-primary me-2">Salvar</button>
+                    <a href="{% url 'request_list' %}" class="btn btn-secondary">Cancelar</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

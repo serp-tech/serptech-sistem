@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+
+{% block title %}Adicionar Requisição{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Adicionar Requisição</h2>
+    <form method="post" class="form-horizontal">
+        {% csrf_token %}
+
+        <!-- Main Request Form Fields -->
+        {% for field in form %}
+        <div class="form-group row">
+            <label class="col-sm-3 col-form-label">{{ field.label }}</label>
+            <div class="col-sm-9">
+                {{ field }}
+                {% if field.help_text %}
+                <small class="form-text text-muted">{{ field.help_text }}</small>
+                {% endif %}
+                {% for error in field.errors %}
+                <div class="text-danger">{{ error }}</div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+
+        <!-- Dynamic Items Section -->
+        <h3>Itens</h3>
+        {{ requestitem_formset.management_form }}
+
+        <div class="form-container">
+            {% for form in requestitem_formset %}
+            <div class="form-item">
+                <div class="form-group row">
+                    <label class="col-sm-3 col-form-label">{{ form.item.label_tag }}</label>
+                    <div class="col-sm-9">
+                        {{ form.item }}
+                        {% for error in form.item.errors %}
+                        <div class="text-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label class="col-sm-3 col-form-label">{{ form.quantity.label_tag }}</label>
+                    <div class="col-sm-9">
+                        {{ form.quantity }}
+                        {% for error in form.quantity.errors %}
+                        <div class="text-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% if form.instance.pk %}
+                <div class="form-group row">
+                    <div class="col-sm-9 offset-sm-3">
+                        <div class="form-check">
+                            {{ form.DELETE }}
+                            <label class="form-check-label" for="{{ form.DELETE.id_for_label }}">Excluir</label>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            <hr>
+            {% endfor %}
+        </div>
+
+        <!-- Submit and Cancel Buttons -->
+        <div class="form-group row">
+            <div class="col-sm-12">
+                <button type="submit" class="btn btn-primary">Salvar</button>
+                <a href="{% url 'request' %}" class="btn btn-primary">Cancelar</a>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", function() {
+        const formContainer = document.querySelector('.form-container');
+        const addButton = document.getElementById('add-item');
+        let formIndex = parseInt(document.getElementById('id_requestitem_formset-TOTAL_FORMS').value);
+
+        addButton.addEventListener('click', function() {
+            const newForm = formContainer.querySelector('.form-item').cloneNode(true);
+            const regex = new RegExp(`requestitem_formset-\\d+`, 'g');
+
+            newForm.innerHTML = newForm.innerHTML.replace(regex, `requestitem_formset-${formIndex}`);
+            
+            newForm.querySelectorAll('input').forEach(input => {
+                input.value = '';
+                if (input.type === 'checkbox') {
+                    input.checked = false;
+                }
+            });
+
+            formContainer.appendChild(newForm);
+            formIndex++;
+            document.getElementById('id_requestitem_formset-TOTAL_FORMS').value = formIndex;
+        });
+    });
+</script>
+{% endblock %}

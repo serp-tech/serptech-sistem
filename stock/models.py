@@ -113,9 +113,11 @@ class Item(models.Model):
 
     name = models.CharField(max_length=200)
     nomenclature = models.CharField(max_length=200)
+    description = models.TextField(max_length=500, blank=True, null=True)
     supplier = models.ForeignKey(Supplier, on_delete=models.PROTECT, related_name='item_supplier')
     ## if the user deletes the supplier this camp will be shown 
     supplier_cnpj = BRCNPJField(blank=True, null=True)
+    sector = models.ManyToManyField(Sector, related_name='sector_item')
     presentation = models.ForeignKey(Presentation, on_delete=models.PROTECT, related_name='presentation_item')
     date = models.DateField(auto_now=True)
     purchase_frequency = models.CharField(max_length=50, choices=FREQUENCY_CHOICES)
@@ -138,7 +140,7 @@ class Inflow(models.Model):
     validity = models.DateField(blank=True, null=True)
     invoice = models.CharField(max_length=200)
     invoice_pdf = models.FileField(upload_to='pdfs/inflow/invoice', blank=True, null=True)
-    source_stock = models.ForeignKey(Unit, on_delete=models.PROTECT, related_name='inflow_source')
+    source_stock = models.ForeignKey(Unit, on_delete=models.PROTECT, related_name='inflow_source', blank=True, null=True)
     source_stock_name = models.CharField(max_length=200, blank=True, null=True)
     target_stock = models.ForeignKey(Unit, on_delete=models.PROTECT, related_name='inflow_target')
     target_stock_name = models.CharField(max_length=200, blank=True, null=True)
@@ -182,8 +184,9 @@ class Outflow(models.Model):
 
 class Request(models.Model):
     
+    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)
     date = models.DateField(auto_now=True, editable=False)
-    approval_date = models.DateField(default=timezone.now, editable=False, blank=True, null=True)
+    approval_date = models.DateField( blank=True, null=True)
     requester = models.ForeignKey(Requester, on_delete=models.SET_NULL, related_name='request_requester', null=True)
     requester_name = models.CharField(max_length=200, blank=True, null=True)
     manager = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='request_manager', null=True)
@@ -192,6 +195,8 @@ class Request(models.Model):
     unit_name = models.CharField(max_length=200, blank=True, null=True)
     sector = models.ForeignKey(Sector, on_delete=models.SET_NULL, related_name='request_sector', null=True)
     sector_name = models.CharField(max_length=200, blank=True, null=True)
+    status = models.CharField(max_length=20, choices=STATUS, default='Análise')
+    
 
 
     class Meta:
@@ -245,8 +250,7 @@ class PurchaseOrder(models.Model):
     class Meta:
         ordering = ['date']
 
-    def __str__(self):
-        return self.item.name
+    
     
 
 
@@ -257,8 +261,8 @@ class ServiceOrder(models.Model):
     sector = models.ForeignKey(Sector, on_delete=models.SET_NULL, related_name='service_sector', null=True)
     sector_name = models.CharField(max_length=200, blank=True, null=True)
     start_date = models.DateField(blank=True, null=True)
-    deleviry_forecast = models.DateField()
-    deleviry_date = models.DateField()
+    delivery_forecast = models.DateField(null=True)
+    delivery_date = models.DateField(null=True)
     service = models.CharField(max_length=200)
     description = models.TextField(max_length=500)
     supplier = models.ForeignKey(Supplier, on_delete=models.SET_NULL, related_name='service_supplier', null=True)

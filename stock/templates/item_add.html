@@ -1,0 +1,203 @@
+{% extends 'base.html' %}
+
+{% block title %}Adicionar Item{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Adicionar Item</h2>
+    <form method="post" class="form-horizontal" id="itemForm">
+        {% csrf_token %}
+        {% for field in form %}
+        <div class="form-group row">
+            <label class="col-sm-3 col-form-label">{{ field.label }}</label>
+            <div class="col-sm-9">
+                <div class="d-flex align-items-center">
+                    {% if field.name == 'sector' %}
+                    <div class="dropdown">
+                        <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Selecionar Setores
+                        </button>
+                        <div class="dropdown-menu" id="sectorDropdown" aria-labelledby="dropdownMenuButton">
+                            <div class="dropdown-item">
+                                <input type="checkbox" id="select_all_sector"> Selecionar Todos
+                            </div>
+                            {% for checkbox in field %}
+                                <div class="dropdown-item">
+                                    {{ checkbox.tag }} {{ checkbox.choice_label }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% else %}
+                    {{ field }}
+                    {% endif %}
+                    {% if field.name == 'supplier' %}
+                    <button type="button" class="btn btn-primary ml-2" id="addSupplierBtn" data-toggle="modal" data-target="#supplierModal">Adicionar</button>
+                    {% elif field.name == 'sector'  %}
+                    <button type="button" class="btn btn-primary ml-2" id="addSectorBtn" data-toggle="modal" data-target="#sectorModal">Adicionar</button>
+                    {% elif field.name == 'presentation' %}
+                    <button type="button" class="btn btn-primary ml-2" id="addPresentationBtn" data-toggle="modal" data-target="#presentationModal">Adicionar</button>
+                    {% endif %}
+                </div>
+                {% if field.help_text %}
+                <small class="form-text text-muted mt-1">{{ field.help_text }}</small>
+                {% endif %}
+                {% for error in field.errors %}
+                <div class="text-danger">{{ error }}</div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+        <div class="form-group row">
+            <div class="col-sm-12">
+                <button type="submit" class="btn btn-primary">Salvar</button>
+                <a href="{% url 'item' %}" class="btn btn-primary">Cancelar</a>
+            </div>
+        </div>
+    </form>
+</div>
+
+{% include 'partials/supplier_modal.html' %}
+{% include 'partials/sector_modal.html' %}
+{% include 'partials/presentation_modal.html' %}
+
+<script src="https://code.jquery.com/jquery-3.2.1.min.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" crossorigin="anonymous"></script>
+
+<script>
+    function saveFormData() {
+        const formData = {};
+        $('#itemForm').serializeArray().forEach(field => {
+            formData[field.name] = field.value;
+        });
+        localStorage.setItem('formData', JSON.stringify(formData));
+    }
+
+    function restoreFormData() {
+        const formData = JSON.parse(localStorage.getItem('formData'));
+        if (formData) {
+            for (const name in formData) {
+                const field = $(`[name="${name}"]`);
+                if (field.attr('type') === 'checkbox') {
+                    field.prop('checked', formData[name] === 'on');
+                } else {
+                    field.val(formData[name]);
+                }
+            }
+            localStorage.removeItem('formData');
+        }
+    }
+
+    $(document).ready(function() {
+        restoreFormData();
+
+        function updateCheckboxes() {
+            const checkboxes = document.querySelectorAll('#sectorDropdown input[type="checkbox"]:not(#select_all_sector)');
+            const selectAllCheckbox = document.getElementById('select_all_sector');
+
+            selectAllCheckbox.addEventListener('change', function() {
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = selectAllCheckbox.checked;
+                });
+            });
+        }
+
+        function reloadCheckboxes(updateUrl) {
+            $.ajax({
+                url: updateUrl,
+                type: 'GET',
+                success: function(response) {
+                    const dropdownMenu = $('#sectorDropdown');
+                    dropdownMenu.empty();  // Limpa os checkboxes existentes
+
+                    // Adiciona o checkbox para selecionar todos
+                    dropdownMenu.append(`
+                        <div class="dropdown-item">
+                            <input type="checkbox" id="select_all_sector"> Selecionar Todos
+                        </div>
+                    `);
+
+                    // Adiciona os checkboxes para cada setor
+                    response.options.forEach(option => {
+                        dropdownMenu.append(`
+                            <div class="dropdown-item">
+                                <input type="checkbox" name="sector" value="${option.id}"> ${option.text}
+                            </div>
+                        `);
+                    });
+
+                    // Reconfigura o evento para "Selecionar Todos"
+                    updateCheckboxes();
+                },
+                error: function() {
+                    console.log('Erro ao recarregar os setores');
+                }
+            });
+        }
+
+        // Salvar os dados do formulário antes de abrir o modal
+        $('#addSupplierBtn, #addSectorBtn, #addPresentationBtn').on('click', function() {
+            saveFormData();
+        });
+
+        // AJAX para adicionar fornecedor
+        $('#supplier-form').on('submit', function(event) {
+            event.preventDefault();
+            saveFormData();
+            $.ajax({
+                url: '{% url "supplier_add" %}',
+                type: 'POST',
+                data: $(this).serialize(),
+                success: function(response) {
+                    $('#supplierModal').modal('hide');
+                    location.reload();
+                },
+                error: function() {
+                    console.log('Erro ao adicionar fornecedor');
+                }
+            });
+        });
+
+        // AJAX para adicionar setor
+        $('#sector-form').on('submit', function(event) {
+            event.preventDefault();
+            saveFormData();
+            $.ajax({
+                url: '{% url "sector_add" %}',
+                type: 'POST',
+                data: $(this).serialize(),
+                success: function(response) {
+                    $('#sectorModal').modal('hide');
+                    location.reload();
+                },
+                error: function() {
+                    console.log('Erro ao adicionar setor');
+                }
+            });
+        });
+
+        // AJAX para adicionar forma de apresentação
+        $('#presentation-form').on('submit', function(event) {
+            event.preventDefault();
+            saveFormData();  // Salvando os dados do formulário principal no LocalStorage
+
+            $.ajax({
+                url: $(this).attr('action'),  // Usar a URL do action no form
+                type: 'POST',
+                data: $(this).serialize(),
+                success: function(response) {
+                    $('#presentationModal').modal('hide');
+                    location.reload();  // Atualizar a lista de opções ou recarregar a página
+                },
+                error: function() {
+                    console.log('Erro ao adicionar forma de apresentação');
+                }
+            });
+        });
+
+        updateCheckboxes();
+    });
+</script>
+
+{% endblock %}

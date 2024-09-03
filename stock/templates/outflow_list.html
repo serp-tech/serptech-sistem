@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}Saídas{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+<div class="container">
+    <h2>Saídas</h2>
+    <a href="{% url 'outflow_add' %}" class="btn btn-primary mb-2">Adicionar Saída</a>
+    <form method="get" action="">
+        <div class="row mb-3">
+            <div class="col-md-4 mb-2">
+                <input type="text" id="nome-item" class="form-control" name="item__itens_do_estoque" placeholder="Nome do Item" value="{{ request.GET.item__itens_do_estoque }}">
+            </div>
+            <div class="col-md-4 mb-2">
+                <input type="date" class="form-control" name="data" placeholder="Data" value="{{ request.GET.data }}">
+            </div>
+            <div class="col-md-4 d-flex align-items-start">
+                <button type="submit" class="btn btn-primary me-2">
+                    <i class="bi bi-search"></i> Filtrar
+                </button>
+            </div>
+        </div>
+    </form>
+    <table class="table table-dark table-striped">
+        <thead>
+            <tr>
+                <th>Data</th>
+                <th>Item</th>
+                <th>Setor</th>
+                <th>Requisitante</th>
+                <th>Quantidade</th>
+                <th>Origem</th>
+                <th>Destino</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in itens %}
+            <tr>
+                <td>{{ item.date|date:"d/m/Y" }}</td>
+                <td>{{ item.item }}</td>
+                <td>{{ item.sector }}</td>
+                <td>
+                    {% if item.requester %}
+                        {{ item.requester }}
+                    {% else %}
+                        {{ item.requester_name }}
+                    {% endif %}
+                </td>
+                <td>{{ item.quantity }}</td>
+                <td>{{ item.source_stock }}</td>
+                <td>{{ item.target_stock }}</td>
+                
+                <td>
+                    <a href="{% url 'outflow_detail' item.pk %}" class="btn btn-sm btn-info">Detalhes</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+$(function() {
+    $("#nome-item").autocomplete({
+        source: function(request, response) {
+            $.ajax({
+                url: "{% url 'outflow_autocomplete' %}",
+                data: {
+                    'term': request.term
+                },
+                dataType: 'json',
+                success: function(data) {
+                    response(data);
+                }
+            });
+        },
+        minLength: 2,
+    });
+});
+</script>
+
+{% endblock %}

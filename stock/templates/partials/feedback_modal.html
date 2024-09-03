@@ -1,0 +1,22 @@
+<div class="modal fade" id="feedbackModal" tabindex="-1" aria-labelledby="feedbackModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" style="background-color: #1e1e1e; color: white;">
+                <h5 class="modal-title" id="feedbackModalLabel">Negar Ordem de Compra</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" style="background-color: #101331; color: white;">
+                <p>Tem certeza de que deseja negar esta ordem de compra?</p>
+                <form id="feedbackForm" method="post" onsubmit="submitFeedback(event);">
+                    {% csrf_token %}
+                    <input type="hidden" id="order-id" name="order_id" value="">
+                    <div id="feedback-section" style="margin-top: 10px;">
+                        <label for="feedback" class="form-label">Feedback:</label>
+                        <textarea id="feedback" name="feedback" rows="4" class="form-control" placeholder="Digite seu feedback aqui..." required></textarea>
+                        <button type="submit" class="btn btn-primary mt-2">Enviar Feedback</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
