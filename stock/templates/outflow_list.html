@@ -9,7 +9,9 @@
 
 <div class="container">
     <h2>Saídas</h2>
+    {% if perms.stock.add_outflow %}
     <a href="{% url 'outflow_add' %}" class="btn btn-primary mb-2">Adicionar Saída</a>
+    {% endif %}
     <form method="get" action="">
         <div class="row mb-3">
             <div class="col-md-4 mb-2">

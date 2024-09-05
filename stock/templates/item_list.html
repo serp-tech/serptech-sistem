@@ -10,8 +10,9 @@
 
 <div class="container">
     <h2>Itens do Estoque</h2>
-    
+    {% if perms.stock.add_item%}
     <a href="{% url 'item_add' %}" class="btn btn-primary mb-2">Novo Item</a>
+    {% endif %}
     <form method="get" action="">
         <div class="row mb-3">
             <div class="col-md-4 mb-2">

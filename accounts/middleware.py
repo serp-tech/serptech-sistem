@@ -8,7 +8,9 @@ class RedirectIfNotLoggedInMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        if request.user.is_authenticated and request.path == '/':
+        if not request.user.is_authenticated and request.path not in [reverse('login')]:
+            return redirect('login')
+        elif request.user.is_authenticated and request.path == '/':
             return redirect('home')
 
         response = self.get_response(request)

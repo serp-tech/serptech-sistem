@@ -5,7 +5,7 @@
 {% block content %}
 <div class="container">
     <h2>Setores</h2>
-    {% if perms.estoque.add_setor %}
+    {% if perms.stock.add_sector %}
     <a href="{% url 'sector_add' %}" class="btn btn-primary mb-2">Novo Setor</a>
     {% endif %}
     <form method="get" action="">
@@ -25,7 +25,9 @@
             <tr>
 
                 <th>Setor</th>
+                {% if perms.stock.delete_sector%}
                 <th>Ações</th>
+                {% endif %}
             </tr>
         </thead>
         <tbody>
@@ -33,9 +35,11 @@
             <tr>
 
                 <td>{{ item.name }}</td>
+                {% if perms.stock.delete_sector%}
                 <td>
                     <a href="{%url 'sector_delete' item.pk %}" class="btn btn-confirm-excluir">Excluir</a>
                 </td>
+                {% endif %}
             </tr>
             {% endfor %}
         </tbody>

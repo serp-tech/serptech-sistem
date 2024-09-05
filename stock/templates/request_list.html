@@ -5,7 +5,7 @@
 {% block content %}
 <div class="container">
     <h2>Requisições</h2>
-    {% if perms.estoque.view_requisicao_setor %}
+    {% if perms.stock.add_request %}
     <a href="{% url 'request_add' %}" class="btn btn-primary mb-2">Nova Requisição</a>
     {% endif %}
     <form method="get" action="">
@@ -40,7 +40,9 @@
                 <th>Unidade</th>
                 <th>Setor</th>
                 <th>Status</th>
+                {% if user_profile.position == 'Gerente' %}
                 <th>Ações</th>
+                {% endif %}
             </tr>
         </thead>
         <tbody>
@@ -69,11 +71,12 @@
                 <td>{{ item.unit }}</td>
                 <td>{{ item.sector }}</td>
                 <td>{{ item.status }}</td>
+                {% if user_profile.position == 'Gerente' %}
                 <td>
                     <div class="btn-group">
                         <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">Ações</button>
                         <ul class="dropdown-menu">
-                            {% if item.status == 'Análise' %}
+                            {% if item.status == 'Análise' and user_profile.position == 'Gerente' %}
                             <li>
                                 <a class="dropdown-item" href="#" onclick="approveRequest({{ item.pk }}); return false;" title="Aprovar">Aprovar</a>
                             </li>
@@ -87,6 +90,7 @@
                         </ul>
                     </div>
                 </td>
+                {% endif %}
             </tr>
             {% endfor %}
         </tbody>

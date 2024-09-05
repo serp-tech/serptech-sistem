@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+
+{% block title %}Financeiro - Saída{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Saídas</h2>
+
+    {% if perms.financial.add_cash_outflow %}
+    <div class="mb-2">
+        <a href="{% url 'cash_outflow_add' %}" class="btn btn-primary">Adicionar Saída</a>
+        <button type="button" id="toggleRelatorioBtn" class="btn btn-success ms-3">
+            <i class="bi bi-file-earmark-text"></i> Relatório
+        </button>
+    </div>
+    {% endif %}
+
+    <!-- Seção de geração de relatório escondida inicialmente -->
+    <div id="relatorioSection" class="mb-4" style="display: none;">
+        <form method="GET" action="{% url 'generate_cashoutflow_report' %}">
+            <div class="form-row align-items-center">
+                <div class="col-auto">
+                    <label for="filtro_periodo">Filtrar por:</label>
+                    <select id="filtro_periodo" name="filtro_periodo" class="form-control form-control-sm">
+                        <option value="anual" {% if filtro_periodo == 'anual' %}selected{% endif %}>Anual</option>
+                        <option value="trimestral" {% if filtro_periodo == 'trimestral' %}selected{% endif %}>Trimestral</option>
+                        <option value="mensal" {% if filtro_periodo == 'mensal' %}selected{% endif %}>Mensal</option>
+                        <option value="diario" {% if filtro_periodo == 'diario' %}selected{% endif %}>Diário</option>
+                        <option value="personalizado" {% if filtro_periodo == 'personalizado' %}selected{% endif %}>Personalizado</option>
+                    </select>
+                </div>
+
+                <div class="col-auto" id="filtro-ano">
+                    <label for="ano">Ano:</label>
+                    <input type="number" id="ano" name="ano" class="form-control form-control-sm" value="{{ ano }}" min="2000" max="{{ current_year }}">
+                </div>
+
+                <div class="col-auto" id="filtro-trimestre" style="display: {% if filtro_periodo == 'trimestral' %}block{% else %}none{% endif %};">
+                    <label for="trimestre">Trimestre:</label>
+                    <select id="trimestre" name="trimestre" class="form-control form-control-sm">
+                        <option value="1" {% if trimestre == 1 %}selected{% endif %}>1º Trimestre (Jan-Mar)</option>
+                        <option value="2" {% if trimestre == 2 %}selected{% endif %}>2º Trimestre (Abr-Jun)</option>
+                        <option value="3" {% if trimestre == 3 %}selected{% endif %}>3º Trimestre (Jul-Set)</option>
+                        <option value="4" {% if trimestre == 4 %}selected{% endif %}>4º Trimestre (Out-Dez)</option>
+                    </select>
+                </div>
+
+                <div class="col-auto" id="filtro-mes" style="display: {% if filtro_periodo == 'mensal' or filtro_periodo == 'diario' %}block{% else %}none{% endif %};">
+                    <label for="mes">Mês:</label>
+                    <select id="mes" name="mes" class="form-control form-control-sm">
+                        <option value="1" {% if mes == 1 %}selected{% endif %}>Janeiro</option>
+                        <option value="2" {% if mes == 2 %}selected{% endif %}>Fevereiro</option>
+                        <option value="3" {% if mes == 3 %}selected{% endif %}>Março</option>
+                        <option value="4" {% if mes == 4 %}selected{% endif %}>Abril</option>
+                        <option value="5" {% if mes == 5 %}selected{% endif %}>Maio</option>
+                        <option value="6" {% if mes == 6 %}selected{% endif %}>Junho</option>
+                        <option value="7" {% if mes == 7 %}selected{% endif %}>Julho</option>
+                        <option value="8" {% if mes == 8 %}selected{% endif %}>Agosto</option>
+                        <option value="9" {% if mes == 9 %}selected{% endif %}>Setembro</option>
+                        <option value="10" {% if mes == 10 %}selected{% endif %}>Outubro</option>
+                        <option value="11" {% if mes == 11 %}selected{% endif %}>Novembro</option>
+                        <option value="12" {% if mes == 12 %}selected{% endif %}>Dezembro</option>
+                    </select>
+                </div>
+
+                <div class="col-auto" id="filtro-dia" style="display: {% if filtro_periodo == 'diario' %}block{% else %}none{% endif %};">
+                    <label for="dia">Dia:</label>
+                    <input type="number" id="dia" name="dia" class="form-control form-control-sm" value="{{ dia }}" min="1" max="31">
+                </div>
+
+                <div class="col-auto" id="filtro-data-inicio" style="display: none;">
+                    <label for="data_inicio">Data Início:</label>
+                    <input type="date" id="data_inicio" name="data_inicio" class="form-control form-control-sm" value="{{ request.GET.data_inicio }}">
+                </div>
+                
+                <div class="col-auto" id="filtro-data-fim" style="display: none;">
+                    <label for="data_fim">Data Fim:</label>
+                    <input type="date" id="data_fim" name="data_fim" class="form-control form-control-sm" value="{{ request.GET.data_fim }}">
+                </div>
+
+                <div class="col-auto align-self-end">
+                    <button type="submit" class="btn btn-sm btn-success ">Gerar Relatório</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <form method="get" action="">
+        <div class="row mb-3">
+            <div class="col-md-4 mb-2">
+                <input type="text" class="form-control" id="beneficiarioFilter" name="beneficiario" placeholder="Beneficiário" value="{{ request.GET.beneficiario }}">
+            </div>
+            <div class="col-md-4 mb-2">
+                <input type="date" class="form-control" name="data" placeholder="Data" value="{{ request.GET.data }}">
+            </div>
+            <div class="col-md-4 d-flex align-items-start">
+                <button type="submit" class="btn btn-primary me-2">
+                    <i class="bi bi-search"></i> Filtrar
+                </button>
+            </div>
+        </div>
+    </form>
+
+    <div class="row">
+        <div class="col-md-12">
+            <table class="table table-dark table-striped">
+                <thead>
+                    <tr>
+                        <th>Data de Lançamento</th>
+                        <th>Beneficiário</th>
+                        <th>CNPJ Beneficiário</th>
+                        <th>Documento</th>
+                        <th>Valor do Título</th>
+                        <th>Multa</th>
+                        <th>Desconto</th>
+                        <th>Data de Faturamento</th>
+                        <th>Data de Vencimento</th>
+                        <th>Data de Pagamento</th>
+                        <th>Forma de Pagamento</th>
+                        <th>Valor Total</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in itens %}
+                    <tr>
+                        <td class="text-center">{{ item.date|date:"d/m/Y" }}</td>
+                        <td class="text-center">{{ item.recipient }}</td>
+                        <td class="telefone">{{ item.recipient_cnpj }}</td>
+                        <td class="telefone">{{ item.document }}</td>
+                        <td class="telefone">{{ item.tittle_value }}</td>
+                        <td class="telefone">{{ item.fine }}</td>
+                        <td class="telefone">{{ item.discount }}</td>
+                        <td class="text-center">{{ item.billing_date|date:"d/m/Y" }}</td>
+                        <td class="text-center">{{ item.due_date|date:"d/m/Y" }}</td>
+                        <td class="text-center">{{ item.payment_date|date:"d/m/Y" }}</td>
+                        <td class="text-center">{{ item.payment_method }}</td>
+                        <td class="telefone">{{ item.total_value }}</td>
+                        <td class="text-center">{{ item.status }}</td>
+                        <td>
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">Ações</button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item btn btn-info" href="{% url 'cash_outflow_detail' item.pk %}">Detalhes</a></li>
+                                    {% if item.status != 'Efetuado' %}
+                                    <li><a class="dropdown-item btn btn-info" href="{% url 'cash_outflow_conclude' item.pk %}">Efetuado</a></li>
+                                    {% endif %}
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Mostrar ou esconder a seção de geração de relatório
+    document.getElementById('toggleRelatorioBtn').addEventListener('click', function() {
+        var relatorioSection = document.getElementById('relatorioSection');
+        if (relatorioSection.style.display === 'none' || relatorioSection.style.display === '') {
+            relatorioSection.style.display = 'block';
+        } else {
+            relatorioSection.style.display = 'none';
+        }
+    });
+
+    // Mostrar ou esconder campos com base na seleção do filtro de período
+    document.getElementById('filtro_periodo').addEventListener('change', function() {
+        var filtroPeriodo = this.value;
+        
+        document.getElementById('filtro-trimestre').style.display = (filtroPeriodo === 'trimestral') ? 'block' : 'none';
+        document.getElementById('filtro-mes').style.display = (filtroPeriodo === 'mensal' || filtroPeriodo === 'diario') ? 'block' : 'none';
+        document.getElementById('filtro-dia').style.display = (filtroPeriodo === 'diario') ? 'block' : 'none';
+        
+        // Mostrar ou esconder o campo "Ano"
+        document.getElementById('filtro-ano').style.display = (filtroPeriodo === 'personalizado') ? 'none' : 'block';
+        
+        // Mostrar ou esconder campos de data personalizada
+        var isPersonalizado = (filtroPeriodo === 'personalizado');
+        document.getElementById('filtro-data-inicio').style.display = isPersonalizado ? 'block' : 'none';
+        document.getElementById('filtro-data-fim').style.display = isPersonalizado ? 'block' : 'none';
+    });
+
+    // Acionar o evento change ao carregar a página para garantir que os campos estejam corretamente exibidos ou escondidos
+    document.getElementById('filtro_periodo').dispatchEvent(new Event('change'));
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+{% endblock %}

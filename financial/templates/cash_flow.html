@@ -1,0 +1,244 @@
+{% extends "base.html" %}
+
+{% block title %}Fluxo de Caixa{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+<div class="container">
+    <h2>Fluxo de Caixa</h2>
+
+    <!-- Entradas, Saídas e Saldo em uma única linha -->
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <div class="card text-white bg-success mb-3">
+                <div class="card-header">Total de Entradas</div>
+                <div class="card-body">
+                    <h5 class="card-title">{{ total_inflows }}</h5>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-danger mb-3">
+                <div class="card-header">Total de Saídas</div>
+                <div class="card-body">
+                    <h5 class="card-title">{{ total_outflows }}</h5>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-info mb-3">
+                <div class="card-header">Saldo</div>
+                <div class="card-body">
+                    <h5 class="card-title">{{ saldo }}</h5>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Botão para mostrar/esconder a seção de geração de relatório -->
+    <button id="toggleRelatorioBtn" class="btn btn-success mb-3"> 
+        <i class="bi bi-file-earmark-text"></i> Relatório</button>
+
+    <!-- Seção de geração de relatório escondida inicialmente -->
+    <div id="relatorioSection" class="mb-4" style="display: none;">
+        <form method="GET" action="{% url 'generate_cash_flow_report' %}">
+            <div class="form-row align-items-center">
+                <div class="col-auto">
+                    <label for="filtro_periodo">Filtrar por:</label>
+                    <select id="filtro_periodo" name="filtro_periodo" class="form-control form-control-sm">
+                        <option value="anual" {% if filtro_periodo == 'anual' %}selected{% endif %}>Anual</option>
+                        <option value="trimestral" {% if filtro_periodo == 'trimestral' %}selected{% endif %}>Trimestral</option>
+                        <option value="mensal" {% if filtro_periodo == 'mensal' %}selected{% endif %}>Mensal</option>
+                        <option value="diario" {% if filtro_periodo == 'diario' %}selected{% endif %}>Diário</option>
+                        <option value="personalizado" {% if filtro_periodo == 'personalizado' %}selected{% endif %}>Personalizado</option>
+                    </select>
+                </div>
+
+                <div class="col-auto" id="filtro-ano">
+                    <label for="ano">Ano:</label>
+                    <input type="number" id="ano" name="ano" class="form-control form-control-sm" value="{{ ano }}" min="2000" max="{{ current_year }}">
+                </div>
+
+                <div class="col-auto" id="filtro-trimestre" style="display: {% if filtro_periodo == 'trimestral' %}block{% else %}none{% endif %};">
+                    <label for="trimestre">Trimestre:</label>
+                    <select id="trimestre" name="trimestre" class="form-control form-control-sm">
+                        <option value="1" {% if trimestre == 1 %}selected{% endif %}>1º Trimestre (Jan-Mar)</option>
+                        <option value="2" {% if trimestre == 2 %}selected{% endif %}>2º Trimestre (Abr-Jun)</option>
+                        <option value="3" {% if trimestre == 3 %}selected{% endif %}>3º Trimestre (Jul-Set)</option>
+                        <option value="4" {% if trimestre == 4 %}selected{% endif %}>4º Trimestre (Out-Dez)</option>
+                    </select>
+                </div>
+
+                <div class="col-auto" id="filtro-mes" style="display: {% if filtro_periodo == 'mensal' or filtro_periodo == 'diario' %}block{% else %}none{% endif %};">
+                    <label for="mes">Mês:</label>
+                    <select id="mes" name="mes" class="form-control form-control-sm">
+                        <option value="1" {% if mes == 1 %}selected{% endif %}>Janeiro</option>
+                        <option value="2" {% if mes == 2 %}selected{% endif %}>Fevereiro</option>
+                        <option value="3" {% if mes == 3 %}selected{% endif %}>Março</option>
+                        <option value="4" {% if mes == 4 %}selected{% endif %}>Abril</option>
+                        <option value="5" {% if mes == 5 %}selected{% endif %}>Maio</option>
+                        <option value="6" {% if mes == 6 %}selected{% endif %}>Junho</option>
+                        <option value="7" {% if mes == 7 %}selected{% endif %}>Julho</option>
+                        <option value="8" {% if mes == 8 %}selected{% endif %}>Agosto</option>
+                        <option value="9" {% if mes == 9 %}selected{% endif %}>Setembro</option>
+                        <option value="10" {% if mes == 10 %}selected{% endif %}>Outubro</option>
+                        <option value="11" {% if mes == 11 %}selected{% endif %}>Novembro</option>
+                        <option value="12" {% if mes == 12 %}selected{% endif %}>Dezembro</option>
+                    </select>
+                </div>
+
+                <div class="col-auto" id="filtro-dia" style="display: {% if filtro_periodo == 'diario' %}block{% else %}none{% endif %};">
+                    <label for="dia">Dia:</label>
+                    <input type="number" id="dia" name="dia" class="form-control form-control-sm" value="{{ dia }}" min="1" max="31">
+                </div>
+                <div class="col-auto" id="filtro-data-inicio" style="display: none;">
+                    <label for="data_inicio">Data Início:</label>
+                    <input type="date" id="data_inicio" name="data_inicio" class="form-control form-control-sm" value="{{ request.GET.data_inicio }}">
+                </div>
+                
+                <div class="col-auto" id="filtro-data-fim" style="display: none;">
+                    <label for="data_fim">Data Fim:</label>
+                    <input type="date" id="data_fim" name="data_fim" class="form-control form-control-sm" value="{{ request.GET.data_fim }}">
+                </div>
+
+                <div class="col-auto align-self-end">
+                    <button type="submit" class="btn btn-sm btn-success">Gerar Relatório</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div id="filtroSection">
+        <form method="GET" action="{% url 'cash_flow' %}">
+            <div class="form-row align-items-center">
+                <div class="col-auto">
+                    <label for="filtro_periodo">Filtrar por:</label>
+                    <select id="filtro_periodo" name="filtro_periodo" class="form-control form-control-sm" onchange="this.form.submit()">
+                        <option value="anual" {% if filtro_periodo == 'anual' %}selected{% endif %}>Anual</option>
+                        <option value="trimestral" {% if filtro_periodo == 'trimestral' %}selected{% endif %}>Trimestral</option>
+                        <option value="mensal" {% if filtro_periodo == 'mensal' %}selected{% endif %}>Mensal</option>
+                        <option value="diario" {% if filtro_periodo == 'diario' %}selected{% endif %}>Diário</option>
+                    </select>
+                </div>
+
+                <div class="col-auto" id="filtro-ano">
+                    <label for="ano">Ano:</label>
+                    <input type="number" id="ano" name="ano" class="form-control form-control-sm" value="{{ ano }}" min="2000" max="{{ current_year }}">
+                </div>
+
+                <div class="col-auto" id="filtro-trimestre" style="display: {% if filtro_periodo == 'trimestral' %}block{% else %}none{% endif %};">
+                    <label for="trimestre">Trimestre:</label>
+                    <select id="trimestre" name="trimestre" class="form-control form-control-sm">
+                        <option value="1" {% if trimestre == 1 %}selected{% endif %}>1º Trimestre (Jan-Mar)</option>
+                        <option value="2" {% if trimestre == 2 %}selected{% endif %}>2º Trimestre (Abr-Jun)</option>
+                        <option value="3" {% if trimestre == 3 %}selected{% endif %}>3º Trimestre (Jul-Set)</option>
+                        <option value="4" {% if trimestre == 4 %}selected{% endif %}>4º Trimestre (Out-Dez)</option>
+                    </select>
+                </div>
+
+                <div class="col-auto" id="filtro-mes" style="display: {% if filtro_periodo == 'mensal' or filtro_periodo == 'diario' %}block{% else %}none{% endif %};">
+                    <label for="mes">Mês:</label>
+                    <select id="mes" name="mes" class="form-control form-control-sm">
+                        <option value="1" {% if mes == 1 %}selected{% endif %}>Janeiro</option>
+                        <option value="2" {% if mes == 2 %}selected{% endif %}>Fevereiro</option>
+                        <option value="3" {% if mes == 3 %}selected{% endif %}>Março</option>
+                        <option value="4" {% if mes == 4 %}selected{% endif %}>Abril</option>
+                        <option value="5" {% if mes == 5 %}selected{% endif %}>Maio</option>
+                        <option value="6" {% if mes == 6 %}selected{% endif %}>Junho</option>
+                        <option value="7" {% if mes == 7 %}selected{% endif %}>Julho</option>
+                        <option value="8" {% if mes == 8 %}selected{% endif %}>Agosto</option>
+                        <option value="9" {% if mes == 9 %}selected{% endif %}>Setembro</option>
+                        <option value="10" {% if mes == 10 %}selected{% endif %}>Outubro</option>
+                        <option value="11" {% if mes == 11 %}selected{% endif %}>Novembro</option>
+                        <option value="12" {% if mes == 12 %}selected{% endif %}>Dezembro</option>
+                    </select>
+                </div>
+
+                <div class="col-auto" id="filtro-dia" style="display: {% if filtro_periodo == 'diario' %}block{% else %}none{% endif %};">
+                    <label for="dia">Dia:</label>
+                    <input type="number" id="dia" name="dia" class="form-control form-control-sm" value="{{ dia }}" min="1" max="31">
+                </div>
+
+                <div class="col-auto align-self-end">
+                    <button type="submit" class="btn btn-primary btn-sm mt-4">Filtrar</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Transações -->
+    <div class="transactions mt-4">
+        <h3>Transações</h3>
+        <table class="table table-dark table-striped">
+            <thead>
+                <tr>
+                    <th>Data</th>
+                    <th>Beneficiário/Cliente</th>
+                    <th>CNPJ</th>
+                    <th>Valor Total</th>
+                </tr>
+            </thead>
+            <tbody> 
+                {% for transacao in transacoes %}
+                <tr>
+                    <td class="text-left">{{ transacao.payment_date|date:"d/m/Y" }}</td>
+                    <td class="text-left">
+                        {% if transacao.recipient %}
+                            {{ transacao.recipient.name }}
+                        {% elif transacao.client %}
+                            {{ transacao.client.name }}
+                        {% endif %}
+                    </td>
+                    <td class="telefone">
+                        {% if transacao.recipient %}
+                            {{ transacao.recipient_cnpj }}
+                        {% elif transacao.client %}
+                            {{ transacao.client_cnpj }}
+                        {% endif %}
+                    </td>
+                    <td class="telefone">{{ transacao.total_value }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3">Nenhuma transação registrada nesse período.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+document.getElementById('filtro_periodo').addEventListener('change', function() {
+    var filtroPeriodo = this.value;
+    document.getElementById('filtro-trimestre').style.display = (filtroPeriodo === 'trimestral') ? 'block' : 'none';
+    document.getElementById('filtro-mes').style.display = (filtroPeriodo === 'mensal' || filtroPeriodo === 'diario') ? 'block' : 'none';
+    document.getElementById('filtro-dia').style.display = (filtroPeriodo === 'diario') ? 'block' : 'none';
+    document.getElementById('filtro-ano').style.display = (filtroPeriodo === 'personalizado') ? 'none' : 'block';
+    document.getElementById('filtro-data-inicio').style.display = (filtroPeriodo === 'personalizado') ? 'block' : 'none';
+    document.getElementById('filtro-data-fim').style.display = (filtroPeriodo === 'personalizado') ? 'block' : 'none';
+});
+
+document.getElementById('toggleRelatorioBtn').addEventListener('click', function() {
+    var relatorioSection = document.getElementById('relatorioSection');
+    var filtroSection = document.getElementById('filtroSection');
+
+    if (relatorioSection.style.display === 'none' || relatorioSection.style.display === '') {
+        relatorioSection.style.display = 'block';
+        filtroSection.style.display = 'none';
+    } else {
+        relatorioSection.style.display = 'none';
+        filtroSection.style.display = 'block';
+    }
+});
+
+// Acionar o evento change ao carregar a página para garantir que os campos estejam corretamente exibidos ou escondidos
+document.getElementById('filtro_periodo').dispatchEvent(new Event('change'));
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+{% endblock %}

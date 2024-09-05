@@ -5,7 +5,9 @@
 {% block content %}
 <div class="container">
     <h2>Requisitantes</h2>
+    {% if perms.stock.add_requester%}
     <a href="{% url 'requester_add' %}" class="btn btn-primary mb-2">Novo Requisitante</a>
+    {% endif  %}
     <form method="get" action="">
         <div class="row mb-3">
             <div class="col-md-4 mb-2">
@@ -45,8 +47,12 @@
                     <div class="btn-group">
                         <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">Ações</button>
                         <ul class="dropdown-menu">
+                            {% if perms.stock.delete_requester%}
                             <li><a href="{% url 'requester_delete' item.pk %}" class="btn">Excluir</a></li>
+                            {% endif %}
+                            {% if perms.stock.change_requester%}
                             <li><a href="{% url 'requester_update' item.pk %}" class="btn">Editar</a></li>
+                            {% endif %}
                         </ul>
                     </div>
                 </td>

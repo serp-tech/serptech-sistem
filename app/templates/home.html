@@ -136,67 +136,85 @@
             {% endif %}
             <h3 id="username-dropdown">{{ user.get_username }}</h3>
             <div id="user-dropdown-container" class="user-dropdown-container">
-                <a href="">Sair</a>
+                <a href="{% url 'logout' %}">Sair</a>
             </div>
             <p>{{ user.userprofile.role }}</p>
         </div>
     </div>
     <div class="content">
         <div class="link-box">
+            {% if perms.stock.view_inflow %}
             <a href="{% url 'inflow' %}">Entradas</a>
+            {% endif %}
         </div>
         <div class="link-box">
+            {% if perms.stock.view_presentation %}
             <a href="{% url 'presentation' %}">Formas de Apresentações</a>
+            {% endif %}
         </div>
         <div class="link-box">
+            {% if perms.stock.view_supplier %}
             <a href="{% url 'supplier' %}">Fornecedores</a>
+            {% endif %}
         </div>
         <div class="link-box">
+            {% if perms.stock.view_inventory %}
             <a href="{% url 'inventory' %}">Inventário</a>
+            {% endif %}
         </div>
-        
         <div class="link-box">
+            {% if perms.stock.view_item %}
             <a href="{% url 'item' %}">Itens</a>
+            {% endif %}
         </div>
-        
         <div class="link-box">
+            {% if perms.stock.view_requester %}
             <a href="{% url 'requester' %}">Requisitantes</a>
+            {% endif %}
         </div>
-
         <div class="link-box">
+            {% if perms.stock.view_request %}
             <a href="{% url 'request' %}">Requisições</a>
+            {% endif %}
         </div>
-        
         <div class="link-box">
+            {% if perms.stock.view_outflow %}
             <a href="{% url 'outflow' %}">Saídas</a>
+            {% endif %}
         </div>
         <div class="link-box">
+            {% if perms.stock.view_sector %}
             <a href="{% url 'sector' %}">Setores</a>
+            {% endif %}
         </div>
-        
         <div class="link-box">
+            {% if perms.stock.view_purchaseorder %}
             <a href="{% url 'purchase' %}">Ordem de Compra</a>
+            {% endif %}
         </div>
-        
         <div class="link-box">
+            {% if perms.stock.view_serviceorder %}
             <a href="{% url 'service' %}">Ordem de Serviço</a>
+            {% endif %}
+        </div>
+        <div class="link-box">
+            {% if perms.stock.view_unit %}
+            <a href="{% url 'unit' %}">Unidades</a>
+            {% endif %}
         </div>
         
-        <div class="link-box">
-            <a href="{% url 'unit' %}">Unidades</a>
-        </div>
         <div class="link-box">
             <a href="{%url 'register' %}">Novo Usuário</a>
         </div>
         
         <div class="link-box">
-            <a href="">Contas a Pagar</a>
+            <a href="{% url 'cash_outflow' %}">Contas a Pagar</a>
         </div>
         <div class="link-box">
-            <a href="">Contas a Receber</a>
+            <a href="{% url 'cash_inflow' %}">Contas a Receber</a>
         </div>
         <div class="link-box">
-            <a href="">Fluxo de Caixa</a>
+            <a href="{% url 'cash_flow' %}">Fluxo de Caixa</a>
         </div>
         
     </div>

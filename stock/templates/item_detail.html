@@ -18,8 +18,12 @@
     <p><strong>Frequência de Saida:</strong> {{ object.outflow_frequency}}</p>
     
     <!-- Botões de ação -->
+    {% if perms.stock.change_item %}
     <a href="{% url 'item_update' object.pk %}" class="btn btn-primary">Editar</a>
+    {% endif %}
     <a href="{% url 'item' %}" class="btn btn-primary">Voltar</a>
+    {% if perms.stock.delete_item %}
     <a href="{% url 'item_delete' object.pk %}" class="btn btn-confirm-excluir">Excluir</a>
+    {% endif %}
 </div>
 {% endblock %}

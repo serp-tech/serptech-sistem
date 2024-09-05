@@ -5,7 +5,7 @@
 {% block content %}
 <div class="container">
     <h2>Ordem de Serviço</h2>
-    {% if perms.estoque.add_ordem_de_servico %}
+    {% if perms.stock.add_serviceorder %}
     <a href="{% url 'service_add' %}" class="btn btn-primary mb-2">Nova Ordem</a>
     {% endif %}
     <form method="get" action="">
@@ -50,7 +50,7 @@
                 <td>{{ item.delivery_date|date:"d/m/Y" }}</td>
                 <td>
                     <a href="{% url 'service_detail' item.pk %}" class="btn btn-sm btn-info mb-2">Detalhes</a>
-                    {% if item.status != 'Feito' %}
+                    {% if item.status != 'Feito' and user_profile.position == 'Gerente' %}
                         {% if item.start_date is None %}
                             <a href="{% url 'start_service' item.pk %}" class="btn btn btn-success mb-2">Iniciar</a>
                         {% endif %}

@@ -17,11 +17,12 @@
     <p><strong>Data de Entrega:</strong> {{ object.delivery_date|date:"d/m/Y"}}</p>
     <p><strong>Feedback:</strong> {{ object.feedback}}</p>
     
-    {% if perms.estoque.change_ordem_de_servico %}
+    {% if perms.stock.change_serviceorder%}
     <a href="{% url 'service_update' object.pk %}" class="btn btn-primary">Editar</a>
     {% endif %}
     <a href="{% url 'service' %}" class="btn btn-primary">Voltar</a>
+    {% if perms.stock.delete_serviceorder %}
     <a href="{% url 'service_delete'   object.pk %}" class="btn btn-danger">Excluir</a>
-
+    {% endif %}
 </div>
 {% endblock %}

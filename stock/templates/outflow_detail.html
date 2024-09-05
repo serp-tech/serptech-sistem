@@ -14,12 +14,12 @@
     <p><strong>Estoque de Destino:</strong> {{ object.target_stock}}</p>
     
     
-
+    {% if perms.stock.change_outflow %}
     <a href="{% url 'outflow_update' object.pk %}" class="btn btn-primary">Editar</a>
-
+    {% endif %}
     <a href="{% url 'outflow' %}" class="btn btn-primary">Voltar</a>
-    
+    {% if perms.stock.delete_outflow %}
     <a href="{% url 'outflow_delete' object.pk %}" class="btn btn-confirm-excluir">Excluir</a>
-    
+    {% endif %}
 </div>
 {% endblock %}

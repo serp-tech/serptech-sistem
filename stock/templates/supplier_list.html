@@ -6,8 +6,9 @@
 
 <div class="container">
     <h2>Fornecedores</h2>
+    {% if perms.stock.add_supplier %}
     <a href="{% url 'supplier_add' %}" class="btn btn-primary mb-2">Novo Fornecedor</a>
-
+    {% endif %}
     <form method="get" action="">
         <div class="row mb-3">
             <div class="col-md-4 mb-2">
@@ -33,7 +34,9 @@
                 <th>Vendedor</th>
                 <th>Email</th>
                 <th>Telefone</th>
+                {% if perms.stock.view_supplier%}
                 <th>Ações</th>
+                {% endif %}
             </tr>
         </thead>
         <tbody>
@@ -45,11 +48,11 @@
                 <td class="text-left">{{ item.seller }}</td>
                 <td class="text-left">{{ item.email }}</td>
                 <td class="telefone">{{ item.phone_number }}</td>
-                
+                {% if perms.stock.view_supplier %}
                 <td>
                     <a href="{% url 'supplier_detail' item.pk %}" class="btn btn-sm btn-info">Detalhes</a>
                 </td>
-                
+                {% endif %}
             </tr>
             {% endfor %}
         </tbody>

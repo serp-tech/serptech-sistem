@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Lista de Clientes{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Clientes</h2>
+    {% if perms.lab.add_convenio %}
+    <div class="mb-2">
+        <a href="{% url 'client_add' %}" class="btn btn-primary">Novo Item</a>
+    </div>
+    {% endif %}
+    <form method="get" action="">
+        <div class="row mb-3">
+            <div class="col-md-4 mb-2">
+                <input type="text" id="name-client" class="form-control" name="name" placeholder="Nome do Cliente" value="{{ request.GET.name}}">
+            </div>
+            <div class="col-md-4 mb-2">
+                <input type="text" class="form-control" name="cnpj" placeholder="CNPJ" value="{{ request.GET.cnpj}}">
+            </div>
+            <div class="col-md-4 d-flex align-items-start">
+                <button type="submit" class="btn btn-primary me-2">
+                    <i class="bi bi-search"></i> Filtrar
+                </button>
+            </div>
+        </div>
+    </form>
+    
+    <div class="row">
+        <div class="col-md-12">
+            <table class="table table-dark table-striped">
+                <thead>
+                    <tr>
+                        <th>nome</th>
+                        <th>CNPJ</th>
+                        <th>Email</th>
+                        <th>Telefone</th>
+                        <th>Ações</th>
+                        
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in itens %}
+                    <tr>
+                        <td>{{ item.name }}</td>
+                        <td class="telefone">{{ item.cnpj }}</td>
+                        <td>{{ item.email}}</td>
+                        <td class="telefone">{{ item.phone_number }}</td>
+                        <td>
+                            <a href="{% url 'client_detail' item.pk %}" class="btn btn-sm btn-info">Detalhes</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

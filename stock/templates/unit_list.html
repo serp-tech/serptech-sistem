@@ -5,7 +5,7 @@
 {% block content %}
 <div class="container">
     <h2>Unidades</h2>
-    {% if perms.estoque.add_unidade %}
+    {% if perms.stock.add_unit %}
     <a href="{% url 'unit_add' %}" class="btn btn-primary mb-2">Nova Unidade</a>
     {% endif %}
     
@@ -26,16 +26,20 @@
         <thead>
             <tr>
                 <th>Unidade</th>
+                {% if perms.stock.delete_unit %}
                 <th>Ações</th>
+                {% endif %}
             </tr>
         </thead>
         <tbody>
             {% for item in itens %}
             <tr>
                 <td>{{ item.name }}</td>
+                {% if perms.stock.delete_unit%}
                 <td>
                     <a href="{% url 'unit_delete' item.pk %}" class="btn btn-confirm-excluir">Excluir</a>
                 </td>
+                {% endif %}
             </tr>
             {% endfor %}
         </tbody>

@@ -5,7 +5,6 @@
 {% block content %}
 <div class="container">
     <h2>Entradas</h2>
-    
     <div class="mb-2">
         <a href="{% url 'inflow_add' %}" class="btn btn-primary">Novo Item</a>
     </div>
@@ -38,9 +37,7 @@
                         <th>Custo Unitario</th>
                         <th>Quantidade</th>
                         <th>Custo Total</th>
-                        {% if perms.estoque.detail_entrada %}
                         <th>Ações</th>
-                        {% endif %}
                     </tr>
                 </thead>
                 <tbody>

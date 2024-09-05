@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% load custom_tags %}
+
+{% block title %}Conta a Receber{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Conta a Receber</h2>
+    <p><strong>Cliente:</strong> {{ object.client }}</p>
+    <p><strong>Valor do Título:</strong> {{ object.tittle_value|format_currency_filter }}</p>
+    <p><strong>Desconto:</strong> {{ object.discount|format_currency_filter }}</p>
+    <p><strong>multa:</strong> {{ object.fine|format_currency_filter }}</p>
+    <p><strong>Valor Total:</strong> {{ object.total_value|format_currency_filter }}</p>
+    <p><strong>Data de Faturamento:</strong> {{ object.billing_date|date:"d/m/Y" }}</p>
+    <p><strong>Data de Vencimento:</strong> {{ object.due_date|date:"d/m/Y" }}</p>
+    <p><strong>Data de Pagamento:</strong> {{ object.payment_date|date:"d/m/Y" }}</p>
+    <p><strong>Data de Recebimento:</strong> {{ object.recive_date|date:"d/m/Y" }}</p>
+    <p><strong>Forma de Recebimento:</strong> {{ object.payment_method }}</p>
+    <p><strong>Documento:</strong> 
+        {% if object.document_pdf %}
+            <a href="{{ object.document_pdf.url }}" target="_blank">Ver Documento</a>
+        {% else %}
+            Não disponível
+        {% endif %}
+    </p>
+    <p><strong>Comprovante:</strong> 
+        {% if object.proof %}
+            <a href="{{ object.proof.url }}" target="_blank">Ver Comprovante</a>
+        {% else %}
+            Não disponível
+        {% endif %}
+    </p>
+    <p><strong>Descrição:</strong> {{ object.descricao }}</p>
+    
+    {% if perms.financial.change_contas_receber %}
+    <a href="{% url 'cash_inflow_update' object.pk %}" class="btn btn-primary">Editar</a>
+    {% endif %}
+    <a href="{% url 'cash_inflow' %}" class="btn btn-primary">Voltar</a>
+    {% if perms.financial.delete_contas_receber %}
+    <a href="{% url 'cash_inflow_delete' object.pk %}" class="btn btn-danger">Excluir</a>
+    {% endif %}
+</div>
+{% endblock %}

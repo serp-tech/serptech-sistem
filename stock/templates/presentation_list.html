@@ -5,7 +5,9 @@
 {% block content %}
 <div class="container">
     <h2>Apresentação</h2>
+    {% if perms.stock.add_presentation%}
     <a href="{%url 'presentation_add' %}" class="btn btn-primary mb-2">Novo Apresentação</a>
+    {% endif %}
     <form method="get" action="">
         <div class="row mb-3">
             <div class="col-md-4 mb-2">
@@ -23,8 +25,9 @@
             <tr>
 
                 <th>Apresentação</th>
+                {% if perms.stock.delete_presentation %}
                 <th>Ações</th>
-
+                {% endif %}
             </tr>
         </thead>
         <tbody>
@@ -32,9 +35,11 @@
             <tr>
 
                 <td>{{ item.name }}</td>
+                {% if perms.stock.delete_presentation %}
                 <td>
                     <a href="{%url 'presentation_delete' item.pk %}" class="btn btn-confirm-excluir">Excluir</a>
                 </td>
+                {% endif %}
             </tr>
             {% endfor %}
         </tbody>

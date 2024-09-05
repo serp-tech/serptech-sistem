@@ -26,14 +26,18 @@ class CustomUserCreationForm(UserCreationForm):
 
         if commit:
             user.save()
-            user_profile = UserProfile(
-                user=user,
-                profile_image=self.cleaned_data.get('profile_image'),
-                position=self.cleaned_data.get('position'),
-            )
+            # Verificar se o UserProfile já existe
+            try:
+                user_profile = UserProfile.objects.get(user=user)
+            except UserProfile.DoesNotExist:
+                user_profile = UserProfile(user=user)
+            
+            # Atualizar ou criar o UserProfile
+            user_profile.profile_image = self.cleaned_data.get('profile_image')
+            user_profile.position = self.cleaned_data.get('position')
             user_profile.save()
 
-            # Agora atribuimos os setores utilizando o método set()
+            # Atribuir os setores e unidades
             user_profile.sector.set(self.cleaned_data.get('sector'))
             user_profile.unit.set(self.cleaned_data.get('unit'))
 

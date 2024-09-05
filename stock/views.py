@@ -1,4 +1,5 @@
 from django.http import JsonResponse
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import get_list_or_404, redirect, get_object_or_404, redirect, render
 from django.utils import timezone
@@ -11,11 +12,12 @@ from .forms import (SectorForm, UnitForm, UnitFilterForm, RequesterForm, Present
                     PurchaseOrderDeniedForm, PurchaseOrderUpdateForm, ServiceOrderForm, ServiceOrderStartForm, ServiceOrderFinishForm)
 from .utils import format_currency
 
-class SectorListView(ListView):
+class SectorListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
 
     model = Sector
     template_name = 'sector_list.html'
     context_object_name = 'itens'
+    permission_required = 'stock.view_sector'
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -25,26 +27,29 @@ class SectorListView(ListView):
         return queryset
     
 
-class SectorCreateView(CreateView):
+class SectorCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
 
     model = Sector
     template_name = 'sector_create.html'
     form_class = SectorForm
     success_url = '/sector/'
+    permission_required = 'stock.add_sector'
 
 
-class SectorDeleteView(DeleteView):
+class SectorDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
 
     model = Sector
     template_name = 'sector_delete.html'
     success_url = '/sector/'
+    permission_required = 'stock.delete_sector'
 
 
-class UnitListView(ListView):
+class UnitListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
 
     model = Unit
     template_name = 'unit_list.html'
     context_object_name = 'itens'
+    permission_required = 'stock.view_unit'
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -54,26 +59,29 @@ class UnitListView(ListView):
         return queryset
     
 
-class UnitCreateView(CreateView):
+class UnitCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
 
     model = Unit
     template_name = 'unit_create.html'
     form_class = UnitForm
     success_url = '/unit/'
+    permission_required = 'stock.add_unit'
 
 
-class UnitDeleteView(DeleteView):
+class UnitDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
 
     model = Unit
     template_name = 'unit_delete.html'
     success_url = '/unit/'
+    permission_required = 'stock.delete_unit'
 
 
-class RequesterListView(ListView):
+class RequesterListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
 
     model = Requester
     template_name = 'requester_list.html'
     context_object_name = 'itens'
+    permission_required = 'stock.view_requester'
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -89,35 +97,39 @@ class RequesterListView(ListView):
         return queryset
     
 
-class RequesterCreateView(CreateView):
+class RequesterCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
 
     model = Requester
     template_name = 'requester_create.html'
     form_class = RequesterForm
     success_url = '/requester/'
+    permission_required = 'stock.add_requester'
 
 
-class RequesterDeleteView(DeleteView):
+class RequesterDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
 
     model = Requester
     template_name = 'requester_delete.html'
     success_url = '/requester/'
+    permission_required = 'stock.delete_requester'
 
 
 
-class RequesterUpdateView(UpdateView):
+class RequesterUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
 
     model = Requester
     template_name = 'requester_update.html'
     form_class = RequesterForm
     success_url = '/requester/'
+    permission_required = 'stock.change_requester'
 
 
-class PresentationListView(ListView):
+class PresentationListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
 
     model = Presentation
     template_name = 'presentation_list.html'
     context_object_name = 'itens'
+    permission_required = 'stock.view_presentation'
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -127,26 +139,29 @@ class PresentationListView(ListView):
         return queryset
     
 
-class PresentationCreateView(CreateView):
+class PresentationCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
 
     model = Presentation
     template_name = 'presentation_create.html'
     form_class = PresentationForm
     success_url = '/presentation/'
+    permission_required = 'stock.add_presentation'
 
 
-class PresentationDeleteView(DeleteView):
+class PresentationDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
 
     model = Presentation
     template_name = 'presentation_delete.html'
     success_url = '/presentation/'
+    permission_required = 'stock.delete_presentation'
 
 
-class SupplierListView(ListView):
+class SupplierListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
 
     model = Supplier
     template_name = 'supplier_list.html'
     context_object_name = 'itens'
+    permission_required = 'stock.view_supplier'
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -158,40 +173,45 @@ class SupplierListView(ListView):
             queryset = queryset.filter(cnpj__icontains=cnpj)
         return queryset
     
-class SupplierCreateView(CreateView):
+class SupplierCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
 
     model = Supplier
     template_name = 'supplier_create.html'
     form_class  = SupplierForm
     success_url = '/supplier/'
+    permission_required = 'stock.add_supplier'
 
 
-class SupplierDetailView(DetailView):
+class SupplierDetailView(LoginRequiredMixin, PermissionRequiredMixin, DetailView):
 
     model = Supplier
     template_name = 'supplier_detail.html'
+    permission_required = 'stock.view_supplier'
 
 
-class SupplierUpdateView(UpdateView):
+class SupplierUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
 
     model = Supplier
     template_name = 'supplier_update.html'
     form_class = SupplierForm
     success_url = '/supplier/'
+    permission_required = 'stock.change_supplier'
 
 
-class SupplierDeleteView(DeleteView):
+class SupplierDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
 
     model = Supplier
     template_name = 'supplier_delete.html'
     success_url = '/supplier/'
+    permission_required = 'stock.delete_supplier'
 
 
-class ItemListView(ListView):
+class ItemListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
 
     model = Item
     template_name = 'item_list.html'
     context_object_name = 'itens'
+    permission_required = 'stock.view_item'
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -201,12 +221,13 @@ class ItemListView(ListView):
         return queryset
 
 
-class ItemCreateView(CreateView):
+class ItemCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
 
     model = Item
     template_name = 'item_add.html'
     form_class = ItemForm
     success_url = '/item/'
+    permission_required = 'stock.add_item'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -216,32 +237,36 @@ class ItemCreateView(CreateView):
         return context
 
 
-class ItemUpdateView(UpdateView):
+class ItemUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
 
     model = Item
     template_name = 'item_update.html'
     form_class = ItemForm
     success_url = '/item/'
+    permission_required = 'stock.change_item'
 
 
-class ItemDetailView(DetailView):
+class ItemDetailView(LoginRequiredMixin, PermissionRequiredMixin, DetailView):
 
     model = Item
     template_name = 'item_detail.html'
+    permission_required = 'stock.view_item'
 
 
-class ItemDeleteView(DeleteView):
+class ItemDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
 
     model = Item
     template_name = 'item_delete.html'
     success_url = '/item/'
+    permission_required = 'stock.delete_item'
 
 
-class InflowListView(ListView):
+class InflowListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
 
     model = Inflow
     template_name = 'inflow_list.html'
     context_object_name = 'itens'
+    permission_required = 'stock.view_inflow'
 
     def get_queryset(self):
         
@@ -264,41 +289,46 @@ class InflowListView(ListView):
         return context
     
 
-class InflowCreateView(CreateView):
+class InflowCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
 
     model = Inflow
     template_name = 'inflow_add.html'
     form_class = InflowForm
     success_url = '/inflow/'
+    permission_required = 'stock.add_inflow'
     
 
-class InflowDetailView(DetailView):
+class InflowDetailView(LoginRequiredMixin, PermissionRequiredMixin, DetailView):
 
     model = Inflow
     template_name = 'inflow_detail.html'
+    permission_required = 'stock.view_inflow'
 
 
-class InflowUpdateView(UpdateView):
+class InflowUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
 
     model = Inflow
     template_name = 'inflow_update.html'
     form_class = InflowForm
     success_url = '/inflow/'
+    permission_required = 'stock.change_inflow'
 
 
-class InflowDeleteView(DeleteView):
+class InflowDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
 
     model = Inflow
     template_name = 'inflow_delete.html'
     success_url = '/inflow/'
+    permission_required = 'stock.delete_inflow'
 
 
 
-class OutflowListView(ListView):
+class OutflowListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
 
     model = Outflow
     template_name = 'outflow_list.html'
     context_object_name = 'itens'
+    permission_required = 'stock.view_outflow'
 
     def get_queryset(self):
         
@@ -312,12 +342,13 @@ class OutflowListView(ListView):
         return queryset
     
 
-class OutflowCreateView(CreateView):
+class OutflowCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
 
     model = Outflow
     template_name = 'outflow_add.html'
     form_class = OutflowForm
     success_url = '/outflow/'
+    permission_required = 'stock.add_outflow'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -326,18 +357,20 @@ class OutflowCreateView(CreateView):
         return context
     
 
-class OutflowDetailView(DetailView):
+class OutflowDetailView(LoginRequiredMixin, PermissionRequiredMixin, DetailView):
 
     model = Outflow
     template_name = 'outflow_detail.html'
+    permission_required = 'stock.view_outflow'
 
 
-class OutflowUpdateView(UpdateView):
+class OutflowUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
 
     model = Outflow
     template_name = 'outflow_update.html'
     form_class = OutflowForm
     success_url = '/outflow/'
+    permission_required = 'stock.change_outflow'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -346,17 +379,19 @@ class OutflowUpdateView(UpdateView):
         return context
 
 
-class OutflowDeleteView(DeleteView):
+class OutflowDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
 
     model = Outflow
     template_name = 'outflow_delete.html'
     success_url = '/outflow/'
+    permission_required = 'stock.delete_outflow'
 
     
-class RequestListView(ListView):
+class RequestListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     model = Request
     template_name = 'request_list.html'  
     context_object_name = 'itens'
+    permission_required = 'stock.view_request'
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -372,11 +407,12 @@ class RequestListView(ListView):
         return queryset
 
 
-class RequestCreateView(CreateView):
+class RequestCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     model = Request
     form_class = RequestForm
     template_name = 'request_add.html'
     success_url = '/request/'
+    permission_required = 'stock.add_request'
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
@@ -402,11 +438,12 @@ class RequestCreateView(CreateView):
 
 
 
-class RequestUpdateView(UpdateView):
+class RequestUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     model = Request
     form_class = RequestForm
     template_name = 'request_update.html'
-    success_url = '/request/'  # Substitua pelo nome correto da URL de sucesso
+    success_url = '/request/' 
+    permission_required = 'stock.change_request'
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
@@ -428,17 +465,19 @@ class RequestUpdateView(UpdateView):
             return self.form_invalid(form)
 
 
-class RequestDeleteView(DeleteView):
+class RequestDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     model = Request
     template_name = 'request_delete.html'  
     success_url = '/request/' 
+    permission_required = 'stock.delete_request'
 
 
-class InventoryListView(ListView):
+class InventoryListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
 
     model = Inventory
     template_name = 'inventory_list.html'
     context_object_name = 'itens'
+    permission_required = 'stock.view_inventory'
 
 
     def get_queryset(self):
@@ -460,25 +499,28 @@ class InventoryListView(ListView):
     
     
 
-class InventoryDetail(DetailView):
+class InventoryDetail(LoginRequiredMixin, PermissionRequiredMixin, DetailView):
 
     model = Inventory
     template_name = 'inventory_detail.html'
+    permission_required = 'stock.view_inventory'
 
 
-class PurchaseOrderListView(ListView):
+class PurchaseOrderListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
 
     model = PurchaseOrder
     template_name = 'purchaseorder_list.html'
     context_object_name = 'itens'
+    permission_required = 'stock.view_purchaseorder'
 
 
-class PurchaseOrderCreateView(CreateView):
+class PurchaseOrderCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     
     model = PurchaseOrder
     template_name = 'purchaseorder_add.html'
     form_class = PurchaseOrderForm
     success_url = '/purchase/'
+    permission_required = 'stock.add_purchaseorder'
 
 
     def form_valid(self, form):
@@ -492,40 +534,45 @@ class PurchaseOrderCreateView(CreateView):
         context['orders_ids'] = PurchaseOrder.objects.values_list('id', flat=True)
         return context
 
-class PurchaseOrderDetailView(DetailView):
+class PurchaseOrderDetailView(LoginRequiredMixin, PermissionRequiredMixin, DetailView):
 
     model = PurchaseOrder
     template_name = 'purchaseorder_detail.html'
+    permission_required = 'stock.view_purchaseorder'
 
 
-class PurchaseOrderUpdateView(UpdateView):
+class PurchaseOrderUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     
     model = PurchaseOrder
     template_name = 'purchaseorder_update.html'
     form_class = PurchaseOrderUpdateForm
     success_url = '/purchase/'
+    permission_required = 'stock.change_purchaseorder'
 
 
-class PurchaseOrderDeleteView(DeleteView):
+class PurchaseOrderDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
 
     model = PurchaseOrder
     template_name = 'purchaseorder_delete.html'
     success_url = '/purchase/'
+    permission_required = 'stock.delete_purchaseorder'
 
 
-class ServiceOrderListView(ListView):
+class ServiceOrderListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
 
     model = ServiceOrder
     template_name = 'serviceorder_list.html'
     context_object_name = 'itens'
+    permission_required = 'stock.view_serviceorder'
 
 
-class ServiceOrderCreateView(CreateView):
+class ServiceOrderCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
 
     model = ServiceOrder
     template_name = 'serviceorder_create.html'
     form_class = ServiceOrderForm
     success_url = '/service/'
+    permission_required = 'stock.add_serviceorder'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -534,25 +581,28 @@ class ServiceOrderCreateView(CreateView):
         return context
 
 
-class ServiceOrderDetailView(DetailView):
+class ServiceOrderDetailView(LoginRequiredMixin, PermissionRequiredMixin, DetailView):
 
     model = ServiceOrder
     template_name = 'serviceorder_detail.html'
+    permission_required = 'stock.view_serviceorder'
 
 
-class ServiceOrderUpdateView(UpdateView):
+class ServiceOrderUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
 
     model = ServiceOrder
     template_name = 'serviceorder_update.html'
     form_class = ServiceOrderForm
     success_url = '/service/'
+    permission_required = 'stock.change_serviceorder'
 
 
-class ServiceOrderDeleteView(DeleteView):
+class ServiceOrderDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
 
     model = ServiceOrder
     template_name = 'serviceorder_delete.html'
     success_url = '/service/'
+    permission_required = 'stock.delete_serviceorder'
 
 
 @csrf_exempt

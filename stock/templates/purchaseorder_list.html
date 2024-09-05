@@ -5,7 +5,7 @@
 {% block content %}
 <div class="container">
     <h2>Ordem de Compra</h2>
-    {% if perms.estoque.add_ordem_de_compra %}
+    {% if perms.stock.add_purchaseorder %}
     <a href="{% url 'purchase_add' %}" class="btn btn-primary mb-2">Nova Ordem</a>
     {% endif %}
     <form method="get" action="">
@@ -43,9 +43,7 @@
                 <th>Gestor</th>
                 <th>Status</th>
                 <th>Status da Compra</th>
-                {% if perms.estoque.detail_ordem_de_compra %}
                 <th>Ações</th>
-                {% endif %}
             </tr>
         </thead>
         <tbody>
@@ -69,11 +67,13 @@
                 <td class="text-center">{{ item.manager }}</td>
                 <td class="text-center">{{ item.status }}</td>
                 <td class="text-center">{{ item.purchase_status }}</td>
+                
                 <td>
                     <div class="btn-group">
                         <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">Ações</button>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item btn btn-info" href="{% url 'purchase_detail' item.pk %}">Detalhes</a></li>
+                            {% if user_profile.position == 'Gerente' %}
                             {% if item.status == 'Análise' %}
                             <li><a class="dropdown-item btn btn-success" href="#" onclick="approvePurchase({{ item.pk }});" title="Aprovar">Aprovar</a></li>
                             <li><a class="dropdown-item btn btn-danger" href="#" onclick="deniedPurchase({{ item.pk }});" title="Negar">Negar</a></li>
@@ -85,7 +85,7 @@
                             <li><a class="dropdown-item btn btn-primary" href="#" onclick="deliveryPurchase({{ item.pk }});">Compra Entregue</a></li>
                             {% endif %}
                             <li><a class="dropdown-item btn btn-warning" href="#" onclick="reorderPurchase({{ item.pk }});">Pedir Novamente</a></li>
-
+                            {% endif %}
                         </ul>
                     </div>
                 </td>

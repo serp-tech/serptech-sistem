@@ -14,10 +14,12 @@
     <p><strong>Telefone:</strong> {{ object.phone_number}}</p>
     
     
-    
+    {% if perms.stock.change_supplier %}
     <a href="{% url 'supplier_update' object.pk %}" class="btn btn-primary">Editar</a>
+    {% endif %}
     <a href="{% url 'supplier' %}" class="btn btn-primary">Voltar</a>
+    {% if perms.stock.delete_supplier %}
     <a href="{% url 'supplier_delete' object.pk %}" class="btn btn-confirm-excluir">Excluir</a>
-
+    {% endif %}
 </div>
 {% endblock %}

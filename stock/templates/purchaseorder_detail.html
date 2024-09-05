@@ -20,11 +20,13 @@
     <p><strong>Status:</strong> {{ object.status }}</p>
     <p><strong>Feedback:</strong> {{ object.feedback }}</p>
 
-
-        <a href="{% url 'purchase_update' object.pk %}" class="btn btn-primary">Editar</a>
+    {% if perms.stock.change_purchase %}
+    <a href="{% url 'purchase_update' object.pk %}" class="btn btn-primary">Editar</a>
+    {% endif %}
     <a href="{% url 'purchase' %}" class="btn btn-primary">Voltar</a>
+    {% if perms.stock.delete_purchase %}
     <a href="{% url 'purchase_delete' object.pk %}" class="btn btn-danger">Excluir</a>
-    
+    {% endif %}
 </div>
 
 

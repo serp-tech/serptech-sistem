@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalhes do Cliente{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Detalhes do Cliente</h2>
+    <p><strong>Nome:</strong> {{ object.name }}</p>
+    <p><strong>CNPJ:</strong> {{ object.cnpj }}</p>
+    <p><strong>Endereço:</strong> {{ object.address }}</p>
+    <p><strong>Email:</strong> {{ object.email }}</p>
+    <p><strong>Telefone:</strong> {{ object.phone_number }}</p>
+    
+
+    <a href="{% url 'client' %}" class="btn btn-primary">Voltar</a>
+    {% if perms.lab.change_convenio%}
+    <a href="{% url 'client_update' object.pk %}" class="btn btn-primary">Editar</a>
+    {% endif%}
+    {% if perms.lab.delete_convenio %}
+    <a href="{% url 'client_delete' object.pk %}" class="btn btn-danger">Excluir</a>
+    {% endif %}
+</div>
+
+
+
+{% endblock %}
