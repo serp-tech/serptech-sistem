@@ -1,9 +1,10 @@
 from django.http import JsonResponse
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.views.decorators.csrf import csrf_exempt
-from django.shortcuts import get_list_or_404, redirect, get_object_or_404, redirect, render
+from django.shortcuts import redirect, get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.generic import ListView, CreateView, DeleteView, DetailView, UpdateView
+from accounts.models import UserProfile
 from .cnpj_api.cnpj_api import request_cnpj
 from .models import (Sector, Unit, Requester, Presentation, Supplier, Item, Inflow, Outflow, Request,
                     Inventory, PurchaseOrder, ServiceOrder)
@@ -96,6 +97,12 @@ class RequesterListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
             queryset = queryset.filter(sector=sector)
         return queryset
     
+
+    def get_context_data(self, **kwargs) :
+        context = super().get_context_data(**kwargs)
+        context['user_profile'] = UserProfile.objects.get(user=self.request.user)
+        return context
+
 
 class RequesterCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
 
@@ -405,6 +412,13 @@ class RequestListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
         if date:
             queryset = queryset.filter(date=date)
         return queryset
+    
+
+    def get_context_data(self, **kwargs) :
+        context = super().get_context_data(**kwargs)
+        context['user_profile'] = UserProfile.objects.get(user=self.request.user)
+        return context
+
 
 
 class RequestCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
@@ -564,6 +578,13 @@ class ServiceOrderListView(LoginRequiredMixin, PermissionRequiredMixin, ListView
     template_name = 'serviceorder_list.html'
     context_object_name = 'itens'
     permission_required = 'stock.view_serviceorder'
+
+
+    def get_context_data(self, **kwargs) :
+        context = super().get_context_data(**kwargs)
+        context['user_profile'] = UserProfile.objects.get(user=self.request.user)
+        return context
+
 
 
 class ServiceOrderCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):

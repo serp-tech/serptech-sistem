@@ -200,7 +200,7 @@
         <a href="{%url 'home' %}">Home</a>
         <a href="#" class="dropdown-btn">Estoque</a>
         <div class="dropdown-container">
-            {% if pemrs.stock.view_inflow%}
+            {% if perms.stock.view_inflow %}
             <a href="{% url 'inflow' %}">Entradas</a>
             {% endif %}
             {% if perms.stock.view_presentation %}
@@ -238,17 +238,22 @@
             {% endif %}
         </div>
         <a href="#" class="dropdown-btn-laboratorio">Operação</a>
+        {% if perms.financial.view_client %}
         <div class="dropdown-container laboratorio-dropdown-container">
             <a href="{% url 'client' %}">Clientes</a>
-            
         </div>
+        {% endif %}
         <a href="#" class="dropdown-btn-financial">Financeiro</a>
         <div class="financial-dropdown-container">
-            
+            {% if perms.financial.view_cashinflow%}
             <a href="{% url 'cash_inflow' %}">Contas Receber</a>
-            
+            {% endif %}
+            {% if perms.financial.view_cashoutflow %}
             <a href="{% url 'cash_outflow' %}">Contas a Pagar</a>
+            {% endif %}
+            {% if perms.financial.view_cashflow %}
             <a href="{% url 'cash_flow' %}">Fluxo de Caixa</a>
+            {% endif %}
         </div>
         
         <a href="{% url 'register' %}">Novo Usuário</a>

@@ -6,12 +6,14 @@
 <div class="container">
     <h2>Saídas</h2>
 
-    {% if perms.financial.add_cash_outflow %}
+    {% if perms.financial.add_cashoutflow or user_profile.position == 'Gerente' or user_profile.positon == 'Diretor' %}
     <div class="mb-2">
         <a href="{% url 'cash_outflow_add' %}" class="btn btn-primary">Adicionar Saída</a>
+        {% if user_profile.position == 'Gerente' or user_profile.positon == 'Diretor' %}
         <button type="button" id="toggleRelatorioBtn" class="btn btn-success ms-3">
             <i class="bi bi-file-earmark-text"></i> Relatório
         </button>
+        {% endif %}
     </div>
     {% endif %}
 

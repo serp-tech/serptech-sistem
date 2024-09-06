@@ -88,3 +88,11 @@ class CashOutflow(models.Model):
 
     def __str__(self) -> str:
         return self.recipient.name
+    
+
+class CashFlowControl(models.Model):
+    class Meta:
+        permissions = [
+            ("view_cashflow", "Can view cash flow"),
+        ]
+    

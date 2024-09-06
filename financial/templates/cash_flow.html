@@ -40,9 +40,10 @@
     </div>
 
     <!-- Botão para mostrar/esconder a seção de geração de relatório -->
+    {% if user_profile.position == 'Gerente' or user_profile.position == 'Diretor' %}
     <button id="toggleRelatorioBtn" class="btn btn-success mb-3"> 
         <i class="bi bi-file-earmark-text"></i> Relatório</button>
-
+    {% endif %}
     <!-- Seção de geração de relatório escondida inicialmente -->
     <div id="relatorioSection" class="mb-4" style="display: none;">
         <form method="GET" action="{% url 'generate_cash_flow_report' %}">

@@ -5,6 +5,8 @@ from django.db.models import Sum, Q
 from django.utils import timezone
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import ListView, CreateView, DeleteView, DetailView, UpdateView
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.contrib.auth.decorators import permission_required
 from io import BytesIO
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
@@ -13,16 +15,18 @@ from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
 from reportlab.lib.pagesizes import landscape
 from reportlab.lib.units import cm
+from accounts.models import UserProfile
 from .models import Client, CashInflow, CashOutflow
 from .forms import ClientForm, CashOutflowForm,CashOutflowUpdateForm , CashInflowForm, CashInflowUpdateForm, ReciveInflowForm, PayOutflowForm
 from stock.utils import format_currency
 
 
-class ClientListView(ListView):
+class ClientListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
 
     model = Client
     template_name = 'client_list.html'
     context_object_name = 'itens'
+    permission_required = 'financial.view_client'
 
 
     def get_queryset(self):
@@ -38,51 +42,58 @@ class ClientListView(ListView):
         return querySet
     
 
-class ClientCreateView(CreateView):
+class ClientCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
 
     model = Client
     template_name = 'client_create.html'
     form_class = ClientForm
     success_url = '/client/'
+    permission_required = 'financial.add_client'
 
 
-class ClientDetailView(DetailView):
+class ClientDetailView(LoginRequiredMixin, DetailView):
 
     model = Client
     template_name = 'client_detail.html'
 
 
-class ClientUpdateView(UpdateView):
+class ClientUpdateView(LoginRequiredMixin, PermissionRequiredMixin,UpdateView):
 
     model = Client
     template_name = 'client_update.html'
     form_class = ClientForm
     success_url = '/client/'
+    permission_required = 'financial.change_client'
 
 
-class ClientDeleteView(DeleteView):
+class ClientDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
 
     model = Client
     template_name = 'client_delete.html'
     success_url = '/client/'
+    permission_required = 'financial.delete_client'
 
 
-class CashInflowListView(ListView):
+class CashInflowListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
 
     model = CashInflow
     template_name = 'cash_inflow_list.html'
     context_object_name = 'itens'
+    permission_required = 'financial.view_cashinflow'
 
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         itens = context['itens']
+        context['user_profile'] = UserProfile.objects.get(user=self.request.user)
         for item in itens:
             item.tittle_value = format_currency(item.tittle_value)
             item.fine = format_currency(item.fine)
             item.discount = format_currency(item.discount)
             item.total_value = format_currency(item.total_value)
         return context
+   
+
     
     def get_queryset(self):
         querySet = super().get_queryset()
@@ -97,44 +108,50 @@ class CashInflowListView(ListView):
             querySet = querySet.filter(status=status)
         return querySet
 
-class CashInflowCreateView(CreateView):
+class CashInflowCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
 
     model = CashInflow
     template_name = 'cash_inflow_create.html'
     form_class = CashInflowForm
     success_url = reverse_lazy('cash_inflow')
+    permission_required = 'financial.add_cashinflow'
 
 
-class CashInflowDetailView(DetailView):
+class CashInflowDetailView(LoginRequiredMixin, PermissionRequiredMixin, DetailView):
 
     model = CashInflow
     template_name = 'cash_inflow_detail.html'
+    permission_required =' financial.view_cashinflow'
 
 
-class CashInflowUpdateView(UpdateView):
+class CashInflowUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
 
     model = CashInflow
     template_name = 'cash_inflow_update.html'
     form_class = CashInflowUpdateForm
     success_url = reverse_lazy('cash_inflow')
+    permission_required = 'financial.change_cashinflow'
 
 
-class CashInflowDeleteView(DeleteView):
+class CashInflowDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
 
     model = CashInflow
     template_name = 'cash_inflow_delete.html'
     success_url = reverse_lazy('cash_inflow')
+    permission_required = 'financial.delete_cashinflow'
 
 
-class CashOutflowListView(ListView):
+class CashOutflowListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
 
     model = CashOutflow
     template_name = 'cash_outflow_list.html'
     context_object_name = 'itens'
+    permission_required = 'financial.view_cashoutflow'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         itens = context['itens']
+        context['user_profile'] = UserProfile.objects.get(user=self.request.user)
         for item in itens:
             item.tittle_value = format_currency(item.tittle_value)
             item.fine = format_currency(item.fine)
@@ -157,35 +174,40 @@ class CashOutflowListView(ListView):
         return querySet
 
 
-class CashOutflowCreateView(CreateView):
+class CashOutflowCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
 
     model = CashOutflow
     template_name = 'cash_outflow_create.html'
     form_class = CashOutflowForm
     success_url = reverse_lazy('cash_outflow')
+    permission_required = 'financial.add_cashoutflow'
 
 
-class CashOutflowDetailView(DetailView):
+class CashOutflowDetailView(LoginRequiredMixin, PermissionRequiredMixin, DetailView):
 
     model = CashOutflow
     template_name = 'cash_outflow_detail.html'
+    permission_required = 'financial.view_cashoutflow'
 
 
-class CashOutflowUpdateView(UpdateView):
+class CashOutflowUpdateView(LoginRequiredMixin, PermissionRequiredMixin,UpdateView):
 
     model = CashOutflow
     template_name = 'cash_outflow_update.html'
     form_class = CashOutflowUpdateForm
     success_url = reverse_lazy('cash_outflow')
+    permission_required = 'financial.change_cashoutflow'
     
 
-class CashOutflowDeleteView(DeleteView):
+class CashOutflowDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
 
     model = CashOutflow
     template_name = 'cash_outflow_delete.html'
     success_url = reverse_lazy('cash_outflow')
+    permission_required = 'financial.delete_cashoutflow'
 
 
+permission_required('financial.view_cashflow')
 def cash_flow_view(request):
    # Capturando os filtros da query string
     filtro_periodo = request.GET.get('filtro_periodo',)  
@@ -302,6 +324,7 @@ def cash_flow_view(request):
         'mes': mes,
         'dia': dia,
     }
+    context['user_profile'] = UserProfile.objects.get(user=request.user)
     # Renderiza a página HTML padrão
     return render(request, 'cash_flow.html', context)
 

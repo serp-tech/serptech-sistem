@@ -73,7 +73,7 @@
                         <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">Ações</button>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item btn btn-info" href="{% url 'purchase_detail' item.pk %}">Detalhes</a></li>
-                            {% if user_profile.position == 'Gerente' %}
+                            {% if user_profile.position == 'Gerente' or user_profile.position == 'Diretor' %}
                             {% if item.status == 'Análise' %}
                             <li><a class="dropdown-item btn btn-success" href="#" onclick="approvePurchase({{ item.pk }});" title="Aprovar">Aprovar</a></li>
                             <li><a class="dropdown-item btn btn-danger" href="#" onclick="deniedPurchase({{ item.pk }});" title="Negar">Negar</a></li>

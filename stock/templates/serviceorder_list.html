@@ -50,7 +50,7 @@
                 <td>{{ item.delivery_date|date:"d/m/Y" }}</td>
                 <td>
                     <a href="{% url 'service_detail' item.pk %}" class="btn btn-sm btn-info mb-2">Detalhes</a>
-                    {% if item.status != 'Feito' and user_profile.position == 'Gerente' %}
+                    {% if item.status != 'Feito' and user_profile.position == 'Gerente' or user_profile.position == 'Diretor' %}
                         {% if item.start_date is None %}
                             <a href="{% url 'start_service' item.pk %}" class="btn btn btn-success mb-2">Iniciar</a>
                         {% endif %}
