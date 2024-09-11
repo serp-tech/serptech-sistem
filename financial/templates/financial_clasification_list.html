@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}Classificações Financeiras{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Classificações Financeiras</h2>
+    {% if perms.financial.add_financialclasification %}
+    <a href="{% url 'financial_clasification_add' %}" class="btn btn-primary mb-2">Nova Classificação Financeira</a>
+    {% endif %}
+    <table class="table table-dark table-striped">
+        <thead>
+            <tr>
+                <th>Classificação Financeira</th>
+                {% if perms.financial.delete_financialclasification %}
+                <th>Ações</th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in itens %}
+            <tr>
+                <td>{{ item.name }}</td>
+                {% if perms.financial.delete_financialclasification %}
+                <td>
+                    <a href="{% url 'financial_clasification_delete' item.pk %}" class="btn btn-confirm-excluir">Excluir</a>
+                </td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

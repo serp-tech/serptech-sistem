@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Centros de Custo{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Centros de Custo</h2>
+    {% if perms.financial.add_costcenter %}
+    <a href="{% url 'costcenter_add' %}" class="btn btn-primary mb-2">Novo Centro de Custo</a>
+    {% endif %}
+    <form method="get" action="">
+        <div class="row mb-3">
+            <div class="col-md-4 mb-2">
+                <input type="text" id="name-costcenter" class="form-control" name="name" placeholder="Centro de Custo" value="{{ request.GET.name }}">
+            </div>
+            <div class="col-md-4 d-flex align-items-start">
+                <button type="submit" class="btn btn-primary me-2">
+                    <i class="bi bi-search"></i> Filtrar
+                </button>
+            </div>
+        </div>
+    </form>
+    <table class="table table-dark table-striped">
+        <thead>
+            <tr>
+                <th>Centro de Custo</th>
+                {% if perms.financial.delete_costcenter %}
+                <th>Ações</th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in itens %}
+            <tr>
+                <td>{{ item.name }}</td>
+                {% if perms.financial.delete_costcenter %}
+                <td>
+                    <a href="{% url 'costcenter_delete' item.pk %}" class="btn btn-confirm-excluir">Excluir</a>
+                </td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

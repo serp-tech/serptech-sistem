@@ -16,8 +16,10 @@ from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, 
 from reportlab.lib.pagesizes import landscape
 from reportlab.lib.units import cm
 from accounts.models import UserProfile
-from .models import Client, CashInflow, CashOutflow
-from .forms import ClientForm, CashOutflowForm,CashOutflowUpdateForm , CashInflowForm, CashInflowUpdateForm, ReciveInflowForm, PayOutflowForm
+from .models import Client, CostCenter, RevenueCenter, CashInflow, CashOutflow, FinancialClasification, FinancialCategory
+from .forms import (
+    ClientForm, CostCenterForm, RevenueCenterForm, CashOutflowForm,CashOutflowUpdateForm , CashInflowForm, 
+    CashInflowUpdateForm, ReciveInflowForm, PayOutflowForm, FinancialCategoryForm, FinancialClasificationForm)
 from stock.utils import format_currency
 
 
@@ -74,6 +76,94 @@ class ClientDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     permission_required = 'financial.delete_client'
 
 
+class CostCenterListView(ListView):
+
+    model = CostCenter
+    template_name = 'cost_center_list.html'
+    context_object_name = 'itens'
+
+
+class CostCenterCreateView(CreateView):
+
+    model = CostCenter
+    template_name = 'cost_center_create.html'
+    form_class = CostCenterForm
+    success_url = '/costcenter/'
+
+
+class CostCenterDeleteView(DeleteView):
+
+    model = CostCenter
+    template_name = 'cost_center_delete.html'
+    success_url = '/costcenter/'
+
+    
+class RevenueCenterListView(ListView):
+
+    model = RevenueCenter
+    template_name = 'Revenue_center_list.html'
+    context_object_name = 'itens'
+
+
+class RevenueCenterCreateView(CreateView):
+
+    model = RevenueCenter
+    template_name = 'Revenue_center_create.html'
+    form_class = RevenueCenterForm
+    success_url = '/revenuecenter/'
+
+
+class RevenueCenterDeleteView(DeleteView):
+
+    model = RevenueCenter
+    template_name = 'Revenue_center_delete.html'
+    success_url = '/revenuecenter/'
+
+
+class FinancialClasificationListView(ListView):
+
+    model = FinancialClasification
+    template_name = 'financial_clasification_list.html'
+    context_object_name = 'itens'
+
+
+class FinancialClasificationCreateView(CreateView):
+
+    model = FinancialClasification
+    template_name = 'financial_classification_create.html'
+    form_class = FinancialClasificationForm
+    success_url = '/financial-classification/'
+
+
+class FinancialClasificationDeleteView(DeleteView):
+
+    model = FinancialClasification
+    template_name = 'financial_classification_delete.html'
+    success_url = '/financial-classification/'
+
+    
+class FinancialCategoryListView(ListView):
+
+    model = FinancialCategory
+    template_name = 'financial_category_list.html'
+    context_object_name = 'itens'
+
+
+class FinancialCategoryCreateView(CreateView):
+
+    model = FinancialCategory
+    template_name = 'financial_category_create.html'
+    form_class = FinancialCategoryForm
+    success_url = '/financial-category/'
+
+
+class FinancialCategoryDeleteView(DeleteView):
+
+    model = FinancialCategory
+    template_name = 'financial_category_delete.html'
+    success_url = '/financial-category/'
+
+
 class CashInflowListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
 
     model = CashInflow
@@ -88,8 +178,8 @@ class CashInflowListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
         context['user_profile'] = UserProfile.objects.get(user=self.request.user)
         for item in itens:
             item.tittle_value = format_currency(item.tittle_value)
-            item.fine = format_currency(item.fine)
-            item.discount = format_currency(item.discount)
+            item.fine = format_currency(item.fine if item.fine is not None else 0)
+            item.discount = format_currency(item.discount if item.discount is not None else 0)
             item.total_value = format_currency(item.total_value)
         return context
    
@@ -154,8 +244,8 @@ class CashOutflowListView(LoginRequiredMixin, PermissionRequiredMixin, ListView)
         context['user_profile'] = UserProfile.objects.get(user=self.request.user)
         for item in itens:
             item.tittle_value = format_currency(item.tittle_value)
-            item.fine = format_currency(item.fine)
-            item.discount = format_currency(item.discount)
+            item.fine = format_currency(item.fine if item.fine is not None else 0)
+            item.discount = format_currency(item.discount if item.discount is not None else 0)
             item.total_value = format_currency(item.total_value)
         return context
 
@@ -181,6 +271,9 @@ class CashOutflowCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateV
     form_class = CashOutflowForm
     success_url = reverse_lazy('cash_outflow')
     permission_required = 'financial.add_cashoutflow'
+
+    def form_valid(self, form):
+        return super().form_valid(form)
 
 
 class CashOutflowDetailView(LoginRequiredMixin, PermissionRequiredMixin, DetailView):
@@ -337,6 +430,10 @@ def conclude_inflow_cash(request, pk):
             payment.status = 'Efetuado'
             if payment.payment_date == None:
                 payment.payment_date = timezone.now().date()
+                if payment.fine == None:
+                    payment.fine = 0
+                if payment.discount == None:
+                    payment.discount = 0
             form.save()
             return redirect('cash_inflow')
     else:

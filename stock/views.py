@@ -2,6 +2,7 @@ from django.http import JsonResponse
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import redirect, get_object_or_404, redirect, render
+from django.contrib.auth.models import User
 from django.utils import timezone
 from django.views.generic import ListView, CreateView, DeleteView, DetailView, UpdateView
 from accounts.models import UserProfile
@@ -402,15 +403,27 @@ class RequestListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
 
     def get_queryset(self):
         queryset = super().get_queryset()
+        user = self.request.user
+        user_profile = UserProfile.objects.get(user=user)
         name = self.request.GET.get('item__name')
         requester = self.request.GET.get('requester__full_name')
+        status = self.request.GET.get('status')
         date = self.request.GET.get('date')
-        if name:
-            queryset = queryset.filter(item__name__icontains=name)
-        if requester:
-            queryset = queryset.filter(requester__full_name__icontains=requester)
-        if date:
-            queryset = queryset.filter(date=date)
+        if user_profile.position == 'Gerente' or user_profile.position == 'Diretor':
+            if not status:
+                queryset = queryset.filter(status='Análise')
+            if date:
+                queryset = queryset.filter(date=date)
+            if status:
+                queryset = queryset.filter(status=status)
+            if name:
+                queryset = queryset.filter(name=name)
+        elif user_profile.position == 'Assistente':
+            queryset = queryset.filter(status='Aprovado')
+            if date:
+                queryset = queryset.filter(date=date)
+        else:
+            queryset = queryset.filter(requester__user=user)
         return queryset
     
 

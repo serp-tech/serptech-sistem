@@ -1,5 +1,5 @@
 from django import forms
-from .models import Client, CashInflow, CashOutflow
+from .models import Client, CostCenter, RevenueCenter, CashInflow, CashOutflow, FinancialCategory, FinancialClasification
 
 
 class ClientForm(forms.ModelForm):
@@ -24,12 +24,55 @@ class ClientForm(forms.ModelForm):
         }
 
 
+class CostCenterForm(forms.ModelForm):
+
+    class Meta:
+        model = CostCenter
+        fields = ['name']
+        labels ={
+            'name': 'Nome',
+        }
+        help_text = {'name': 'Obrigatório',}
+
+
+class RevenueCenterForm(forms.ModelForm):
+
+    class Meta:
+        model = RevenueCenter
+        fields = ['name']
+        labels ={
+            'name': 'Nome',
+        }
+        help_text = {'name': 'Obrigatório',}
+
+class FinancialCategoryForm(forms.ModelForm):
+
+    class Meta:
+        model = FinancialCategory
+        fields = ['name']
+        labels ={
+            'name': 'Nome',
+        }
+        help_text = {'name': 'Obrigatório',}
+
+
+class FinancialClasificationForm(forms.ModelForm):
+
+    class Meta:
+        model = FinancialClasification
+        fields = ['name']
+        labels ={
+            'name': 'Nome',
+        }
+        help_text = {'name': 'Obrigatório',}
+
+
 class CashInflowForm(forms.ModelForm):
 
     class Meta:
 
         model = CashInflow
-        fields = ['client', 'document', 'tittle_value', 'fine', 'discount', 
+        fields = ['client', 'revenue_center', 'document', 'financial_classification', 'financial_category', 'tittle_value', 'fine', 'discount', 
                   'total_value', 'billing_date', 'due_date', 'document_pdf', 'description']
         widgets = {
             'billing_date': forms.DateInput(attrs={'type': 'date'}),
@@ -37,6 +80,7 @@ class CashInflowForm(forms.ModelForm):
         }
         labels = {
             'client': 'Cliente',
+            'revenue_center': 'Centro de Receita',
             'document': 'Documento',
             'tittle_value': 'Valor do Título',
             'fine': 'Multa',
@@ -106,7 +150,7 @@ class ReciveInflowForm(forms.ModelForm):
     class Meta:
 
         model = CashInflow
-        fields = ['tittle_value', 'fine', 'discount', 'total_value', 
+        fields = ['tittle_value', 'fine', 'discount', 'total_value','financial_classification', 'financial_category', 
                   'payment_method', 'payment_date', 'recive_date', 'proof']
         widgets = {
             'payment_date': forms.DateInput(attrs={'type': 'date'}),
@@ -130,7 +174,7 @@ class  CashOutflowForm(forms.ModelForm):
     class Meta:
 
         model = CashOutflow
-        fields = ['recipient', 'document', 'tittle_value', 'fine', 'discount',
+        fields = ['recipient', 'cost_center', 'document', 'tittle_value', 'fine', 'discount',
                   'total_value', 'billing_date', 'due_date', 'document_pdf', 'description']
         
         widgets = {
@@ -142,6 +186,7 @@ class  CashOutflowForm(forms.ModelForm):
 
         labels = {
             'recipient': 'Beneficiário',
+            'cost_center': 'Centro de Custo',
             'document': 'Documento',
             'tittle_value': 'Valor do Título',
             'fine': 'Multa',

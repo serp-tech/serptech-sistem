@@ -11,9 +11,7 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-
 
     <style>
         body {
@@ -76,31 +74,25 @@
             color: #9d9d9d;
         }
 
-        .dropdown-container,
-        .user-dropdown-container,
-        .financial-dropdown-container {
+        .dropdown-container {
             display: none;
             background-color: #1e1e1e;
             padding-left: 15px;
             width: 100%;
         }
 
-        .dropdown-container.active,
-        .user-dropdown-container.active,
-        .financial-dropdown-container.active {
+        .dropdown-container.active {
             display: block;
         }
 
-        .dropdown-container a,
-        .financial-dropdown-container a {
+        .dropdown-container a {
             color: #c1bbc3;
             text-decoration: none;
             display: block;
             padding: 10px;
         }
 
-        .dropdown-container a:hover,
-        .financial-dropdown-container a:hover {
+        .dropdown-container a:hover {
             box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
         }
 
@@ -191,87 +183,112 @@
             <img src="{{ user.userprofile.profile_image.url }}" alt="{{ user.get_full_name }}">
             {% endif %}
             <h3 id="username-dropdown">{{ user.get_username }}</h3>
-            <div id="user-dropdown-container" class="user-dropdown-container">
+            <div id="user-dropdown-container" class="dropdown-container">
                 <a href="{% url 'logout' %}">Sair</a>
             </div>
             <p>{{ user.userprofile.role }}</p>
         </div>
         <a href="#">Dashboard</a>
-        <a href="{%url 'home' %}">Home</a>
+        <a href="{% url 'home' %}">Home</a>
+
+        <!-- Dropdown de Estoque -->
         <a href="#" class="dropdown-btn">Estoque</a>
         <div class="dropdown-container">
             {% if perms.stock.view_inflow %}
-                <a href="{% url 'inflow' %}">Entradas</a>
+            <a href="{% url 'inflow' %}">Entradas</a>
             {% endif %}
             {% if perms.stock.view_inventory %}
-                <a href="{% url 'inventory' %}">Inventário</a>
+            <a href="{% url 'inventory' %}">Inventário</a>
             {% endif %}
             {% if perms.stock.view_purchase %}
-                <a href="{% url 'purchase' %}">Ordem de Compra</a>
+            <a href="{% url 'purchase' %}">Ordem de Compra</a>
             {% endif %}
             {% if perms.stock.view_service %}
-                <a href="{% url 'service' %}">Ordem de Serviço</a>
+            <a href="{% url 'service' %}">Ordem de Serviço</a>
             {% endif %}
             {% if perms.stock.view_request %}
-                <a href="{% url 'request' %}">Requisições</a>
+            <a href="{% url 'request' %}">Requisições</a>
             {% endif %}
             {% if perms.stock.view_outflow %}
-                <a href="{% url 'outflow' %}">Saídas</a>
+            <a href="{% url 'outflow' %}">Saídas</a>
             {% endif %}
         </div>
+
+        <!-- Dropdown de Cadastro -->
         <a href="#" class="dropdown-btn-laboratorio">Cadastro</a>
-        {% if perms.financial.view_client %}
-    <div class="dropdown-container laboratorio-dropdown-container">
-        <a href="{% url 'client' %}">Clientes</a>
-        {% endif %}
-        <a href="{% url 'register' %}">Novo Usuário</a>
-        {% if perms.stock.view_item %}
-            <a href="{% url 'item' %}">Itens</a>
-        {% endif %}
-        {% if perms.stock.view_presentation %}
-            <a href="{% url 'presentation' %}">Formas de Apresentações</a>
-        {% endif %}
-        {% if perms.stock.view_requester %}
-            <a href="{% url 'requester' %}">Requisitantes</a>
-        {% endif %}
-        {% if perms.stock.view_sector %}
-            <a href="{% url 'sector' %}">Setores</a>
-        {% endif %}
-        {% if perms.stock.view_supplier %}
-            <a href="{% url 'supplier' %}">Fornecedores</a>
-        {% endif %}
-        {% if perms.stock.view_unit %}
-            <a href="{% url 'unit' %}">Unidades</a>
-        {% endif %}
-    </div>
+        <div class="dropdown-container">
+            <a href="#" class="dropdown-btn-financeiro">Financeiro</a>
+            <div class="dropdown-container">
+                {% if perms.financial.view_client %}
+                <a href="{% url 'client' %}">Clientes</a>
+                {% endif %}
+                {% if perms.financial.view_costcenter %}
+                <a href="{% url 'costcenter' %}">Centro de Custo</a>
+                {% endif %}
+                {% if perms.financial.view_revenuecenter %}
+                <a href="{% url 'revenuecenter' %}">Centro de Receita</a>
+                {% endif %}
+                {% if perms.financial.view_financialcategory %}
+                <a href="{% url 'financial_category' %}">Categorias</a>
+                {% endif %}
+                {% if perms.financial.view_financialcategory %}
+                <a href="{% url 'financial_clasification' %}">Classificação</a>
+                {% endif %}
+            </div>
+
+            <!-- Cadastro de Estoque -->
+            <a href="#" class="dropdown-btn-estoque">Estoque</a>
+            <div class="dropdown-container">
+                <a href="{% url 'register' %}">Novo Usuário</a>
+                {% if perms.stock.view_item %}
+                <a href="{% url 'item' %}">Itens</a>
+                {% endif %}
+                {% if perms.stock.view_presentation %}
+                <a href="{% url 'presentation' %}">Formas de Apresentações</a>
+                {% endif %}
+                {% if perms.stock.view_requester %}
+                <a href="{% url 'requester' %}">Requisitantes</a>
+                {% endif %}
+                {% if perms.stock.view_sector %}
+                <a href="{% url 'sector' %}">Setores</a>
+                {% endif %}
+                {% if perms.stock.view_supplier %}
+                <a href="{% url 'supplier' %}">Fornecedores</a>
+                {% endif %}
+                {% if perms.stock.view_unit %}
+                <a href="{% url 'unit' %}">Unidades</a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Dropdown Financeiro -->
         <a href="#" class="dropdown-btn-financial">Financeiro</a>
-        <div class="financial-dropdown-container">
+        <div class="dropdown-container">
             {% if perms.financial.view_cashflow %}
-                <a href="{% url 'cash_flow' %}">Fluxo de Caixa</a>
+            <a href="{% url 'cash_flow' %}">Fluxo de Caixa</a>
             {% endif %}
             {% if perms.financial.view_cashinflow %}
-                <a href="{% url 'cash_inflow' %}">Contas Receber</a>
+            <a href="{% url 'cash_inflow' %}">Contas Receber</a>
             {% endif %}
             {% if perms.financial.view_cashoutflow %}
-                <a href="{% url 'cash_outflow' %}">Contas a Pagar</a>
+            <a href="{% url 'cash_outflow' %}">Contas a Pagar</a>
             {% endif %}
         </div>
-        
-        
-        
-
-        <a href="#">Outros</a>
     </div>
+
     <div class="content">
         {% block content %}{% endblock %}
     </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            // Dropdown de Estoque
-            const dropdownBtn = document.querySelector('.dropdown-btn');
-            const dropdownContainer = document.querySelector('.dropdown-container');
-            dropdownBtn.addEventListener('click', function () {
-                dropdownContainer.classList.toggle('active');
+            // Dropdown de Estoque e Cadastro
+            const dropdownBtns = document.querySelectorAll('.dropdown-btn, .dropdown-btn-laboratorio, .dropdown-btn-financeiro, .dropdown-btn-estoque, .dropdown-btn-financial');
+            dropdownBtns.forEach(function (dropdownBtn) {
+                dropdownBtn.addEventListener('click', function () {
+                    const dropdownContainer = this.nextElementSibling;
+                    dropdownContainer.classList.toggle('active');
+                });
             });
 
             // Dropdown de Usuário
@@ -280,22 +297,9 @@
             userDropdown.addEventListener('click', function () {
                 userDropdownContainer.classList.toggle('active');
             });
-
-            // Dropdown de Laboratório
-            const laboratorioDropdownBtn = document.querySelector('.dropdown-btn-laboratorio');
-            const laboratorioDropdownContainer = document.querySelector('.laboratorio-dropdown-container');
-            laboratorioDropdownBtn.addEventListener('click', function () {
-                laboratorioDropdownContainer.classList.toggle('active');
-            });
-
-            // Dropdown de Financeiro
-            const financialDropdownBtn = document.querySelector('.dropdown-btn-financial');
-            const financialDropdownContainer = document.querySelector('.financial-dropdown-container');
-            financialDropdownBtn.addEventListener('click', function () {
-                financialDropdownContainer.classList.toggle('active');
-            });
         });
     </script>
+
 </body>
 
 </html>
