@@ -8,6 +8,7 @@
     {% if perms.stock.add_request %}
     <a href="{% url 'request_add' %}" class="btn btn-primary mb-2">Nova Requisição</a>
     {% endif %}
+    <a href="{% url 'report_request_pdf' %}" class="btn btn-success mb-2"><i class="bi bi-file-earmark-text"></i>Relatório</a>
     <form method="get" action="">
         <div class="row mb-3">
             <div class="col-md-3 mb-2">
@@ -40,6 +41,7 @@
                 <th>Unidade</th>
                 <th>Setor</th>
                 <th>Status</th>
+                <th>Entrega</th>
                 {% if user_profile.position == 'Gerente' or user_profile.position == 'Diretor' %}
                 <th>Ações</th>
                 {% endif %}
@@ -71,6 +73,7 @@
                 <td>{{ item.unit }}</td>
                 <td>{{ item.sector }}</td>
                 <td>{{ item.status }}</td>
+                <td>{{ item.delivery_status }}</td>
                 {% if user_profile.position == 'Gerente' or user_profile.position == 'Diretor' %}
                 <td>
                     <div class="btn-group">
@@ -83,6 +86,11 @@
                             </li>
                             <li>
                                 <a class="dropdown-item" href="#" onclick="denyRequest({{ item.pk }}); return false;" title="Negar">Negar</a>
+                            </li>
+                            {% endif %}
+                            {% if item.status == 'Aprovado' and item.delivery_status != 'Efetuada' and user_profile.position == 'Gerente' or user_profile.position == 'Diretor' or user_profile.position == 'Assistente' %}
+                            <li>
+                                <a class="dropdown-item" href="#" onclick="deliveryRequest({{ item.pk }}); return false;" title="Delivery">Entregar</a>
                             </li>
                             {% endif %}
                             <li>
@@ -123,6 +131,27 @@ function approveRequest(pk) {
 
 function denyRequest(pk) {
     const url = "{% url 'denied_request' '0' %}".replace('0', pk);
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': '{{ csrf_token }}'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert(data.message || 'Erro ao negar a requisição.');
+        }
+    })
+    .catch(error => {
+        console.error('Error denying request:', error);
+    });
+}
+function deliveryRequest(pk) {
+    const url = "{% url 'delivery_request' '0' %}".replace('0', pk);
     fetch(url, {
         method: 'POST',
         headers: {

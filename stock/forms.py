@@ -249,8 +249,9 @@ class PurchaseOrderForm(forms.ModelForm):
 
     class Meta:
         model = PurchaseOrder
-        fields = ['item', 'brand', 'quantity', 'sector', 'specification', 'description', 'justification']
+        fields = ['item', 'brand', 'quantity', 'unit','sector', 'specification', 'description', 'justification']
         labels = {
+            'unit': 'Unidade',
             'sector': 'Setor',
             'item': 'Item',
             'brand': 'Marca', 
@@ -274,8 +275,9 @@ class PurchaseOrderUpdateForm(forms.ModelForm):
 
     class Meta:
         model = PurchaseOrder
-        fields = ['sector', 'item', 'brand', 'quantity', 'specification', 'description', 'justification', 'feedback']
+        fields = ['unit', 'sector', 'item', 'brand', 'quantity', 'specification', 'description', 'justification', 'feedback']
         labels = {
+            'unit': 'Unidade',
             'sector': 'Setor',
             'item': 'Item',
             'brand': 'Marca', 

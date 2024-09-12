@@ -3,7 +3,7 @@ from django.db import transaction
 from django.db.models import Sum
 from django.db.models.signals import post_save, post_delete, m2m_changed, pre_delete
 from django.utils import timezone
-from .models import (Unit, Requester, Item, Inflow, Outflow, Request, Inventory, PurchaseOrder)
+from .models import (Unit, Requester, Item, Inflow, Outflow, Request, Inventory, Request)
 from accounts.models import UserProfile
 
 
@@ -30,7 +30,7 @@ def post_delete_outflows(sender, instance, **kwargs):
 
 @receiver(post_save, sender=Request)
 def create_outflow(sender, instance, created, **kwargs):
-    if instance.status == 'Aprovado':
+    if instance.status == 'Aprovado' and instance.delivery_status == 'Efetuada':
        for request_item in instance.request_item_request.all():
            Outflow.objects.create(
                 item = request_item.item,
@@ -99,7 +99,7 @@ def update_requester_delete(sender, instance, **kwargs):
     # Usar uma transação para garantir a atomicidade das operações
     with transaction.atomic():
         outflows = Outflow.objects.filter(requester=instance)
-        purchases = PurchaseOrder.objects.filter(requester=instance)
+        purchases = Request.objects.filter(requester=instance)
         requests = Request.objects.filter(requester=instance)
         
         for i in outflows:

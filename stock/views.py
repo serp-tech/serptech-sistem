@@ -5,10 +5,19 @@ from django.shortcuts import redirect, get_object_or_404, redirect, render
 from django.contrib.auth.models import User
 from django.utils import timezone
 from django.views.generic import ListView, CreateView, DeleteView, DetailView, UpdateView
+from django.http import HttpResponse
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+from reportlab.lib.pagesizes import landscape
+from reportlab.lib.units import cm
+from datetime import datetime
 from accounts.models import UserProfile
 from .cnpj_api.cnpj_api import request_cnpj
 from .models import (Sector, Unit, Requester, Presentation, Supplier, Item, Inflow, Outflow, Request,
-                    Inventory, PurchaseOrder, ServiceOrder)
+                    Inventory, Request, PurchaseOrder, ServiceOrder)
 from .forms import (SectorForm, UnitForm, UnitFilterForm, RequesterForm, PresentationForm, SupplierForm, 
                     ItemForm, InflowForm, OutflowForm, RequestForm, RequestItemFormSet, PurchaseOrderForm,
                     PurchaseOrderDeniedForm, PurchaseOrderUpdateForm, ServiceOrderForm, ServiceOrderStartForm, ServiceOrderFinishForm)
@@ -541,6 +550,12 @@ class PurchaseOrderListView(LoginRequiredMixin, PermissionRequiredMixin, ListVie
     permission_required = 'stock.view_purchaseorder'
 
 
+    def get_context_data(self, **kwargs) :
+        context = super().get_context_data(**kwargs)
+        context['user_profile'] = UserProfile.objects.get(user=self.request.user)
+        return context
+
+
 class PurchaseOrderCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     
     model = PurchaseOrder
@@ -558,7 +573,7 @@ class PurchaseOrderCreateView(LoginRequiredMixin, PermissionRequiredMixin, Creat
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['orders_ids'] = PurchaseOrder.objects.values_list('id', flat=True)
+        context['orders_ids'] = Request.objects.values_list('id', flat=True)
         return context
 
 class PurchaseOrderDetailView(LoginRequiredMixin, PermissionRequiredMixin, DetailView):
@@ -769,6 +784,29 @@ def denied_request(request, pk):
         return JsonResponse({'success': False})
 
 
+def delivery_request(request, pk):
+    if request.method == 'POST':
+        request_sector = get_object_or_404(Request, pk=pk)
+        all_available = True
+        for item in request_sector.request_item_request.all():
+            try:
+                inventory = Inventory.objects.get(item=item.item, unit=request_sector.unit)
+                if inventory.quantity_available < item.quantity:
+                    all_available = False
+                    break
+            except Inventory.DoesNotExist:
+                all_available = False
+                break
+        if not all_available:
+            return JsonResponse({'success': False, 'message': 'Não há quantidade suficiente no inventário para alguns itens.'})
+        request_sector = Request.objects.get(pk=pk)
+        request_sector.delivery_status = 'Efetuada'
+        request_sector.save()
+        return JsonResponse({'success': True})
+    
+    return JsonResponse({'success': False}, status=400)
+
+
 def approve_purchase(request, pk):
     if request.method == 'POST':
         purchase = get_object_or_404(PurchaseOrder, pk=pk)
@@ -899,3 +937,169 @@ def check_quantity_available(request, item_id, unit_id):
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
+
+
+def report_request_pdf(request):
+    # Filtrar requisições com status 'Aprovado' e status de entrega 'Não efetuada'
+    requisicoes = Request.objects.filter(status='Aprovado', delivery_status='Não efetuada')
+
+    # Configurações de resposta
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="Requisicoes_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf"'
+
+    # Configurações de documento PDF
+    doc = SimpleDocTemplate(response, pagesize=landscape(A4), rightMargin=2*cm, leftMargin=2*cm, topMargin=2*cm, bottomMargin=2*cm)
+    elements = []
+
+    # Estilos
+    styles = getSampleStyleSheet()
+    title_style = ParagraphStyle(
+        name='TitleStyle',
+        parent=styles['Title'],
+        fontSize=18,
+        leading=22,
+        alignment=TA_CENTER,
+        textColor=colors.HexColor('#4B4B4B'),
+        spaceAfter=20,
+    )
+    table_header_style = ParagraphStyle(
+        name='TableHeaderStyle',
+        parent=styles['Normal'],
+        fontSize=10,
+        leading=12,
+        alignment=TA_CENTER,
+        textColor=colors.whitesmoke,
+    )
+    table_data_style = ParagraphStyle(
+        name='TableDataStyle',
+        parent=styles['Normal'],
+        fontSize=10,
+        leading=12,
+        alignment=TA_LEFT,
+        textColor=colors.black,
+    )
+
+    # Adicionando título
+    elements.append(Paragraph('Requisições', title_style))
+    elements.append(Spacer(1, 20))
+
+    # Cabeçalho da tabela
+    requisicao_setor = [
+        [Paragraph('Data', table_header_style), Paragraph('Data de Aprovação', table_header_style), Paragraph('Requisitante', table_header_style),
+         Paragraph('Gestor', table_header_style), Paragraph('Setor', table_header_style), Paragraph('Unidade', table_header_style)]
+    ]
+
+    # Dados das requisições
+    for requisicao in requisicoes:
+        requisicao_setor.append([
+            Paragraph(requisicao.date.strftime('%d/%m/%Y'), table_data_style),
+            Paragraph(requisicao.approval_date.strftime('%d/%m/%Y') if requisicao.approval_date else 'N/A', table_data_style),
+            Paragraph(requisicao.requester_name or requisicao.requester.full_name if requisicao.requester else 'N/A', table_data_style),
+            Paragraph(requisicao.manager_name or requisicao.manager.username if requisicao.manager else 'N/A', table_data_style),
+            Paragraph(requisicao.sector_name or requisicao.sector.name if requisicao.sector else 'N/A', table_data_style),
+            Paragraph(requisicao.unit_name or requisicao.unit.name if requisicao.unit else 'N/A', table_data_style),
+        ])
+
+    # Configurando a tabela
+    table = Table(requisicao_setor, colWidths=[2.5*cm, 3.5*cm, 3.5*cm, 3.5*cm, 3.5*cm, 3.5*cm])
+    table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#4B4B4B')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#E0E0E0')),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+    ]))
+
+    elements.append(table)
+
+    # Gerar o PDF
+    doc.build(elements)
+
+    return response
+
+def report_purchase_pdf(request):
+    # Filtrar pedidos de compra com status 'Aprovado' e status de entrega 'Não efetuada'
+    pedidos = PurchaseOrder.objects.filter(status='Aprovado', purchase_status='Não efetuada')
+
+    # Configurações de resposta
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="Pedidos_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf"'
+
+    # Configurações de documento PDF
+    doc = SimpleDocTemplate(response, pagesize=landscape(A4), rightMargin=2*cm, leftMargin=2*cm, topMargin=2*cm, bottomMargin=2*cm)
+    elements = []
+
+    # Estilos
+    styles = getSampleStyleSheet()
+    title_style = ParagraphStyle(
+        name='TitleStyle',
+        parent=styles['Title'],
+        fontSize=18,
+        leading=22,
+        alignment=TA_CENTER,
+        textColor=colors.HexColor('#4B4B4B'),
+        spaceAfter=20,
+    )
+    table_header_style = ParagraphStyle(
+        name='TableHeaderStyle',
+        parent=styles['Normal'],
+        fontSize=10,
+        leading=12,
+        alignment=TA_CENTER,
+        textColor=colors.whitesmoke,
+    )
+    table_data_style = ParagraphStyle(
+        name='TableDataStyle',
+        parent=styles['Normal'],
+        fontSize=10,
+        leading=12,
+        alignment=TA_LEFT,
+        textColor=colors.black,
+    )
+
+    # Adicionando título
+    elements.append(Paragraph('Pedidos de Compra', title_style))
+    elements.append(Spacer(1, 20))
+
+    # Cabeçalho da tabela
+    pedidos_tabela = [
+        [Paragraph('Data', table_header_style), Paragraph('Data de Compra', table_header_style), Paragraph('Item', table_header_style),
+         Paragraph('Quantidade', table_header_style), Paragraph('Requisitante', table_header_style), 
+         Paragraph('Gestor', table_header_style), Paragraph('Setor', table_header_style), Paragraph('Unidade', table_header_style)]
+    ]
+
+    # Dados dos pedidos
+    for pedido in pedidos:
+        pedidos_tabela.append([
+            Paragraph(pedido.date.strftime('%d/%m/%Y'), table_data_style),
+            Paragraph(pedido.purchase_date.strftime('%d/%m/%Y') if pedido.purchase_date else 'N/A', table_data_style),
+            Paragraph(pedido.item, table_data_style),
+            Paragraph(str(pedido.quantity), table_data_style),
+            Paragraph(pedido.requester_name or pedido.requester.full_name if pedido.requester else 'N/A', table_data_style),
+            Paragraph(pedido.manager_name or pedido.manager.username if pedido.manager else 'N/A', table_data_style),
+            Paragraph(pedido.sector_name or pedido.sector.name if pedido.sector else 'N/A', table_data_style),
+            Paragraph(pedido.unit_name or pedido.unit.name if pedido.unit else 'N/A', table_data_style),
+        ])
+
+    # Configurando a tabela
+    table = Table(pedidos_tabela, colWidths=[2.5*cm, 3.5*cm, 3.5*cm, 2.5*cm, 3.5*cm, 3.5*cm, 3.5*cm, 3.5*cm])
+    table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#4B4B4B')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#E0E0E0')),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+    ]))
+
+    elements.append(table)
+
+    # Gerar o PDF
+    doc.build(elements)
+
+    return response

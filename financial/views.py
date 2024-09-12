@@ -272,9 +272,6 @@ class CashOutflowCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateV
     success_url = reverse_lazy('cash_outflow')
     permission_required = 'financial.add_cashoutflow'
 
-    def form_valid(self, form):
-        return super().form_valid(form)
-
 
 class CashOutflowDetailView(LoginRequiredMixin, PermissionRequiredMixin, DetailView):
 
@@ -450,6 +447,8 @@ def make_payment(request, pk):
             if payment.payment_date == None:
                 payment.payment_date = timezone.now().date()
             if payment.discount == None:
+                payment.discount = 0.0
+            if payment.fine == None:
                 payment.discount = 0.0
             form.save()
             return redirect('cash_outflow')

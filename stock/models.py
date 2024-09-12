@@ -196,6 +196,7 @@ class Request(models.Model):
     sector = models.ForeignKey(Sector, on_delete=models.SET_NULL, related_name='request_sector', null=True)
     sector_name = models.CharField(max_length=200, blank=True, null=True)
     status = models.CharField(max_length=20, choices=STATUS, default='Análise')
+    delivery_status = models.CharField(max_length=20, choices=PURCHASE_STATUS, default='Não efetuada')
     
 
 

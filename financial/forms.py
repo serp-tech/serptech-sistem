@@ -81,6 +81,8 @@ class CashInflowForm(forms.ModelForm):
         labels = {
             'client': 'Cliente',
             'revenue_center': 'Centro de Receita',
+            'financial_classification': 'Classificação',
+            'financial_category': 'Categoria',
             'document': 'Documento',
             'tittle_value': 'Valor do Título',
             'fine': 'Multa',
@@ -119,6 +121,8 @@ class CashInflowUpdateForm(forms.ModelForm):
         labels = {
             'client': 'Cliente',
             'document': 'Documento',
+            'financial_classification': 'Classificação',
+            'financial_category': 'Categoria',
             'tittle_value': 'Valor do Título',
             'fine': 'Multa',
             'discount': 'Desconto',
@@ -174,7 +178,7 @@ class  CashOutflowForm(forms.ModelForm):
     class Meta:
 
         model = CashOutflow
-        fields = ['recipient', 'cost_center', 'document', 'tittle_value', 'fine', 'discount',
+        fields = ['recipient', 'cost_center', 'financial_classification', 'financial_category', 'document', 'tittle_value', 'fine', 'discount',
                   'total_value', 'billing_date', 'due_date', 'document_pdf', 'description']
         
         widgets = {
@@ -187,6 +191,8 @@ class  CashOutflowForm(forms.ModelForm):
         labels = {
             'recipient': 'Beneficiário',
             'cost_center': 'Centro de Custo',
+            'financial_classification': 'Classificação',
+            'financial_category': 'Categoria',
             'document': 'Documento',
             'tittle_value': 'Valor do Título',
             'fine': 'Multa',

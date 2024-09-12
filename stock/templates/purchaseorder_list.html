@@ -8,6 +8,7 @@
     {% if perms.stock.add_purchaseorder %}
     <a href="{% url 'purchase_add' %}" class="btn btn-primary mb-2">Nova Ordem</a>
     {% endif %}
+    <a href="{% url 'report_purchase_pdf' %}" class="btn btn-success mb-2"><i class="bi bi-file-earmark-text"></i>Relatório</a>
     <form method="get" action="">
         <div class="row mb-3">
             <div class="col-md-3 mb-2">
@@ -39,6 +40,7 @@
                 <th>Marca</th>
                 <th>Quantidade</th>
                 <th>Requisitante</th>
+                <th>Unidade</th>
                 <th>Setor</th>
                 <th>Gestor</th>
                 <th>Status</th>
@@ -63,6 +65,7 @@
                         {{ item.requester_name }}
                     {% endif %}
                   </td>
+                <td class="text-center">{{ item.unit }}</td>
                 <td class="text-center">{{ item.sector }}</td>
                 <td class="text-center">{{ item.manager }}</td>
                 <td class="text-center">{{ item.status }}</td>
