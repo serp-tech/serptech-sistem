@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from django.urls import reverse_lazy
-from django.http import HttpResponse
+from django.http import HttpResponse,JsonResponse
 from django.db.models import Sum, Q
 from django.utils import timezone
 from django.shortcuts import get_object_or_404, redirect, render
@@ -16,11 +16,26 @@ from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, 
 from reportlab.lib.pagesizes import landscape
 from reportlab.lib.units import cm
 from accounts.models import UserProfile
-from .models import Client, CostCenter, RevenueCenter, CashInflow, CashOutflow, FinancialClasification, FinancialCategory
+from .models import Client, CostCenter, RevenueCenter, CashInflow, CashOutflow, FinancialClasification, FinancialCategory, Area
 from .forms import (
     ClientForm, CostCenterForm, RevenueCenterForm, CashOutflowForm,CashOutflowUpdateForm , CashInflowForm, 
-    CashInflowUpdateForm, ReciveInflowForm, PayOutflowForm, FinancialCategoryForm, FinancialClasificationForm)
+    CashInflowUpdateForm, ReciveInflowForm, PayOutflowForm, FinancialCategoryForm, FinancialClasificationForm, AreaForm)
 from stock.utils import format_currency
+from stock.forms import SectorForm
+
+
+def add_area(request):
+    if request.method == 'POST':
+        form = AreaForm(request.POST)
+        if form.is_valid():
+            form.save()
+            if request.is_ajax():
+                return JsonResponse({'message': 'Área adicionada com sucesso!'})
+            else:
+                return redirect('some_view_name')  # Redirecione conforme necessário
+    else:
+        form = AreaForm()
+    return render(request, 'your_template.html', {'form': form})
 
 
 class ClientListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
@@ -90,6 +105,13 @@ class CostCenterCreateView(CreateView):
     form_class = CostCenterForm
     success_url = '/costcenter/'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['area_form'] = AreaForm
+        context['sector_form'] = SectorForm
+        
+        return context
+
 
 class CostCenterDeleteView(DeleteView):
 
@@ -97,7 +119,7 @@ class CostCenterDeleteView(DeleteView):
     template_name = 'cost_center_delete.html'
     success_url = '/costcenter/'
 
-    
+
 class RevenueCenterListView(ListView):
 
     model = RevenueCenter

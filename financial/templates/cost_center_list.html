@@ -24,6 +24,9 @@
         <thead>
             <tr>
                 <th>Centro de Custo</th>
+                <th>Diretoria</th>
+                <th>Área</th>
+                <th>Área Final</th>
                 {% if perms.financial.delete_costcenter %}
                 <th>Ações</th>
                 {% endif %}
@@ -32,7 +35,10 @@
         <tbody>
             {% for item in itens %}
             <tr>
-                <td>{{ item.name }}</td>
+                <td>{{ item.id_center }}</td>
+                <td>{{ item.sector }}</td>
+                <td>{{ item.area }}</td>
+                <td>{{ item.final_area }}</td>
                 {% if perms.financial.delete_costcenter %}
                 <td>
                     <a href="{% url 'costcenter_delete' item.pk %}" class="btn btn-confirm-excluir">Excluir</a>

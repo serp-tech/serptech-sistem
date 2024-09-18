@@ -4,11 +4,14 @@ from .views import (ClientCreateView, ClientDeleteView, ClientDetailView, Client
                     conclude_inflow_cash, CashOutflowListView, CashOutflowDetailView, CashOutflowCreateView, CashOutflowUpdateView, CashOutflowDeleteView, 
                     cash_flow_view, make_payment, generate_cash_outflow_report, generate_cash_inflow_report, generate_cash_flow_report,
                     CostCenterListView, CostCenterCreateView, CostCenterDeleteView, RevenueCenterListView, RevenueCenterCreateView, RevenueCenterDeleteView,
-                    FinancialCategoryListView, FinancialCategoryCreateView, FinancialCategoryDeleteView, FinancialClasificationListView, FinancialClasificationCreateView, FinancialClasificationDeleteView                   
+                    FinancialCategoryListView, FinancialCategoryCreateView, FinancialCategoryDeleteView, FinancialClasificationListView, FinancialClasificationCreateView, FinancialClasificationDeleteView,
+                    add_area                  
 )
 
 
 urlpatterns = [
+    path('area/add', add_area, name='area_add'),
+
     path('client/', ClientListView.as_view(), name='client'),
     path('client/add', ClientCreateView.as_view(), name='client_add'),
     path('client/<int:pk>', ClientDetailView.as_view(), name='client_detail'),

@@ -1,5 +1,6 @@
 from django import forms
-from .models import Client, CostCenter, RevenueCenter, CashInflow, CashOutflow, FinancialCategory, FinancialClasification
+from django.db import IntegrityError
+from .models import Client, Area, CostCenter, RevenueCenter, CashInflow, CashOutflow, FinancialCategory, FinancialClasification
 
 
 class ClientForm(forms.ModelForm):
@@ -24,26 +25,101 @@ class ClientForm(forms.ModelForm):
         }
 
 
+class AreaForm(forms.ModelForm):
+
+    class Meta:
+        model = Area
+        fields = ['name']
+        labels = {
+            'name': 'Nome',
+        }
+        help_text = {'name': 'Obrigatório',}
+
 class CostCenterForm(forms.ModelForm):
+    area_name = forms.CharField(max_length=100, label="Área", required=True)
+    final_area_name = forms.CharField(max_length=100, label="Área Final", required=False)
 
     class Meta:
         model = CostCenter
-        fields = ['name']
-        labels ={
-            'name': 'Nome',
+        fields = ['sector', 'area_name', 'final_area_name']
+        labels = {
+            'sector': 'Setor',
+            'area_name': 'Área', 
+            'final_area_name': 'Área Final',
         }
-        help_text = {'name': 'Obrigatório',}
+        help_texts = {
+            'sector': 'Obrigatório',
+            'area_name': 'Obrigatório', 
+            'final_area_name': 'Opcional',
+        }
+
+    def save(self, commit=True):
+        # Buscar ou criar a área principal
+        area_name = self.cleaned_data['area_name']
+        area = Area.objects.filter(name=area_name).first()
+        if not area:
+            area = Area.objects.create(name=area_name)
+
+        # Buscar ou criar a área final, se for fornecida
+        final_area_name = self.cleaned_data.get('final_area_name')
+        final_area = None
+        if final_area_name:
+            final_area = Area.objects.filter(name=final_area_name).first()
+            if not final_area:
+                final_area = Area.objects.create(name=final_area_name)
+
+        # Criar o objeto Centro de Custo
+        cost_center = super(CostCenterForm, self).save(commit=False)
+        cost_center.area = area
+        cost_center.final_area = final_area
+
+        if commit:
+            cost_center.save()
+
+        return cost_center
 
 
 class RevenueCenterForm(forms.ModelForm):
+    area_name = forms.CharField(max_length=100, label="Área", required=True)
+    final_area_name = forms.CharField(max_length=100, label="Área Final", required=False)
 
     class Meta:
         model = RevenueCenter
-        fields = ['name']
-        labels ={
-            'name': 'Nome',
+        fields = ['sector', 'area_name', 'final_area_name']
+        labels = {
+            'sector': 'Setor',
+            'area_name': 'Área',
+            'final_area_name': 'Área Final',
         }
-        help_text = {'name': 'Obrigatório',}
+        help_texts = {
+            'sector': 'Obrigatório',
+            'area_name': 'Obrigatório',
+            'final_area_name': 'Opcional',
+        }
+
+    def save(self, commit=True):
+        # Buscar ou criar a área principal
+        area_name = self.cleaned_data['area_name']
+        area, created = Area.objects.get_or_create(name=area_name)
+
+        # Buscar ou criar a área final, se for fornecida
+        final_area_name = self.cleaned_data.get('final_area_name')
+        final_area = None
+        if final_area_name:
+            final_area, created = Area.objects.get_or_create(name=final_area_name)
+
+        # Criar o objeto Centro de Custo
+        revenue_center = super().save(commit=False)
+        revenue_center.area = area
+        revenue_center.final_area = final_area
+
+        if commit:
+            try:
+                revenue_center.save()
+            except IntegrityError as e:
+                print(f"Erro ao salvar o centro de receita: {e}")
+
+        return revenue_center
 
 class FinancialCategoryForm(forms.ModelForm):
 
