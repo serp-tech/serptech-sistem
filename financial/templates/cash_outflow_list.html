@@ -6,16 +6,19 @@
 <div class="container">
     <h2>Saídas</h2>
 
-    {% if perms.financial.add_cashoutflow or user_profile.position == 'Gerente' or user_profile.positon == 'Diretor' %}
+    
     <div class="mb-2">
+        {% if perms.financial.add_cashoutflow or user_profile.position == 'Gerente' or user_profile.position == 'Diretor' %}
         <a href="{% url 'cash_outflow_add' %}" class="btn btn-primary">Adicionar Saída</a>
-        {% if user_profile.position == 'Gerente' or user_profile.positon == 'Diretor' %}
+        {% endif %}
+        {% if user_profile.position == 'Gerente' or user_profile.position == 'Diretor'  or user_profile.position == 'Contador' %}
         <button type="button" id="toggleRelatorioBtn" class="btn btn-success ms-3">
             <i class="bi bi-file-earmark-text"></i> Relatório
         </button>
+        
         {% endif %}
     </div>
-    {% endif %}
+    
 
     <!-- Seção de geração de relatório escondida inicialmente -->
     <div id="relatorioSection" class="mb-4" style="display: none;">
@@ -145,7 +148,7 @@
                                 <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">Ações</button>
                                 <ul class="dropdown-menu">
                                     <li><a class="dropdown-item btn btn-info" href="{% url 'cash_outflow_detail' item.pk %}">Detalhes</a></li>
-                                    {% if item.status != 'Efetuado' %}
+                                    {% if item.status != 'Efetuado' and user_profile.position == 'Gerente' or user_profile.position == 'Diretor' %}
                                     <li><a class="dropdown-item btn btn-info" href="{% url 'cash_outflow_conclude' item.pk %}">Efetuado</a></li>
                                     {% endif %}
                                 </ul>

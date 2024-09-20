@@ -239,7 +239,9 @@
             <!-- Cadastro de Estoque -->
             <a href="#" class="dropdown-btn-estoque">Estoque</a>
             <div class="dropdown-container">
+                {% if perms.accounts.add_userprofile %}
                 <a href="{% url 'register' %}">Novo Usuário</a>
+                {%  endif %}
                 {% if perms.stock.view_item %}
                 <a href="{% url 'item' %}">Itens</a>
                 {% endif %}

@@ -6,6 +6,7 @@ OFFICE_STATUS = (
     ('Estagiário', 'Estagiário'),
     ('Auxiliar', 'Auxiliar'),
     ('Assistente', 'Assistente'),
+    ('Contador', 'Contador'),
     ('Gerente', 'Gerente'),
     ('Diretor', 'Diretor'),
 )
@@ -40,6 +41,8 @@ class UserProfile(models.Model):
             group, created = Group.objects.get_or_create(name='manager')
         elif self.position == 'Assistente':
             group, created = Group.objects.get_or_create(name='assistant')
+        elif self.position == 'Contador':
+            group, created = Group.objects.get_or_create(name='counter')
         else:
             group, created = Group.objects.get_or_create(name='group2')
         

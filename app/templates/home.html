@@ -207,9 +207,11 @@
             <a href="{% url 'unit' %}">Unidades</a>
         </div>
         {% endif %}
+        {% if perms.accounts.add_userprofile %}
         <div class="link-box">
             <a href="{%url 'register' %}">Novo Usuário</a>
         </div>
+        {% endif %}
         {% if perms.financial.view_cashoutflow %}
         <div class="link-box">
             <a href="{% url 'cash_outflow' %}">Contas a Pagar</a>
