@@ -16,10 +16,10 @@ from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, 
 from reportlab.lib.pagesizes import landscape
 from reportlab.lib.units import cm
 from accounts.models import UserProfile
-from .models import Client, CostCenter, RevenueCenter, CashInflow, CashOutflow, FinancialClasification, FinancialCategory, Area
+from .models import Client, CostCenter, RevenueCenter, CashInflow, CashOutflow, FinancialClasification, FinancialCategory, ChartOfAccounts
 from .forms import (
     ClientForm, CostCenterForm, RevenueCenterForm, CashOutflowForm,CashOutflowUpdateForm , CashInflowForm, 
-    CashInflowUpdateForm, ReciveInflowForm, PayOutflowForm, FinancialCategoryForm, FinancialClasificationForm, AreaForm)
+    CashInflowUpdateForm, ReciveInflowForm, PayOutflowForm, FinancialCategoryForm, FinancialClasificationForm, AreaForm, ChartOfAccountsForm)
 from stock.utils import format_currency
 from stock.forms import SectorForm
 
@@ -186,6 +186,25 @@ class FinancialCategoryDeleteView(DeleteView):
     success_url = '/financial-category/'
 
 
+class ChartOfAccountsListView(ListView):
+    model = ChartOfAccounts
+    template_name = 'chartofaccounts_list.html'
+    context_object_name = 'itens'
+
+
+class ChartOfAccountsCreateView(CreateView):
+    model = ChartOfAccounts
+    template_name = 'chartofaccounts_create.html'
+    form_class = ChartOfAccountsForm
+    success_url = '/chart-of-accounts/'
+
+
+class ChartOfAccountsDeleteView(DeleteView):
+    model = ChartOfAccounts
+    template_name = 'chartofaccounts_delete.html'
+    success_url = '/chart-of-accounts/'
+
+
 class CashInflowListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
 
     model = CashInflow
@@ -317,6 +336,66 @@ class CashOutflowDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteV
     template_name = 'cash_outflow_delete.html'
     success_url = reverse_lazy('cash_outflow')
     permission_required = 'financial.delete_cashoutflow'
+
+
+def get_cost_center(request):
+    query = request.GET.get('q', '')
+    if query:
+        costs = CostCenter.objects.filter(
+            Q(id_center__icontains=query) |
+            Q(sector__name__icontains=query) |
+            Q(area__name__icontains=query) |
+            Q(final_area__name__icontains=query)
+        ).distinct().order_by('id')[:10]  # added order_by for consistent ordering
+    else:
+        costs = CostCenter.objects.all().order_by('id')[:10]
+    
+    results = [
+        {
+            'id': cost.id,
+            'text': f"{cost.id_center}-{cost.sector.name}-{cost.area.name}-{cost.final_area.name}" if cost.final_area else f"{cost.id_center}-{cost.sector.name}-{cost.area.name}",
+        } for cost in costs
+    ]
+    return JsonResponse({'results': results})
+
+def get_revenue_center(request):
+    query = request.GET.get('q', '')
+    if query:
+        renvenues = RevenueCenter.objects.filter(
+            Q(id_center__icontains=query) |
+            Q(sector__name__icontains=query) |
+            Q(area__name__icontains=query) |
+            Q(final_area__name__icontains=query)
+        ).distinct().order_by('id')[:10]  # added order_by for consistent ordering
+    else:
+        renvenues = RevenueCenter.objects.all().order_by('id')[:10]
+    
+    results = [
+        {
+            'id': revenue.id,
+            'text': f"{revenue.id_center}-{revenue.sector.name}-{revenue.area.name}-{revenue.final_area.name}" if revenue.final_area else f"{revenue.id_center}-{revenue.sector.name}-{revenue.area.name}",
+        } for revenue in renvenues
+    ]
+    return JsonResponse({'results': results})
+
+def get_chart_of_accounts(request):
+    query = request.GET.get('q', '')
+    if query:
+        charts = ChartOfAccounts.objects.filter(
+            Q(id_plan__icontains=query) |
+            Q(classification__name__icontains=query) |
+            Q(category__name__icontains=query)
+        ).distinct().order_by('id')[:10]  # added order_by for consistent ordering
+    else:
+        charts = ChartOfAccounts.objects.all().order_by('id')[:10]
+    
+    results = [
+        {
+            'id': chart.id,
+            'text': f"{chart.id_plan}-{chart.classification.name}-{chart.category.name}",
+        } for chart in charts
+    ]
+    return JsonResponse({'results': results})
 
 
 permission_required('financial.view_cashflow')

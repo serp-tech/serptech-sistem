@@ -56,50 +56,48 @@ class CostCenter(models.Model):
         ordering = ['id_center']
 
     def save(self, *args, **kwargs):
+        # Abreviação do setor
         sector_abbr = self.sector.name[:2].upper()
 
-        # Verifica se já existe alguma entrada para essa combinação de setor e área.
-        existing_area_count = CostCenter.objects.filter(sector=self.sector, area=self.area).count()
-        
-        # Se for a primeira vez que essa combinação aparece, incrementa o contador baseado no setor.
-        if existing_area_count == 0:
-            # Pega a maior identificação de área já utilizada para esse setor e incrementa.
-            last_sector_entry = CostCenter.objects.filter(sector=self.sector).order_by('-id_center').first()
-            if last_sector_entry:
-                initial_count = int(last_sector_entry.id_center.split('-')[1]) + 1
+        # Verifica se já existe relação entre setor e área
+        exists_relation = CostCenter.objects.filter(sector=self.sector, area=self.area).count()
+
+        if exists_relation == 0:
+            last_sector = CostCenter.objects.filter(sector=self.sector).order_by('-id_center').first()
+            if last_sector:
+                initial_count = int(last_sector.id_center.split('-')[1]) + 1
             else:
                 initial_count = 1
         else:
-            # Usa a mesma identificação de área da última entrada para essa combinação de setor e área.
             initial_count = int(CostCenter.objects.filter(sector=self.sector, area=self.area).first().id_center.split('-')[1])
 
-        # Iniciar a contagem da área final apenas se `final_area` estiver presente.
+        # Gera o id_center baseado na área final, se houver
         if self.final_area:
-            final_count = CostCenter.objects.filter(sector=self.sector, area=self.area, final_area=self.final_area).count() + 1
-            self.id_center = f"{sector_abbr}-{initial_count:04d}-{final_count:04d}"
+            last_sector_area = CostCenter.objects.filter(sector=self.sector, area=self.area).order_by('-id_center').first()
+
+            # Verifica se existe algum registro anterior
+            if last_sector_area:
+                if len(last_sector_area.id_center) > 7:
+                    last_four_digits = last_sector_area.id_center.split('-')[-1]
+                    last_four_digits = int(last_four_digits)
+                    final_count = last_four_digits + 1
+                else:
+                    final_count = CostCenter.objects.filter(sector=self.sector, area=self.area, final_area=self.final_area).count() + 1
+                self.id_center = f"{sector_abbr}-{initial_count:04d}-{final_count:04d}"
+            else:
+                # Se não houver setor anterior, começa a contagem
+                self.id_center = f"{sector_abbr}-{initial_count:04d}-0001"
         else:
-            # Se não houver final_area, não adicionar a última parte do id_center.
             self.id_center = f"{sector_abbr}-{initial_count:04d}"
 
-        # Chama o método save original com tentativas de resolver problemas de concorrência.
-        attempt = 0
-        while attempt < 5:
-            try:
-                super().save(*args, **kwargs)
-                break
-            except IntegrityError:
-                # Incrementar o final_count e tentar novamente se houver erro de integridade.
-                if self.final_area:
-                    final_count += 1
-                    self.id_center = f"{sector_abbr}-{initial_count:04d}-{final_count:04d}"
-                attempt += 1
+        # Chama o save original para salvar o objeto no banco
+        super().save(*args, **kwargs)
 
-        if attempt == 5:
-            raise IntegrityError(f"Não foi possível salvar o CostCenter após várias tentativas devido a conflitos de chave única.")
-
-    def __str__(self):
-        return self.id_center
-
+    def __str__(self) -> str:
+        if self.final_area != None:
+            return f'{self.id_center}-{self.sector}-{self.area}-{self.final_area}'
+        else:
+            return f'{self.id_center}-{self.sector}-{self.area}'
 
 class RevenueCenter(models.Model):
 
@@ -112,49 +110,48 @@ class RevenueCenter(models.Model):
         ordering = ['id_center']
 
     def save(self, *args, **kwargs):
+        # Abreviação do setor
         sector_abbr = self.sector.name[:2].upper()
 
-        # Verifica se já existe alguma entrada para essa combinação de setor e área.
-        existing_area_count = RevenueCenter.objects.filter(sector=self.sector, area=self.area).count()
-        
-        # Se for a primeira vez que essa combinação aparece, incrementa o contador baseado no setor.
-        if existing_area_count == 0:
-            # Pega a maior identificação de área já utilizada para esse setor e incrementa.
-            last_sector_entry = RevenueCenter.objects.filter(sector=self.sector).order_by('-id_center').first()
-            if last_sector_entry:
-                initial_count = int(last_sector_entry.id_center.split('-')[1]) + 1
+        # Verifica se já existe relação entre setor e área
+        exists_relation = RevenueCenter.objects.filter(sector=self.sector, area=self.area).count()
+
+        if exists_relation == 0:
+            last_sector = RevenueCenter.objects.filter(sector=self.sector).order_by('-id_center').first()
+            if last_sector:
+                initial_count = int(last_sector.id_center.split('-')[1]) + 1
             else:
                 initial_count = 1
         else:
-            # Usa a mesma identificação de área da última entrada para essa combinação de setor e área.
             initial_count = int(RevenueCenter.objects.filter(sector=self.sector, area=self.area).first().id_center.split('-')[1])
 
-        # Iniciar a contagem da área final apenas se `final_area` estiver presente.
+        # Gera o id_center baseado na área final, se houver
         if self.final_area:
-            final_count = RevenueCenter.objects.filter(sector=self.sector, area=self.area, final_area=self.final_area).count() + 1
-            self.id_center = f"{sector_abbr}-{initial_count:04d}-{final_count:04d}"
+            last_sector_area = RevenueCenter.objects.filter(sector=self.sector, area=self.area).order_by('-id_center').first()
+
+            # Verifica se existe algum registro anterior
+            if last_sector_area:
+                if len(last_sector_area.id_center) > 7:
+                    last_four_digits = last_sector_area.id_center.split('-')[-1]
+                    last_four_digits = int(last_four_digits)
+                    final_count = last_four_digits + 1
+                else:
+                    final_count = RevenueCenter.objects.filter(sector=self.sector, area=self.area, final_area=self.final_area).count() + 1
+                self.id_center = f"{sector_abbr}-{initial_count:04d}-{final_count:04d}"
+            else:
+                # Se não houver setor anterior, começa a contagem
+                self.id_center = f"{sector_abbr}-{initial_count:04d}-0001"
         else:
-            # Se não houver final_area, não adicionar a última parte do id_center.
             self.id_center = f"{sector_abbr}-{initial_count:04d}"
 
-        # Chama o método save original com tentativas de resolver problemas de concorrência.
-        attempt = 0
-        while attempt < 5:
-            try:
-                super().save(*args, **kwargs)
-                break
-            except IntegrityError:
-                # Incrementar o final_count e tentar novamente se houver erro de integridade.
-                if self.final_area:
-                    final_count += 1
-                    self.id_center = f"{sector_abbr}-{initial_count:04d}-{final_count:04d}"
-                attempt += 1
+        # Chama o save original para salvar o objeto no banco
+        super().save(*args, **kwargs)
 
-        if attempt == 5:
-            raise IntegrityError(f"Não foi possível salvar o revenuecenter após várias tentativas devido a conflitos de chave única.")
-
-    def __str__(self):
-        return self.id_center
+    def __str__(self) -> str:
+        if self.final_area != None:
+            return f'{self.id_center}-{self.sector}-{self.area}-{self.final_area}'
+        else:
+            return f'{self.id_center}-{self.sector}-{self.area}'
 
 
 class FinancialCategory(models.Model):
@@ -180,14 +177,24 @@ class FinancialClasification(models.Model):
         return self.name
 
 
+class ChartOfAccounts(models.Model):
+
+    classification = models.ForeignKey(FinancialClasification, on_delete=models.PROTECT, related_name='classification_accounts')
+    category = models.ForeignKey(FinancialClasification, on_delete=models.PROTECT, related_name='category_accounts')
+    id_plan = models.CharField(max_length=30)
+
+    def __str__(self) -> str:
+        return f'{self.id_plan}-{self.classification}-{self.category}'
+    
+
+
 
 class CashInflow(models.Model):
 
     date = models.DateField(default=timezone.now, editable=False)
     client = models.ForeignKey(Client, on_delete=models.SET_NULL, related_name='inflow_client', null=True)
     client_cnpj = BRCNPJField()
-    financial_classification = models.ForeignKey(FinancialClasification, on_delete=models.PROTECT, related_name='financial_classification_inflow', default=None)
-    financial_category = models.ForeignKey(FinancialCategory, on_delete=models.PROTECT, related_name='financial_category_inflow', default=None)
+    chart_of_accounts = models.ForeignKey(ChartOfAccounts, on_delete=models.PROTECT, related_name='chart_cash_inflow', default=None)
     document = models.CharField(max_length=50)
     document_pdf = models.FileField(upload_to='pdf/document/cash-inflow', blank=True, null=True)
     revenue_center = models.ForeignKey(RevenueCenter, on_delete=models.PROTECT, related_name='revenue_center_cashinflow', default=None)
@@ -221,8 +228,7 @@ class CashOutflow(models.Model):
     document = models.CharField(max_length=50)
     document_pdf = models.FileField(upload_to='pdf/document/cash-outflow', blank=True, null=True)
     cost_center = models.ForeignKey(CostCenter, on_delete=models.PROTECT, related_name='cost_cente_cashoutflow')
-    financial_classification = models.ForeignKey(FinancialClasification, on_delete=models.PROTECT, related_name='financial_classification_outflow', )
-    financial_category = models.ForeignKey(FinancialCategory, on_delete=models.PROTECT, related_name='financial_category_outflow')
+    chart_of_accounts = models.ForeignKey(ChartOfAccounts, on_delete=models.PROTECT, related_name='chart_cash_outflow', default=None)
     proof = models.FileField(upload_to='pdf/proof/cash-outflow', blank=True, null=True)
     tittle_value = models.FloatField()
     fine = models.FloatField(default=0, null=True, blank=True)

@@ -4,8 +4,8 @@ from .views import (ClientCreateView, ClientDeleteView, ClientDetailView, Client
                     conclude_inflow_cash, CashOutflowListView, CashOutflowDetailView, CashOutflowCreateView, CashOutflowUpdateView, CashOutflowDeleteView, 
                     cash_flow_view, make_payment, generate_cash_outflow_report, generate_cash_inflow_report, generate_cash_flow_report,
                     CostCenterListView, CostCenterCreateView, CostCenterDeleteView, RevenueCenterListView, RevenueCenterCreateView, RevenueCenterDeleteView,
-                    FinancialCategoryListView, FinancialCategoryCreateView, FinancialCategoryDeleteView, FinancialClasificationListView, FinancialClasificationCreateView, FinancialClasificationDeleteView,
-                    add_area                  
+                    FinancialCategoryListView, FinancialCategoryCreateView, FinancialCategoryDeleteView, FinancialClasificationListView, FinancialClasificationCreateView, 
+                    FinancialClasificationDeleteView, ChartOfAccountsListView, ChartOfAccountsCreateView, ChartOfAccountsDeleteView, add_area, get_chart_of_accounts, get_cost_center                  
 )
 
 
@@ -50,6 +50,13 @@ urlpatterns = [
     path('financial-classification/', FinancialClasificationListView.as_view(), name='financial_clasification'),
     path('financial-classification/add', FinancialClasificationCreateView.as_view(), name='financial_clasification_add'),
     path('financial-classification/<int:pk>/delete', FinancialClasificationDeleteView.as_view(), name='financial_clasification_delete'),
+
+    path('chart-of-accounts/', ChartOfAccountsListView.as_view(), name='chart_of_accounts'),
+    path('chart-of-accounts/add', ChartOfAccountsCreateView.as_view(), name='chart_of_accounts_add'),
+    path('chart-of-accounts/<int:pk>/delete', ChartOfAccountsDeleteView.as_view(), name='chart_of_accounts_delete'),
+
+    path('get_chart_of_accounts/', get_chart_of_accounts, name='get_chart_of_accounts'),
+    path('get_cost_center/',get_cost_center, name='get_cost_center'),
 
     path('cash-flow/', cash_flow_view, name='cash_flow'),
     path('generate_cash_flow_report/', generate_cash_flow_report, name='generate_cash_flow_report'),

@@ -14,6 +14,27 @@
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 
     <style>
+        .select2-container--default .select2-results__option {
+            color: #333; /* Cor do texto - escolha a cor que preferir */
+        }
+
+        /* Estilizando o texto do item selecionado no dropdown */
+        .select2-container--default .select2-results__option--highlighted[aria-selected] {
+            background-color: #5897fb; /* Cor de fundo para o item em hover ou selecionado */
+            color: white;  /* Cor do texto para o item em hover ou selecionado */
+        }
+
+        /* Estilizando o campo de entrada do Select2 */
+        .select2-container--default .select2-selection--single {
+            background-color: #fff; /* Cor de fundo do campo */
+            border: 1px solid #aaa; /* Cor da borda */
+            color: #555; /* Cor do texto */
+        }
+
+        /* Estilizando o texto dentro do campo quando um item está selecionado */
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            color: #555; /* Cor do texto */
+        }
         body {
             display: flex;
             min-height: 100vh;
@@ -233,6 +254,9 @@
                 {% endif %}
                 {% if perms.financial.view_financialcategory %}
                 <a href="{% url 'financial_clasification' %}">Classificação</a>
+                {% endif %}
+                {% if perms.financial.view_chartofaccounts %}
+                <a href="{% url 'chart_of_accounts' %}">Plano de Contas</a>
                 {% endif %}
             </div>
 

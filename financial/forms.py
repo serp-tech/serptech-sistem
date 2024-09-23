@@ -1,6 +1,5 @@
 from django import forms
-from django.db import IntegrityError
-from .models import Client, Area, CostCenter, RevenueCenter, CashInflow, CashOutflow, FinancialCategory, FinancialClasification
+from .models import Client, Area, CostCenter, RevenueCenter, CashInflow, CashOutflow, FinancialCategory, FinancialClasification, ChartOfAccounts
 
 
 class ClientForm(forms.ModelForm):
@@ -44,12 +43,12 @@ class CostCenterForm(forms.ModelForm):
         fields = ['sector', 'area_name', 'final_area_name']
         labels = {
             'sector': 'Setor',
-            'area_name': 'Área', 
+            'area_name': 'Área',
             'final_area_name': 'Área Final',
         }
         help_texts = {
             'sector': 'Obrigatório',
-            'area_name': 'Obrigatório', 
+            'area_name': 'Obrigatório',
             'final_area_name': 'Opcional',
         }
 
@@ -68,13 +67,15 @@ class CostCenterForm(forms.ModelForm):
             if not final_area:
                 final_area = Area.objects.create(name=final_area_name)
 
-        # Criar o objeto Centro de Custo
-        cost_center = super(CostCenterForm, self).save(commit=False)
+        # Criar o objeto CostCenter
+        cost_center = super().save(commit=False)  # Não salva imediatamente
+
+        # Atribui a área e a área final
         cost_center.area = area
         cost_center.final_area = final_area
 
         if commit:
-            cost_center.save()
+            cost_center.save()  # Salva o objeto com a lógica de ID center no modelo
 
         return cost_center
 
@@ -100,24 +101,27 @@ class RevenueCenterForm(forms.ModelForm):
     def save(self, commit=True):
         # Buscar ou criar a área principal
         area_name = self.cleaned_data['area_name']
-        area, created = Area.objects.get_or_create(name=area_name)
+        area = Area.objects.filter(name=area_name).first()
+        if not area:
+            area = Area.objects.create(name=area_name)
 
         # Buscar ou criar a área final, se for fornecida
         final_area_name = self.cleaned_data.get('final_area_name')
         final_area = None
         if final_area_name:
-            final_area, created = Area.objects.get_or_create(name=final_area_name)
+            final_area = Area.objects.filter(name=final_area_name).first()
+            if not final_area:
+                final_area = Area.objects.create(name=final_area_name)
 
-        # Criar o objeto Centro de Custo
-        revenue_center = super().save(commit=False)
+        # Criar o objeto CostCenter
+        revenue_center = super().save(commit=False)  # Não salva imediatamente
+
+        # Atribui a área e a área final
         revenue_center.area = area
         revenue_center.final_area = final_area
 
         if commit:
-            try:
-                revenue_center.save()
-            except IntegrityError as e:
-                print(f"Erro ao salvar o centro de receita: {e}")
+            revenue_center.save()  # Salva o objeto com a lógica de ID center no modelo
 
         return revenue_center
 
@@ -143,12 +147,29 @@ class FinancialClasificationForm(forms.ModelForm):
         help_text = {'name': 'Obrigatório',}
 
 
+class ChartOfAccountsForm(forms.ModelForm):
+    class Meta:
+        model = ChartOfAccounts
+        fields = ['classification', 'category', 'id_plan']
+        labels = {
+            'classification': 'Classificação',
+            'category': 'Categoria',
+            'id_plan': 'ID',
+        }
+        help_texts = {
+            'classification': 'Obrigatório',
+            'category': 'Obrigatório',
+            'id_plan': 'Obrigatório',
+        }
+
+
+
 class CashInflowForm(forms.ModelForm):
 
     class Meta:
 
         model = CashInflow
-        fields = ['client', 'revenue_center', 'document', 'financial_classification', 'financial_category', 'tittle_value', 'fine', 'discount', 
+        fields = ['client', 'revenue_center', 'chart_of_accounts', 'document',  'tittle_value', 'fine', 'discount', 
                   'total_value', 'billing_date', 'due_date', 'document_pdf', 'description']
         widgets = {
             'billing_date': forms.DateInput(attrs={'type': 'date'}),
@@ -157,8 +178,7 @@ class CashInflowForm(forms.ModelForm):
         labels = {
             'client': 'Cliente',
             'revenue_center': 'Centro de Receita',
-            'financial_classification': 'Classificação',
-            'financial_category': 'Categoria',
+            'chart_of_accounts': 'Plano de Contas',
             'document': 'Documento',
             'tittle_value': 'Valor do Título',
             'fine': 'Multa',
@@ -230,7 +250,7 @@ class ReciveInflowForm(forms.ModelForm):
     class Meta:
 
         model = CashInflow
-        fields = ['tittle_value', 'fine', 'discount', 'total_value','financial_classification', 'financial_category', 
+        fields = ['tittle_value', 'fine', 'discount', 'total_value','chart_of_accounts', 
                   'payment_method', 'payment_date', 'recive_date', 'proof']
         widgets = {
             'payment_date': forms.DateInput(attrs={'type': 'date'}),
@@ -240,6 +260,7 @@ class ReciveInflowForm(forms.ModelForm):
         labels = {
             'tittle_value': 'Valor do Título',
             'fine': 'Multa',
+            'chart_of_accounts': 'Plano de Contas',
             'discount': 'Desconto',
             'total_value': 'Valor Total',
             'payment_method': 'Método de Pagamento',
@@ -254,7 +275,7 @@ class  CashOutflowForm(forms.ModelForm):
     class Meta:
 
         model = CashOutflow
-        fields = ['recipient', 'cost_center', 'financial_classification', 'financial_category', 'document', 'tittle_value', 'fine', 'discount',
+        fields = ['recipient', 'cost_center', 'chart_of_accounts', 'document', 'tittle_value', 'fine', 'discount',
                   'total_value', 'billing_date', 'due_date', 'document_pdf', 'description']
         
         widgets = {
@@ -267,8 +288,7 @@ class  CashOutflowForm(forms.ModelForm):
         labels = {
             'recipient': 'Beneficiário',
             'cost_center': 'Centro de Custo',
-            'financial_classification': 'Classificação',
-            'financial_category': 'Categoria',
+            'chart_of_accounts': 'Plano de Contas',
             'document': 'Documento',
             'tittle_value': 'Valor do Título',
             'fine': 'Multa',
