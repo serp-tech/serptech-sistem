@@ -180,7 +180,7 @@ class FinancialClasification(models.Model):
 class ChartOfAccounts(models.Model):
 
     classification = models.ForeignKey(FinancialClasification, on_delete=models.PROTECT, related_name='classification_accounts')
-    category = models.ForeignKey(FinancialClasification, on_delete=models.PROTECT, related_name='category_accounts')
+    category = models.ForeignKey(FinancialCategory, on_delete=models.PROTECT, related_name='category_accounts')
     id_plan = models.CharField(max_length=30)
 
     def __str__(self) -> str:
