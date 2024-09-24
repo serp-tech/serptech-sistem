@@ -1,5 +1,5 @@
 from django import forms
-from .models import Client, Area, CostCenter, RevenueCenter, CashInflow, CashOutflow, FinancialCategory, FinancialClasification, ChartOfAccounts
+from .models import Client, Area, CostCenter, RevenueCenter, CashInflow, CashOutflow, FinancialCategory, FinancialClasification, ChartOfAccounts, BankAccount
 
 
 class ClientForm(forms.ModelForm):
@@ -250,7 +250,7 @@ class ReciveInflowForm(forms.ModelForm):
     class Meta:
 
         model = CashInflow
-        fields = ['tittle_value', 'fine', 'discount', 'total_value','chart_of_accounts', 
+        fields = ['bank_account', 'tittle_value', 'fine', 'discount', 'total_value','chart_of_accounts', 
                   'payment_method', 'payment_date', 'recive_date', 'proof']
         widgets = {
             'payment_date': forms.DateInput(attrs={'type': 'date'}),
@@ -258,6 +258,7 @@ class ReciveInflowForm(forms.ModelForm):
         }
 
         labels = {
+            'bank_account': 'Conta Bancária',
             'tittle_value': 'Valor do Título',
             'fine': 'Multa',
             'chart_of_accounts': 'Plano de Contas',
@@ -326,6 +327,7 @@ class CashOutflowUpdateForm(forms.ModelForm):
         }
         labels = {
             'client': 'Cliente',
+            'payment_date': 'Data de Pagamento',
             'document': 'Documento',
             'tittle_value': 'Valor do Título',
             'fine': 'Multa',
@@ -358,7 +360,7 @@ class PayOutflowForm(forms.ModelForm):
     class Meta:
 
         model = CashOutflow
-        fields = ['tittle_value', 'fine', 'discount', 'total_value', 'payment_date',
+        fields = ['bank_account', 'tittle_value', 'fine', 'discount', 'total_value', 'payment_date',
                   'payment_method', 'proof']
         
         widgets = {
@@ -366,10 +368,33 @@ class PayOutflowForm(forms.ModelForm):
         }
 
         labels = {
+            'bank_account': 'Conta Bancária',
+            'payment_date': 'Data de Pagamento',
             'tittle_value': 'Valor do Título',
             'fine': 'Multa',
             'discount': 'Desconto',
             'total_value': 'Valor Total',
             'payment_method': 'Forma de Pagamento',
             'proof': 'Comprovante',
+        }
+
+
+class BankAccountForm(forms.ModelForm):
+    class Meta:
+        model = BankAccount
+        fields = ['bank_id', 'bank', 'branch', 'account_number', 'tpe', 'value']
+        labels = {
+            'bank_id': 'Código do Banco',
+            'bank': 'Banco',
+            'branch': 'Agência',
+            'account_number': 'Número da Conta',
+            'tpe': 'Tipo',
+            'value': 'Saldo',
+        }
+        help_texts = {
+            'bank_id': 'Obrigatório',
+            'bank': 'Obrigatório',
+            'branch': 'Obrigatório',
+            'account_number': 'Obrigatório',
+            'value': 'Obrigatório',
         }

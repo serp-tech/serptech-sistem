@@ -5,7 +5,8 @@ from .views import (ClientCreateView, ClientDeleteView, ClientDetailView, Client
                     cash_flow_view, make_payment, generate_cash_outflow_report, generate_cash_inflow_report, generate_cash_flow_report,
                     CostCenterListView, CostCenterCreateView, CostCenterDeleteView, RevenueCenterListView, RevenueCenterCreateView, RevenueCenterDeleteView,
                     FinancialCategoryListView, FinancialCategoryCreateView, FinancialCategoryDeleteView, FinancialClasificationListView, FinancialClasificationCreateView, 
-                    FinancialClasificationDeleteView, ChartOfAccountsListView, ChartOfAccountsCreateView, ChartOfAccountsDeleteView, add_area, get_chart_of_accounts, get_cost_center                  
+                    FinancialClasificationDeleteView, ChartOfAccountsListView, ChartOfAccountsCreateView, ChartOfAccountsDeleteView, add_area, get_chart_of_accounts, get_cost_center,
+                    BankAccountListView, BankAccountCreateView, BankAccountDetailView, BankAccountUpdateView, BankAccountDeleteView, get_bank_view, get_revenue_center                 
 )
 
 
@@ -55,8 +56,16 @@ urlpatterns = [
     path('chart-of-accounts/add', ChartOfAccountsCreateView.as_view(), name='chart_of_accounts_add'),
     path('chart-of-accounts/<int:pk>/delete', ChartOfAccountsDeleteView.as_view(), name='chart_of_accounts_delete'),
 
+    path('bank-account/', BankAccountListView.as_view(), name='bank_account'),
+    path('bank-account/add', BankAccountCreateView.as_view(), name='bank_account_add'),
+    path('bank-account/<int:pk>', BankAccountDetailView.as_view(), name='bank_account_detail'),
+    path('bank-account/<int:pk>/update', BankAccountUpdateView.as_view(), name='bank_account_update'),
+    path('bank-account/<int:pk>/delete', BankAccountDeleteView.as_view(), name='bank_account_delete'),
+
     path('get_chart_of_accounts/', get_chart_of_accounts, name='get_chart_of_accounts'),
     path('get_cost_center/',get_cost_center, name='get_cost_center'),
+    path('get_revenue_center/',get_revenue_center, name='get_revenue_center'),
+    path('get-bank/<str:code_bank>/', get_bank_view , name='get_bank'),
 
     path('cash-flow/', cash_flow_view, name='cash_flow'),
     path('generate_cash_flow_report/', generate_cash_flow_report, name='generate_cash_flow_report'),

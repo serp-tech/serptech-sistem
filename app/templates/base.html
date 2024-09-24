@@ -243,6 +243,9 @@
                 {% if perms.financial.view_client %}
                 <a href="{% url 'client' %}">Clientes</a>
                 {% endif %}
+                {% if perms.financial.view_bankaccount %}
+                <a href="{% url 'bank_account' %}">Conta Bancária</a>
+                {% endif %}
                 {% if perms.financial.view_costcenter %}
                 <a href="{% url 'costcenter' %}">Centro de Custo</a>
                 {% endif %}

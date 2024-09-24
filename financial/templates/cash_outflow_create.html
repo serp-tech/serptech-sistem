@@ -13,7 +13,7 @@
             <div class="col-sm-9">
                 {% if field.name == 'cost_center' %}
                     <!-- Customização para Select2 -->
-                    <select id="cost_center" class="form-control searchable-dropdown" style="width: 50%;">
+                    <select id="cost_center" name="cost_center" class="form-control searchable-dropdown" style="width: 50%;">
                         <option value="">--- Selecione ---</option>
                     </select>
                 {% elif field.name == 'chart_of_accounts' %}

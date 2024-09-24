@@ -13,7 +13,7 @@
             <div class="col-sm-9">
                 {% if field.name == 'revenue_center' %}
                     <!-- Customização para Select2 -->
-                    <select id="revenue_center" class="form-control searchable-dropdown" style="width: 45%;">
+                    <select id="revenue_center" name="revenue_center" class="form-control searchable-dropdown" style="width: 45%;">
                         <option value="">--- Selecione ---</option>
                     </select>
                 {% elif field.name == 'chart_of_accounts' %}
@@ -94,7 +94,7 @@
         $('#revenue_center').select2({
             placeholder: '--- Selecione ---',
             ajax: {
-                url: '{% url "get_cost_center" %}',
+                url: '{% url "get_revenue_center" %}',
                 dataType: 'json',
                 delay: 250,
                 data: function (params) {

@@ -16,10 +16,11 @@ from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, 
 from reportlab.lib.pagesizes import landscape
 from reportlab.lib.units import cm
 from accounts.models import UserProfile
-from .models import Client, CostCenter, RevenueCenter, CashInflow, CashOutflow, FinancialClasification, FinancialCategory, ChartOfAccounts
+from .models import Client, CostCenter, RevenueCenter, CashInflow, CashOutflow, FinancialClasification, FinancialCategory, ChartOfAccounts, BankAccount
 from .forms import (
     ClientForm, CostCenterForm, RevenueCenterForm, CashOutflowForm,CashOutflowUpdateForm , CashInflowForm, 
-    CashInflowUpdateForm, ReciveInflowForm, PayOutflowForm, FinancialCategoryForm, FinancialClasificationForm, AreaForm, ChartOfAccountsForm)
+    CashInflowUpdateForm, ReciveInflowForm, PayOutflowForm, FinancialCategoryForm, FinancialClasificationForm, AreaForm, ChartOfAccountsForm, BankAccountForm)
+from .utils import buscar_banco_por_codigo
 from stock.utils import format_currency
 from stock.forms import SectorForm
 
@@ -338,6 +339,58 @@ class CashOutflowDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteV
     permission_required = 'financial.delete_cashoutflow'
 
 
+class BankAccountListView(ListView):
+    model = BankAccount
+    template_name = 'bank_account_list.html'
+    context_object_name = 'items'
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        bank = self.request.GET.get('bank')
+        branch = self.request.GET.get('branch')
+        account_number = self.request.GET.get('account_number')
+        if bank:
+            queryset = queryset.filter(bank=bank)
+        if branch:
+            queryset = queryset.filter(branch=branch)
+        if account_number:
+            queryset = queryset.filter(account_number=account_number)
+        
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        items = context['items']
+        for item in items:
+            item.value = format_currency(item.value)
+        return context
+
+
+class BankAccountCreateView(CreateView):
+    model = BankAccount
+    template_name = 'bank_account_create.html'
+    form_class = BankAccountForm
+    success_url = '/bank-account/'
+
+
+class BankAccountUpdateView(UpdateView):
+    model = BankAccount
+    template_name = 'bank_account_update.html'
+    form_class = BankAccountForm
+    success_url = '/bank-account/'
+
+
+class BankAccountDetailView(DetailView):
+    model = BankAccount
+    template_name = 'bank_account_detail.html'
+
+
+class BankAccountDeleteView(DeleteView):
+    model = BankAccount
+    template_name = 'bank_account_delete.html'
+    success_url = '/bank-account/'
+
+
 def get_cost_center(request):
     query = request.GET.get('q', '')
     if query:
@@ -397,6 +450,20 @@ def get_chart_of_accounts(request):
     ]
     return JsonResponse({'results': results})
 
+
+def get_bank_view(request, code_bank):
+    """View para buscar informações de um banco por código e retornar um JsonResponse"""
+    banco = buscar_banco_por_codigo(code_bank)
+    
+    if banco:
+        return JsonResponse({
+            'code': banco.get('ispb'),
+            'name': banco.get('name'),
+            'full_code': banco.get('code'),
+            'full_name': banco.get('fullName')
+        })
+    else:
+        return JsonResponse({'error': 'Banco não encontrado'}, status=404)
 
 permission_required('financial.view_cashflow')
 def cash_flow_view(request):

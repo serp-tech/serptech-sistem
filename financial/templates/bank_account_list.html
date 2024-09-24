@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Contas Bancárias{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+<div class="container">
+    <h2>Contas Bancárias</h2>
+    {% if perms.financial.add_bankaccount %}
+    <a href="{% url 'bank_account_add' %}" class="btn btn-primary mb-2">Nova Conta</a>
+    {% endif %}
+    <form method="get" action="">
+        <div class="row mb-3">
+            <div class="col-md-4 mb-2">
+                <input type="text" class="form-control" id="bankFilter" name="bank"
+                    placeholder="Nome do Banco" value="{{ request.GET.bank }}">
+            </div>
+            <div class="col-md-4 mb-2">
+                <input type="text" class="form-control" id="account_numberFilter" name="account_number"
+                    placeholder="Número da conta" value="{{ request.GET.account_number }}">
+            </div>
+            <div class="col-md-4 d-flex align-items-start">
+                <button type="submit" class="btn btn-primary me-2">
+                    <i class="bi bi-search"></i> Filter
+                </button>
+            </div>
+        </div>
+    </form>
+
+    <table class="table table-dark table-striped">
+        <thead>
+            <tr>
+                <th>Código do Banco</th>
+                <th>Banco</th>
+                <th>Agência</th>
+                <th>Numero da Conta</th>
+                <th>Tipo</th>
+                <th>Saldo</th>
+                {% if perms.bankaccount.detail_bankaccount %}
+                <th>Ações</th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+            <tr>
+                <td>{{ item.bank_id }}</td>
+                <td>{{ item.bank }}</td>
+                <td>{{ item.branch }}</td>
+                <td>{{ item.account_number }}</td>
+                <td>{{ item.tpe }}</td>
+                <td class="telefone">{{ item.value }}</td>
+                <td>
+                    {% if perms.financial.view_bankaccount %}
+                    <a href="{% url 'bank_account_detail' item.pk %}" class="btn btn-sm btn-info">Details</a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

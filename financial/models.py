@@ -1,9 +1,11 @@
 from django.db import models
 from django.utils import timezone
-from django.db.utils import IntegrityError
 from django.core.validators import EmailValidator, RegexValidator
 from localflavor.br.models import BRCNPJField
 from stock.models import Supplier, Sector
+from .utils import formatar_agencia_conta
+
+
 PAYMENT_METHOD = (
     ('dinheiro', 'Dinheiro'),
     ('cartão de crédito', 'Cartão de Crédito'),
@@ -17,6 +19,13 @@ PAYMENT_METHOD = (
 STATUS_CHOICES = (
     ('efetuado', 'Efetuado'),
     ('não efetuado', 'Não Efetuado'),
+)
+
+ACCOUNT_TYPES = (
+    ('Corrente', 'Corrente'),
+    ('Investimento', 'Investimento'),
+    ('Poupança', 'Poupança'),
+    ('Caixa Pequeno', 'Caixa Pequeno'),
 )
 
 
@@ -186,7 +195,28 @@ class ChartOfAccounts(models.Model):
     def __str__(self) -> str:
         return f'{self.id_plan}-{self.classification}-{self.category}'
     
+    
+class BankAccount(models.Model):
 
+    bank_id = models.CharField(max_length=20)
+    bank = models.CharField(max_length=200)
+    branch = models.CharField(max_length=20)
+    account_number = models.CharField(max_length=20)
+    tpe = models.CharField(max_length=100, choices=ACCOUNT_TYPES)
+    value = models.FloatField(default=0.0)
+
+    class Meta:
+        ordering = ['bank']
+
+    def format_branch_account(self):
+        return formatar_agencia_conta(self.bank_id, self.branch, self.account_number)
+    
+    def save(self, *args, **kwargs):
+        self.branch, self.account_number = self.format_branch_account()
+        super().save(*args, **kwargs)
+
+    def __str__(self) -> str:
+        return f"{self.bank}-{self.branch}-{self.account_number}"
 
 
 class CashInflow(models.Model):
@@ -195,6 +225,7 @@ class CashInflow(models.Model):
     client = models.ForeignKey(Client, on_delete=models.SET_NULL, related_name='inflow_client', null=True)
     client_cnpj = BRCNPJField()
     chart_of_accounts = models.ForeignKey(ChartOfAccounts, on_delete=models.PROTECT, related_name='chart_cash_inflow', default=None)
+    bank_account = models.ForeignKey(BankAccount, on_delete=models.CASCADE, blank=True, null=True)
     document = models.CharField(max_length=50)
     document_pdf = models.FileField(upload_to='pdf/document/cash-inflow', blank=True, null=True)
     revenue_center = models.ForeignKey(RevenueCenter, on_delete=models.PROTECT, related_name='revenue_center_cashinflow', default=None)
@@ -229,6 +260,7 @@ class CashOutflow(models.Model):
     document_pdf = models.FileField(upload_to='pdf/document/cash-outflow', blank=True, null=True)
     cost_center = models.ForeignKey(CostCenter, on_delete=models.PROTECT, related_name='cost_cente_cashoutflow')
     chart_of_accounts = models.ForeignKey(ChartOfAccounts, on_delete=models.PROTECT, related_name='chart_cash_outflow', default=None)
+    bank_account = models.ForeignKey(BankAccount, on_delete=models.CASCADE, blank=True, null=True)
     proof = models.FileField(upload_to='pdf/proof/cash-outflow', blank=True, null=True)
     tittle_value = models.FloatField()
     fine = models.FloatField(default=0, null=True, blank=True)

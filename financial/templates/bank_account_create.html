@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+{% block title %}Adicionar Conta Bancária{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Adicionar Conta Bancária</h2>
+    <form method="post" class="form-horizontal">
+        {% csrf_token %}
+        {% for field in form %}
+        <div class="form-group row">
+            <label class="col-sm-3 col-form-label">
+                {{ field.label }}
+            </label>
+            <div class="col-sm-9">
+                {{ field }}
+                {% if field.help_text %}
+                <small class="form-text text-muted">{{ field.help_text }}</small>
+                {% endif %}
+                {% for error in field.errors %}
+                <div class="text-danger">{{ error }}</div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+        <div class="form-group row">
+            <div class="col-sm-12">
+                <button type="submit" class="btn btn-primary">Salvar</button>
+                <a href="{% url 'bank_account' %}" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const tipoField = document.querySelector('#id_tpe'); // Campo "Tipo de Conta" (corresponde ao campo 'tpe')
+    const codigoBancoField = document.querySelector('#id_bank_id'); // Campo "Código do Banco" (corresponde ao campo 'bank_id')
+    const bancoField = document.querySelector('#id_bank'); // Campo "Banco" (corresponde ao campo 'bank')
+    const agenciaField = document.querySelector('#id_branch'); // Campo "Agência" (corresponde ao campo 'branch')
+    const numeroContaField = document.querySelector('#id_account_number'); // Campo "Número da Conta" (corresponde ao campo 'account_number')
+
+    // Função para atualizar os campos automaticamente para Caixa Pequeno
+    function updateFieldsForCaixaPequeno() {
+        if (tipoField.value === 'Caixa Pequeno') {
+            codigoBancoField.value = '000';
+            bancoField.value = 'Caixa Pequeno';
+            agenciaField.value = '0000';
+            numeroContaField.value = '0000';
+
+            // Desabilitar os campos para evitar edição
+            codigoBancoField.setAttribute('readonly', true);
+            bancoField.setAttribute('readonly', true);
+            agenciaField.setAttribute('readonly', true);
+            numeroContaField.setAttribute('readonly', true);
+        }
+    }
+    // Chama a função ao carregar a página para garantir que os campos estejam corretos
+    updateFieldsForCaixaPequeno();
+
+    // Listener para quando o tipo de conta mudar
+    tipoField.addEventListener('change', updateFieldsForCaixaPequeno);
+
+    // Função para buscar dados do banco quando o código for alterado
+    codigoBancoField.addEventListener('change', function() {
+        const codigoBanco = this.value;
+
+        // Faz a requisição para a view que busca o banco
+        fetch(`/get-bank/${codigoBanco}/`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Banco não encontrado');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Preenche os campos do formulário com os dados retornados
+                bancoField.value = data.name || ''; // Preenchendo o campo do banco
+                // Adicione mais campos conforme necessário
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                alert('Erro ao buscar informações do banco: ' + error.message);
+            });
+    });
+});
+</script>
+{% endblock %}
