@@ -1,8 +1,9 @@
+from datetime import datetime, timedelta
 from django.http import JsonResponse
+from django.db.models import Sum
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import redirect, get_object_or_404, redirect, render
-from django.contrib.auth.models import User
 from django.utils import timezone
 from django.views.generic import ListView, CreateView, DeleteView, DetailView, UpdateView
 from django.http import HttpResponse
@@ -1103,3 +1104,304 @@ def report_purchase_pdf(request):
     doc.build(elements)
 
     return response
+
+
+def generate_inflow_report(request):
+    filtro_periodo = request.GET.get('filtro_periodo')
+
+    # Obtendo e validando o ano
+    ano = request.GET.get('ano')
+    ano = int(ano) if ano and ano.isdigit() else datetime.now().year
+
+    # Obtendo e validando trimestre, mês e dia
+    trimestre = request.GET.get('trimestre')
+    trimestre = int(trimestre) if trimestre and trimestre.isdigit() else 1
+
+    mes = request.GET.get('mes')
+    mes = int(mes) if mes and mes.isdigit() else 1
+
+    dia = request.GET.get('dia')
+    dia = int(dia) if dia and dia.isdigit() else 1
+
+    # Obtendo as datas personalizadas
+    data_inicio_personalizada = request.GET.get('data_inicio')
+    data_fim_personalizada = request.GET.get('data_fim')
+
+    # Definindo as datas com base no filtro selecionado
+    if filtro_periodo == 'anual':
+        data_inicio = datetime(ano, 1, 1)
+        data_fim = datetime(ano, 12, 31)
+    elif filtro_periodo == 'trimestral':
+        data_inicio = datetime(ano, 3 * (trimestre - 1) + 1, 1)
+        data_fim = (data_inicio + timedelta(days=90)) - timedelta(days=1)
+    elif filtro_periodo == 'mensal':
+        data_inicio = datetime(ano, mes, 1)
+        data_fim = (data_inicio + timedelta(days=31)).replace(day=1) - timedelta(days=1)
+    elif filtro_periodo == 'diario':
+        data_inicio = datetime(ano, mes, dia)
+        data_fim = data_inicio
+    elif filtro_periodo == 'personalizado':
+        if data_inicio_personalizada and data_fim_personalizada:
+            data_inicio = datetime.strptime(data_inicio_personalizada, '%Y-%m-%d')
+            data_fim = datetime.strptime(data_fim_personalizada, '%Y-%m-%d')
+        else:
+            data_inicio = None
+            data_fim = None
+    else:
+        data_inicio = None
+        data_fim = None
+
+    entradas = Inflow.objects.all()
+
+    if data_inicio and data_fim:
+        entradas_registradas = entradas.filter(date__range=[data_inicio, data_fim])
+
+    total_itens_entrada = entradas_registradas.aggregate(Sum('quantity'))["quantity__sum"] or 0
+
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="relatorio_entradas_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf"'
+
+    doc = SimpleDocTemplate(response, pagesize=landscape(A4), rightMargin=2*cm, leftMargin=2*cm, topMargin=2*cm, bottomMargin=2*cm)
+    elements = []
+
+    styles = getSampleStyleSheet()
+    title_style = ParagraphStyle(
+        name='TitleStyle',
+        parent=styles['Title'],
+        fontSize=18,
+        leading=22,
+        alignment=TA_CENTER,
+        textColor=colors.HexColor('#4B4B4B'),
+        spaceAfter=20,
+    )
+
+    subtitle_style = ParagraphStyle(
+        name='SubtitleStyle',
+        parent=styles['Normal'],
+        fontSize=12,
+        leading=14,
+        alignment=TA_LEFT,
+        textColor=colors.HexColor('#6B6B6B'),
+        spaceAfter=10,
+    )
+
+    table_header_style = ParagraphStyle(
+        name='TableHeaderStyle',
+        parent=styles['Normal'],
+        fontSize=10,
+        leading=12,
+        alignment=TA_CENTER,
+        textColor=colors.whitesmoke,
+    )
+
+    table_data_style = ParagraphStyle(
+        name='TableDataStyle',
+        parent=styles['Normal'],
+        fontSize=10,
+        leading=12,
+        alignment=TA_CENTER,
+        textColor=colors.black,
+    )
+
+    # Título e subtítulo
+    elements.append(Paragraph('Relatório de Entradas de Itens', title_style))
+    elements.append(Spacer(1, 20))
+
+    subtitulos = [
+        [Paragraph(f'Tipo de Relatório: {filtro_periodo.capitalize()}', subtitle_style)],
+        [Paragraph(f'Período: {data_inicio.strftime("%d/%m/%Y")} - {data_fim.strftime("%d/%m/%Y")}', subtitle_style)],
+        [Paragraph(f'Total de Itens Entrados: {total_itens_entrada}', subtitle_style)]
+    ]
+
+    subtitulo_table = Table(subtitulos, colWidths=[16*cm])
+    subtitulo_table.setStyle(TableStyle([
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+    ]))
+    elements.append(subtitulo_table)
+    elements.append(Spacer(1, 20))
+
+    # Tabela "Entradas Registradas"
+    elements.append(Paragraph('Entradas Registradas', title_style))
+    data_entradas = [
+        [Paragraph('Data de Entrada', table_header_style), Paragraph('Item', table_header_style),  Paragraph('Quantidade', table_header_style),
+         Paragraph('Custo Unitário', table_header_style),  Paragraph('Custo Total', table_header_style), Paragraph('Estoque de Origem', table_header_style), Paragraph('Estoque de Destino', table_header_style)]
+    ]
+    for entrada in entradas_registradas:
+        data_entradas.append([
+            Paragraph(entrada.date.strftime('%d/%m/%Y'), table_data_style),
+            Paragraph(entrada.item.name or entrada.item_name, table_data_style),
+            Paragraph(f'{entrada.quantity}', table_data_style),
+            Paragraph(f"{format_currency(entrada.unit_cost)}", table_data_style),
+            Paragraph(f"{format_currency(entrada.total_cost)}", table_data_style),
+            Paragraph(entrada.source_stock.name if entrada.source_stock else (entrada.source_stock_name or 'N/A'), table_data_style),
+            Paragraph(entrada.target_stock.name or entrada.target_stock_name, table_data_style),
+        ])
+
+    table = Table(data_entradas, colWidths=[2.5*cm, 3.5*cm, 3*cm, 3*cm, 4*cm, 3*cm, 3*cm, 4*cm])
+    table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#4B4B4B')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#E0E0E0')),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+    ]))
+    elements.append(table)
+
+    doc.build(elements)
+
+    return response
+
+
+
+def generate_outflow_report(request):
+    filtro_periodo = request.GET.get('filtro_periodo')
+
+    # Obtendo e validando o ano
+    ano = request.GET.get('ano')
+    ano = int(ano) if ano and ano.isdigit() else datetime.now().year
+
+    # Obtendo e validando trimestre, mês e dia
+    trimestre = request.GET.get('trimestre')
+    trimestre = int(trimestre) if trimestre and trimestre.isdigit() else 1
+
+    mes = request.GET.get('mes')
+    mes = int(mes) if mes and mes.isdigit() else 1
+
+    dia = request.GET.get('dia')
+    dia = int(dia) if dia and dia.isdigit() else 1
+
+    # Obtendo as datas personalizadas
+    data_inicio_personalizada = request.GET.get('data_inicio')
+    data_fim_personalizada = request.GET.get('data_fim')
+
+    # Definindo as datas com base no filtro selecionado
+    if filtro_periodo == 'anual':
+        data_inicio = datetime(ano, 1, 1)
+        data_fim = datetime(ano, 12, 31)
+    elif filtro_periodo == 'trimestral':
+        data_inicio = datetime(ano, 3 * (trimestre - 1) + 1, 1)
+        data_fim = (data_inicio + timedelta(days=90)) - timedelta(days=1)
+    elif filtro_periodo == 'mensal':
+        data_inicio = datetime(ano, mes, 1)
+        data_fim = (data_inicio + timedelta(days=31)).replace(day=1) - timedelta(days=1)
+    elif filtro_periodo == 'diario':
+        data_inicio = datetime(ano, mes, dia)
+        data_fim = data_inicio
+    elif filtro_periodo == 'personalizado':
+        if data_inicio_personalizada and data_fim_personalizada:
+            data_inicio = datetime.strptime(data_inicio_personalizada, '%Y-%m-%d')
+            data_fim = datetime.strptime(data_fim_personalizada, '%Y-%m-%d')
+        else:
+            data_inicio = None
+            data_fim = None
+    else:
+        data_inicio = None
+        data_fim = None
+
+    saidas = Outflow.objects.all()
+
+    if data_inicio and data_fim:
+        saidas_registradas = saidas.filter(date__range=[data_inicio, data_fim])
+
+    total_itens_saida = saidas_registradas.aggregate(Sum('quantity'))["quantity__sum"] or 0
+
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="relatorio_saidas_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf"'
+
+    doc = SimpleDocTemplate(response, pagesize=landscape(A4), rightMargin=2*cm, leftMargin=2*cm, topMargin=2*cm, bottomMargin=2*cm)
+    elements = []
+
+    styles = getSampleStyleSheet()
+    title_style = ParagraphStyle(
+        name='TitleStyle',
+        parent=styles['Title'],
+        fontSize=18,
+        leading=22,
+        alignment=TA_CENTER,
+        textColor=colors.HexColor('#4B4B4B'),
+        spaceAfter=20,
+    )
+
+    subtitle_style = ParagraphStyle(
+        name='SubtitleStyle',
+        parent=styles['Normal'],
+        fontSize=12,
+        leading=14,
+        alignment=TA_LEFT,
+        textColor=colors.HexColor('#6B6B6B'),
+        spaceAfter=10,
+    )
+
+    table_header_style = ParagraphStyle(
+        name='TableHeaderStyle',
+        parent=styles['Normal'],
+        fontSize=10,
+        leading=12,
+        alignment=TA_CENTER,
+        textColor=colors.whitesmoke,
+    )
+
+    table_data_style = ParagraphStyle(
+        name='TableDataStyle',
+        parent=styles['Normal'],
+        fontSize=10,
+        leading=12,
+        alignment=TA_CENTER,
+        textColor=colors.black,
+    )
+
+    # Título e subtítulo
+    elements.append(Paragraph('Relatório de Saídas de Itens', title_style))
+    elements.append(Spacer(1, 20))
+
+    subtitulos = [
+        [Paragraph(f'Tipo de Relatório: {filtro_periodo.capitalize()}', subtitle_style)],
+        [Paragraph(f'Período: {data_inicio.strftime("%d/%m/%Y")} - {data_fim.strftime("%d/%m/%Y")}', subtitle_style)],
+        [Paragraph(f'Total de Itens Saídos:  {total_itens_saida}', subtitle_style)]
+    ]
+
+    subtitulo_table = Table(subtitulos, colWidths=[16*cm])
+    subtitulo_table.setStyle(TableStyle([
+        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+    ]))
+    elements.append(subtitulo_table)
+    elements.append(Spacer(1, 20))
+
+    # Tabela "Saídas Registradas"
+    elements.append(Paragraph('Saídas Registradas', title_style))
+    data_saidas = [
+        [Paragraph('Data de Saída', table_header_style), Paragraph('Item', table_header_style), Paragraph('Setor', table_header_style),
+         Paragraph('Quantidade', table_header_style), Paragraph('Estoque de Origem', table_header_style), Paragraph('Estoque de Destino', table_header_style)]
+    ]
+    for saida in saidas_registradas:
+        data_saidas.append([
+            Paragraph(saida.date.strftime('%d/%m/%Y'), table_data_style),
+            Paragraph(saida.item.name or saida.item_name, table_data_style),
+            Paragraph(saida.sector.name or saida.sector_name, table_data_style),
+            Paragraph(f'{saida.quantity}', table_data_style),
+            Paragraph(saida.source_stock.name or saida.source_stock_name, table_data_style),
+            Paragraph(saida.target_stock.name or saida.target_stock_name, table_data_style),
+        ])
+
+    table = Table(data_saidas, colWidths=[2.5*cm, 3.5*cm, 3*cm, 2.5*cm, 3*cm, 3*cm])
+    table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#4B4B4B')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#E0E0E0')),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+    ]))
+    elements.append(table)
+
+    doc.build(elements)
+
+    return response
+

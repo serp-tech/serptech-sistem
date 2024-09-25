@@ -11,7 +11,7 @@ from .views import (
     supplier_autocomplete, item_autocomplete, inflow_autocomplete, outflow_autocomplete, inventory_autocomplete, PurchaseOrderListView,
     PurchaseOrderDetailView, PurchaseOrderCreateView, PurchaseOrderDeleteView, PurchaseOrderUpdateView, ServiceOrderListView, ServiceOrderCreateView,
     ServiceOrderDetailView, ServiceOrderUpdateView, ServiceOrderDeleteView, approve_request, denied_request, delivery_request, approve_purchase, denied_purchase, submit_feedback, get_purchase,
-    purchase_made, delivery_purchase, reorder_order, start_service, finish_service, check_quantity_available,report_request_pdf, report_purchase_pdf              
+    purchase_made, delivery_purchase, reorder_order, start_service, finish_service, check_quantity_available,report_request_pdf, report_purchase_pdf, generate_outflow_report, generate_inflow_report             
 )
 
 
@@ -51,12 +51,14 @@ urlpatterns = [
     path('inflow/<int:pk>/delete', InflowDeleteView.as_view(), name='inflow_delete'),
     path('inflow/<int:pk>/update', InflowUpdateView.as_view(), name='inflow_update'),
     path('inflow/<int:pk>/detail', InflowDetailView.as_view(), name='inflow_detail'),
+    path('generate-inflow-report/', generate_inflow_report, name='generate_inflow_report'),
 
     path('outflow/', OutflowListView.as_view(), name='outflow'),
     path('outflow/add', OutflowCreateView.as_view(), name='outflow_add'),
     path('outflow/<int:pk>/delete', OutflowDeleteView.as_view(), name='outflow_delete'),
     path('outflow/<int:pk>/update', OutflowUpdateView.as_view(), name='outflow_update'),
     path('outflow/<int:pk>/detail', OutflowDetailView.as_view(), name='outflow_detail'),
+    path('generate-outflow-report/', generate_outflow_report, name='generate_outflow_report'),
     
     path('request/', RequestListView.as_view(), name='request'),
     path('request/add', RequestCreateView.as_view(), name='request_add'),
