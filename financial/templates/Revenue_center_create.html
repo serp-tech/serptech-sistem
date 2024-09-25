@@ -13,12 +13,17 @@
                 {{ field.label }}
             </label>
             <div class="col-sm-9">
-                {{ field }}
+                <div class="d-flex align-items-center">
+                    {{ field }}
+                    {% if field.name == 'sector' %}
+                        <button type="button" class="btn btn-primary ml-2" id="addSectorBtn" data-toggle="modal" data-target="#sectorModal">Adicionar</button>
+                    {% endif %}
+                </div>
                 {% if field.help_text %}
-                <small class="form-text text-muted">{{ field.help_text }}</small>
+                    <small class="form-text text-muted">{{ field.help_text }}</small>
                 {% endif %}
                 {% for error in field.errors %}
-                <div class="text-danger">{{ error }}</div>
+                    <div class="text-danger">{{ error }}</div>
                 {% endfor %}
             </div>
         </div>
@@ -26,10 +31,39 @@
         <div class="form-group row">
             <div class="col-sm-12">
                 <button type="submit" class="btn btn-primary">Salvar</button>
-                <a href="{% url 'revenuecenter' %}" class="btn btn-primary">Cancelar</a>
+                <a href="{% url 'costcenter' %}" class="btn btn-primary">Cancelar</a>
             </div>
         </div>
     </form>
 </div>
 
+{% include 'partials/sector_modal.html' %}
+
+<script src="https://code.jquery.com/jquery-3.2.1.min.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" crossorigin="anonymous"></script>
+
+<script>
+$('#addSectorBtn').on('click', function() {
+    saveFormData(); // Função que você pode definir para salvar temporariamente os dados do formulário, se necessário
+});
+
+// AJAX para adicionar setor
+$('#sector-form').on('submit', function(event) {
+    event.preventDefault(); // Impede o envio padrão do formulário
+
+    $.ajax({
+        url: '{% url "sector_add" %}', // URL para adicionar setor
+        type: 'POST',
+        data: $(this).serialize(), // Serializa os dados do formulário
+        success: function(response) {
+            $('#sectorModal').modal('hide'); // Fecha o modal após sucesso
+            location.reload(); // Recarrega a página para atualizar a lista
+        },
+        error: function() {
+            console.log('Erro ao adicionar setor');
+        }
+    });
+});
+</script>
 {% endblock %}

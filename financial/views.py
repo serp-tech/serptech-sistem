@@ -135,6 +135,11 @@ class RevenueCenterCreateView(CreateView):
     form_class = RevenueCenterForm
     success_url = '/revenuecenter/'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['sector_form'] = SectorForm
+        return context
+
 
 class RevenueCenterDeleteView(DeleteView):
 
@@ -199,6 +204,12 @@ class ChartOfAccountsCreateView(CreateView):
     form_class = ChartOfAccountsForm
     success_url = '/chart-of-accounts/'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['financial_category_form'] = FinancialCategoryForm()
+        context['financial_classification_form'] = FinancialClasificationForm()
+        return context
+
 
 class ChartOfAccountsDeleteView(DeleteView):
     model = ChartOfAccounts
@@ -247,6 +258,11 @@ class CashInflowCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateVi
     form_class = CashInflowForm
     success_url = reverse_lazy('cash_inflow')
     permission_required = 'financial.add_cashinflow'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['client_form'] = ClientForm()
+        return context
 
 
 class CashInflowDetailView(LoginRequiredMixin, PermissionRequiredMixin, DetailView):

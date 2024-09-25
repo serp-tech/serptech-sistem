@@ -1,0 +1,66 @@
+<div class="modal fade" id="clientModal" tabindex="-1" role="dialog" aria-labelledby="clientModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <!-- Cabeçalho do Modal -->
+            <div class="modal-header" style="background-color: #1e1e1e; color: white;">
+                <h5 class="modal-title" id="clientModalLabel">Adicionar Cliente</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <!-- Corpo do Modal -->
+            <div class="modal-body" style="background-color: #101331; color: white;">
+                <form id="client-form">
+                    {% csrf_token %}
+                    {% for field in client_form %}
+                    <div class="form-group row">
+                        <label class="col-sm-3 col-form-label">{{ field.label }}</label>
+                        <div class="col-sm-9">
+                            {{ field }}
+                            {% if field.name == 'cnpj' %}
+                            <button type="button" id="request-cnpj" class="btn btn-primary">Consultar</button>
+                            {% endif %}
+                            {% if field.help_text %}
+                            <small class="form-text text-muted">{{ field.help_text }}</small>
+                            {% endif %}
+                            {% for error in field.errors %}
+                            <div class="text-danger">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Script para consultar o CNPJ -->
+<script>
+    document.getElementById('request-cnpj').addEventListener('click', function() {
+        const cnpj = document.querySelector('input[name="cnpj"]').value.replace(/\D/g, '');
+        if (cnpj) {
+            fetch(`/request-cnpj/${cnpj}/`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert(data.error);
+                    } else {
+                        // Preencher automaticamente os campos do cliente
+                        document.querySelector('input[name="name"]').value = data.name;
+                        document.querySelector('textarea[name="address"]').value = `${data.street}, ${data.number} ${data.complement}, ${data.neighborhood}, ${data.city}, ${data.state}`;
+                        document.querySelector('input[name="phone_number"]').value = data.phone;
+                        document.querySelector('input[name="email"]').value = data.email;
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro:', error);
+                    alert('Ocorreu um erro ao consultar o CNPJ.');
+                });
+        } else {
+            alert('Por favor, insira um CNPJ.');
+        }
+    });
+</script>
