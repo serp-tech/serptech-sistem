@@ -205,6 +205,7 @@
             {% endif %}
             <h3 id="username-dropdown">{{ user.get_username }}</h3>
             <div id="user-dropdown-container" class="dropdown-container">
+                <a href="{% url 'profile_detail' request.user.pk %}">Meu Perfil</a>
                 <a href="{% url 'logout' %}">Sair</a>
             </div>
             <p>{{ user.userprofile.role }}</p>
@@ -221,6 +222,9 @@
             {% if perms.stock.view_inventory %}
             <a href="{% url 'inventory' %}">Inventário</a>
             {% endif %}
+            {% if perms.stock.view_outflow %}
+            <a href="{% url 'outflow' %}">Saídas</a>
+            {% endif %}
             {% if perms.stock.view_purchase %}
             <a href="{% url 'purchase' %}">Ordem de Compra</a>
             {% endif %}
@@ -230,9 +234,6 @@
             {% if perms.stock.view_request %}
             <a href="{% url 'request' %}">Requisições</a>
             {% endif %}
-            {% if perms.stock.view_outflow %}
-            <a href="{% url 'outflow' %}">Saídas</a>
-            {% endif %}
         </div>
 
         <!-- Dropdown de Cadastro -->
@@ -240,11 +241,11 @@
         <div class="dropdown-container">
             <a href="#" class="dropdown-btn-financeiro">Financeiro</a>
             <div class="dropdown-container">
-                {% if perms.financial.view_client %}
-                <a href="{% url 'client' %}">Clientes</a>
-                {% endif %}
                 {% if perms.financial.view_bankaccount %}
                 <a href="{% url 'bank_account' %}">Conta Bancária</a>
+                {% endif %}
+                {% if perms.financial.view_client %}
+                <a href="{% url 'client' %}">Clientes</a>
                 {% endif %}
                 {% if perms.financial.view_costcenter %}
                 <a href="{% url 'costcenter' %}">Centro de Custo</a>
@@ -266,23 +267,20 @@
             <!-- Cadastro de Estoque -->
             <a href="#" class="dropdown-btn-estoque">Estoque</a>
             <div class="dropdown-container">
-                {% if perms.accounts.add_userprofile %}
-                <a href="{% url 'register' %}">Novo Usuário</a>
-                {%  endif %}
-                {% if perms.stock.view_item %}
-                <a href="{% url 'item' %}">Itens</a>
-                {% endif %}
                 {% if perms.stock.view_presentation %}
                 <a href="{% url 'presentation' %}">Formas de Apresentações</a>
+                {% endif %}
+                {% if perms.stock.view_supplier %}
+                <a href="{% url 'supplier' %}">Fornecedores</a>
+                {% endif %}
+                {% if perms.stock.view_item %}
+                <a href="{% url 'item' %}">Itens</a>
                 {% endif %}
                 {% if perms.stock.view_requester %}
                 <a href="{% url 'requester' %}">Requisitantes</a>
                 {% endif %}
                 {% if perms.stock.view_sector %}
                 <a href="{% url 'sector' %}">Setores</a>
-                {% endif %}
-                {% if perms.stock.view_supplier %}
-                <a href="{% url 'supplier' %}">Fornecedores</a>
                 {% endif %}
                 {% if perms.stock.view_unit %}
                 <a href="{% url 'unit' %}">Unidades</a>
@@ -293,16 +291,19 @@
         <!-- Dropdown Financeiro -->
         <a href="#" class="dropdown-btn-financial">Financeiro</a>
         <div class="dropdown-container">
-            {% if perms.financial.view_cashflow %}
-            <a href="{% url 'cash_flow' %}">Fluxo de Caixa</a>
-            {% endif %}
             {% if perms.financial.view_cashinflow %}
             <a href="{% url 'cash_inflow' %}">Contas Receber</a>
             {% endif %}
             {% if perms.financial.view_cashoutflow %}
             <a href="{% url 'cash_outflow' %}">Contas a Pagar</a>
             {% endif %}
+            {% if perms.financial.view_cashflow %}
+            <a href="{% url 'cash_flow' %}">Fluxo de Caixa</a>
+            {% endif %}
         </div>
+        {% if perms.accounts.add_userprofile %}
+        <a href="{% url 'register' %}">Novo Usuário</a>
+        {%  endif %}
     </div>
 
     <div class="content">

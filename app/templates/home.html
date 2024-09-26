@@ -136,6 +136,7 @@
             {% endif %}
             <h3 id="username-dropdown">{{ user.get_username }}</h3>
             <div id="user-dropdown-container" class="user-dropdown-container">
+                <a href="{% url 'profile_detail' request.user.pk %}">Meu Perfil</a>
                 <a href="{% url 'logout' %}">Sair</a>
             </div>
             <p>{{ user.userprofile.role }}</p>

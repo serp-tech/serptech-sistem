@@ -10,10 +10,15 @@ from stock.models import Requester
 
 @receiver(pre_save, sender=UserProfile)
 def user_pre_save(sender, instance, **kwargs):
-    if not instance.profile_image:
+    # Verifica se a imagem de perfil está vazia e se não existe uma imagem de perfil atual
+    if not instance.profile_image and not instance.pk:
+        # Apenas gera um novo avatar padrão se não houver imagem de perfil e o objeto for novo
         default_avatar = generate_default_avatar(instance.user.get_username())
-        instance.profile_image.save(
-            'default_avatar.png', default_avatar, save=False)
+        instance.profile_image.save('default_avatar.png', default_avatar, save=False)
+    elif not instance.profile_image and instance.pk:
+        # Se a imagem de perfil estiver vazia mas o perfil já existir, mantenha a imagem atual
+        existing_profile = UserProfile.objects.get(pk=instance.pk)
+        instance.profile_image = existing_profile.profile_image
         
 
 @receiver(post_delete, sender=UserProfile)

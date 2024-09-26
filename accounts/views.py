@@ -1,12 +1,14 @@
-from django.urls import reverse_lazy
+from django.db.models.base import Model as Model
+from django.db.models.query import QuerySet
+from django.urls import reverse
 from django.shortcuts import redirect, render
 from django.contrib.auth.models import User
 from django.contrib.auth.mixins import PermissionRequiredMixin, LoginRequiredMixin
 from django.contrib.auth.forms import AuthenticationForm
-from .forms import CustomUserCreationForm
-from django.views.generic import CreateView
+from django.views.generic import CreateView, DetailView, UpdateView
 from django.contrib.auth import authenticate, login, logout
 from .models import UserProfile
+from .forms import CustomUserCreationForm, CustomUserChangeForm
 
 
 def LoginView(request):
@@ -30,9 +32,38 @@ def LogoutView(request):
 
 
 
-class UserCreateView(CreateView):
+class UserCreateView(PermissionRequiredMixin, CreateView):
+    
     model = User
     form_class = CustomUserCreationForm
     template_name = 'register.html'
     success_url = '/requester/'
+    permission_required = 'accounts.add_userprofile'
 
+
+class ProfileDetailView(LoginRequiredMixin, DetailView):
+
+    model = User
+    template_name = 'perfil_detail.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['user_profile'] = UserProfile.objects.get(user=self.request.user)
+        return context
+    
+    def get_object(self):
+        return self.request.user
+    
+
+class ProfileUpdateView(LoginRequiredMixin, UpdateView):
+
+    model = User
+    form_class = CustomUserChangeForm
+    template_name = 'perfil_update.html'
+    
+
+    def get_object(self):
+        return self.request.user
+    
+    def get_success_url(self):
+        return reverse('profile_detail', kwargs={'pk': self.request.user.pk})

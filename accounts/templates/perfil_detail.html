@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalhes do Perfil{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Detalhes do Perfil</h2>
+
+    <p><strong>Nome de Usuário:</strong> {{ user.username }}</p>
+    <p><strong>Nome Completo:</strong> {{ user.first_name }} {{ user.last_name }}</p>
+    <p><strong>Email:</strong> {{ user.email }}</p>
+    
+    <p><strong>Cargo:</strong> {{ user_profile.position }}</p>
+    
+    <p><strong>Setores:</strong>
+        {% for sector in user_profile.sector.all %}
+            {{ sector.name }}{% if not forloop.last %}, {% endif %}
+        {% empty %}
+            Nenhum setor associado
+        {% endfor %}
+    </p>
+    
+    <p><strong>Unidades:</strong>
+        {% for unit in user_profile.unit.all %}
+            {{ unit.name }}{% if not forloop.last %}, {% endif %}
+        {% empty %}
+            Nenhuma unidade associada
+        {% endfor %}
+    </p>
+    <!-- Botões de ação -->
+    <a href="{% url 'profile_update' object.pk %}" class="btn btn-primary">Editar</a>
+</div>
+{% endblock %}

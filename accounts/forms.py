@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.models import User
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from .models import UserProfile, OFFICE_STATUS
 from stock.models import Sector, Unit
 
@@ -42,3 +42,36 @@ class CustomUserCreationForm(UserCreationForm):
             user_profile.unit.set(self.cleaned_data.get('unit'))
 
         return user
+
+
+class CustomUserChangeForm(UserChangeForm):
+    
+    profile_image = forms.ImageField(required=False)
+    
+    class Meta:
+        model = User
+        fields = ("profile_image", "username", "email", "first_name", "last_name",)
+
+    def save(self, commit=True):
+        user = super(CustomUserChangeForm, self).save(commit=False)
+        user.first_name = self.cleaned_data["first_name"]
+        user.last_name = self.cleaned_data["last_name"]
+        
+        if commit:
+            user.save()
+            
+            # Atualizar ou criar o perfil do usuário
+            user_profile, created = UserProfile.objects.get_or_create(user=user)
+
+            # Atualiza a imagem de perfil apenas se uma nova imagem foi fornecida
+            if self.cleaned_data.get('profile_image'):
+                user_profile.profile_image = self.cleaned_data.get('profile_image')
+            
+            user_profile.save()
+
+        return user
+
+    def __init__(self, *args, **kwargs):
+        super(CustomUserChangeForm, self).__init__(*args, **kwargs)
+        self.fields.pop('password', None)
+
