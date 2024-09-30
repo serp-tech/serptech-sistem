@@ -22,7 +22,7 @@
 
 <!-- Seção de geração de relatório escondida inicialmente -->
 <div id="relatorioSection" class="mb-4" style="display: none;">
-    <form method="GET" action="{% url 'generate_cashinflow_report' %}">
+    <form  id="relatorioForm" method="GET" action="{% url 'generate_cashinflow_report' %}" target="popupRelatorio" onsubmit="openPopup(); return false;">
         <div class="form-row align-items-center">
             <div class="col-auto">
                 <label for="filtro_periodo">Filtrar por:</label>
@@ -190,6 +190,13 @@
 
     // Acionar o evento change ao carregar a página para garantir que os campos estejam corretamente exibidos ou escondidos
     document.getElementById('filtro_periodo').dispatchEvent(new Event('change'));
+
+    function openPopup() {
+        // Abre a nova janela com um nome e especificações
+        window.open('', 'popupRelatorio', 'width=800,height=600');
+        document.getElementById('relatorioForm').submit(); // Submete o formulário no popup
+    }
+</script>
 </script>
 
 

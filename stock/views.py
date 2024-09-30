@@ -946,7 +946,7 @@ def report_request_pdf(request):
 
     # Configurações de resposta
     response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="Requisicoes_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf"'
+    response['Content-Disposition'] = f'inline; filename="Requisicoes_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf"'
 
     # Configurações de documento PDF
     doc = SimpleDocTemplate(response, pagesize=landscape(A4), rightMargin=2*cm, leftMargin=2*cm, topMargin=2*cm, bottomMargin=2*cm)
@@ -1027,7 +1027,7 @@ def report_purchase_pdf(request):
 
     # Configurações de resposta
     response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="Pedidos_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf"'
+    response['Content-Disposition'] = f'inline; filename="Pedidos_{datetime.now().strftime("%d?%m/%Y")}.pdf"'
 
     # Configurações de documento PDF
     doc = SimpleDocTemplate(response, pagesize=landscape(A4), rightMargin=2*cm, leftMargin=2*cm, topMargin=2*cm, bottomMargin=2*cm)
@@ -1159,7 +1159,7 @@ def generate_inflow_report(request):
     total_itens_entrada = entradas_registradas.aggregate(Sum('quantity'))["quantity__sum"] or 0
 
     response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="relatorio_entradas_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf"'
+    response['Content-Disposition'] = f'inline; filename="relatorio_entradas_{datetime.now().strftime("%d/%m/%Y")}.pdf"'
 
     doc = SimpleDocTemplate(response, pagesize=landscape(A4), rightMargin=2*cm, leftMargin=2*cm, topMargin=2*cm, bottomMargin=2*cm)
     elements = []
@@ -1310,7 +1310,7 @@ def generate_outflow_report(request):
     total_itens_saida = saidas_registradas.aggregate(Sum('quantity'))["quantity__sum"] or 0
 
     response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="relatorio_saidas_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf"'
+    response['Content-Disposition'] = f'inline; filename="relatorio_saidas_{datetime.now().strftime("%m/%d/%Y")}.pdf"'
 
     doc = SimpleDocTemplate(response, pagesize=landscape(A4), rightMargin=2*cm, leftMargin=2*cm, topMargin=2*cm, bottomMargin=2*cm)
     elements = []
@@ -1361,7 +1361,7 @@ def generate_outflow_report(request):
     subtitulos = [
         [Paragraph(f'Tipo de Relatório: {filtro_periodo.capitalize()}', subtitle_style)],
         [Paragraph(f'Período: {data_inicio.strftime("%d/%m/%Y")} - {data_fim.strftime("%d/%m/%Y")}', subtitle_style)],
-        [Paragraph(f'Total de Itens Saídos:  {total_itens_saida}', subtitle_style)]
+        [Paragraph(f'Total de Saídas:  {total_itens_saida}', subtitle_style)]
     ]
 
     subtitulo_table = Table(subtitulos, colWidths=[16*cm])

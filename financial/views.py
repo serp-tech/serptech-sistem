@@ -692,7 +692,7 @@ def generate_cash_inflow_report(request):
     total_paid = cash_inflows_paid.aggregate(Sum('total_value'))["total_value__sum"] or 0
 
     response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = 'attachment; filename="relatorio_entradas_financeiras.pdf"'
+    response['Content-Disposition'] = f'inline; filename="relatorio_entradas_financeiras.pdf"'
 
     buffer = BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=landscape(A4), rightMargin=2*cm, leftMargin=2*cm, topMargin=2*cm, bottomMargin=2*cm)
@@ -867,7 +867,7 @@ def generate_cash_outflow_report(request):
     total_paid = cash_outflows_paid.aggregate(Sum('total_value'))["total_value__sum"] or 0
 
     response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = 'attachment; filename="relatorio_saidas_financeiras.pdf"'
+    response['Content-Disposition'] = f'inline; filename="relatorio_saidas_financeiras.pdf"'
 
     buffer = BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=landscape(A4), rightMargin=2*cm, leftMargin=2*cm, topMargin=2*cm, bottomMargin=2*cm)
@@ -1106,7 +1106,7 @@ def generate_cash_flow_report(request):
 
     # Gerar o PDF
     response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="relatorio_fluxo_caixa_{datetime.now().strftime("%d%m%Y_%H%M%S")}.pdf"'
+    response['Content-Disposition'] = f'inline; filename="relatorio_fluxo_caixa_{datetime.now().strftime("%d%m%Y_%H%M%S")}.pdf"'
 
     # Ajustando as margens para criar espaço nas laterais. O pdf é criado em forma de paisagem
     doc = SimpleDocTemplate(response, pagesize=landscape(A4), rightMargin=2*cm, leftMargin=2*cm, topMargin=2*cm, bottomMargin=2*cm)

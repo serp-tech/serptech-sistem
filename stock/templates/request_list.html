@@ -8,7 +8,7 @@
     {% if perms.stock.add_request %}
     <a href="{% url 'request_add' %}" class="btn btn-primary mb-2">Nova Requisição</a>
     {% endif %}
-    <a href="{% url 'report_request_pdf' %}" class="btn btn-success mb-2"><i class="bi bi-file-earmark-text"></i>Relatório</a>
+    <a href="{% url 'report_request_pdf' %}" class="btn btn-success mb-2" target="popupRelatorio" onclick="abrirPopup(); return false;"><i class="bi bi-file-earmark-text"></i>Relatório</a>
     <form method="get" action="">
         <div class="row mb-3">
             <div class="col-md-3 mb-2">
@@ -170,6 +170,10 @@ function deliveryRequest(pk) {
     .catch(error => {
         console.error('Error denying request:', error);
     });
+}
+function abrirPopup() {
+    // Abre a nova janela com um nome e especificações
+    window.open('{% url "report_request_pdf" %}', 'popupRelatorio', 'width=800,height=600');
 }
 </script>
 
