@@ -18,7 +18,7 @@
 
     <!-- Seção de geração de relatório escondida inicialmente -->
     <div id="relatorioSection" class="mb-4" style="display: none;">
-        <form  id="relatorioForm" method="GET" action="{% url 'generate_outflow_report' %}" target="popupRelatorio" onclick="openPopup(); return false;">
+        <form  id="relatorioForm" method="GET" action="{% url 'generate_outflow_report' %}" target="popupRelatorio">
             <div class="form-row align-items-center">
                 <div class="col-auto">
                     <label for="filtro_periodo">Filtrar por:</label>
@@ -79,8 +79,29 @@
                     <input type="date" id="data_fim" name="data_fim" class="form-control form-control-sm" value="{{ request.GET.data_fim }}">
                 </div>
 
+                <div class="col-auto">
+                    <label for="requisitanteFilter">Requisitante:</label>
+                    <input type="text" id="requisitanteFilter" name="requisitante" class="form-control form-control-sm"
+                        value="{{ request.GET.requisitante }}">
+                </div>
+                <div class="col-auto">
+                    <label for="itemFilter">Item:</label>
+                    <input type="text" id="itemFilter" name="item" class="form-control form-control-sm"
+                        value="{{ request.GET.item }}">
+                </div>
+                <div class="col-auto">
+                    <label for="setorFilter">Setor:</label>
+                    <input type="text" id="setorFilter" name="setor" class="form-control form-control-sm"
+                        value="{{ request.GET.setor }}">
+                </div>
+                <div class="col-auto">
+                    <label for="unidadeFilter">Unidade:</label>
+                    <input type="text" id="unidadeFilter" name="unidade" class="form-control form-control-sm"
+                        value="{{ request.GET.unidade }}">
+                </div>
+
                 <div class="col-auto align-self-end">
-                    <button type="submit" class="btn btn-sm btn-success">Gerar Relatório</button>
+                    <button type="submit" class="btn btn-sm btn-success" onclick="openPopup(); return false;">Gerar Relatório</button>
                 </div>
             </div>
         </form>

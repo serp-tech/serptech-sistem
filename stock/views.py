@@ -1108,6 +1108,10 @@ def report_purchase_pdf(request):
 
 def generate_inflow_report(request):
     filtro_periodo = request.GET.get('filtro_periodo')
+    fornecedor = request.GET.get('fornecedor')
+    item = request.GET.get('item')
+    nota = request.GET.get('nota')
+    unidade = request.GET.get('unidade')
 
     # Obtendo e validando o ano
     ano = request.GET.get('ano')
@@ -1154,9 +1158,20 @@ def generate_inflow_report(request):
     entradas = Inflow.objects.all()
 
     if data_inicio and data_fim:
-        entradas_registradas = entradas.filter(date__range=[data_inicio, data_fim])
+        entradas = entradas.filter(date__range=[data_inicio, data_fim])
+    if fornecedor:
+        entradas = entradas.filter(item__supplier__name__icontains=fornecedor)
 
-    total_itens_entrada = entradas_registradas.aggregate(Sum('quantity'))["quantity__sum"] or 0
+    if item:
+        entradas = entradas.filter(item__name__icontains=item)
+
+    if nota:
+        entradas = entradas.filter(invoice__icontains=nota)
+
+    if unidade:
+        entradas = entradas.filter(unit__name__icontains=unidade)
+
+    total_itens_entrada = entradas.aggregate(Sum('quantity'))["quantity__sum"] or 0
 
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = f'inline; filename="relatorio_entradas_{datetime.now().strftime("%d/%m/%Y")}.pdf"'
@@ -1227,7 +1242,7 @@ def generate_inflow_report(request):
         [Paragraph('Data de Entrada', table_header_style), Paragraph('Item', table_header_style),  Paragraph('Quantidade', table_header_style),
          Paragraph('Custo Unitário', table_header_style),  Paragraph('Custo Total', table_header_style), Paragraph('Estoque de Origem', table_header_style), Paragraph('Estoque de Destino', table_header_style)]
     ]
-    for entrada in entradas_registradas:
+    for entrada in entradas:
         data_entradas.append([
             Paragraph(entrada.date.strftime('%d/%m/%Y'), table_data_style),
             Paragraph(entrada.item.name or entrada.item_name, table_data_style),
@@ -1259,7 +1274,10 @@ def generate_inflow_report(request):
 
 def generate_outflow_report(request):
     filtro_periodo = request.GET.get('filtro_periodo')
-
+    item = request.GET.get('item')
+    requisitante = request.GET.get('requisitante')
+    unidade = request.GET.get('unidade')
+    setor = request.GET.get('setor')
     # Obtendo e validando o ano
     ano = request.GET.get('ano')
     ano = int(ano) if ano and ano.isdigit() else datetime.now().year
@@ -1306,6 +1324,18 @@ def generate_outflow_report(request):
 
     if data_inicio and data_fim:
         saidas_registradas = saidas.filter(date__range=[data_inicio, data_fim])
+
+    if requisitante:
+        saidas_registradas = saidas.filter(requester__full_name__icontains=requisitante)
+
+    if item:
+        saidas_registradas = saidas.filter(item__name__icontains=item)
+
+    if setor:
+        saidas_registradas = saidas.filter(sector__name__icontains=setor)
+
+    if unidade:
+        saidas_registradas = saidas.filter(source_stock__name__icontains=unidade)
 
     total_itens_saida = saidas_registradas.aggregate(Sum('quantity'))["quantity__sum"] or 0
 

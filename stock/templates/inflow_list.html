@@ -76,6 +76,23 @@
                     <input type="date" id="data_fim" name="data_fim" class="form-control form-control-sm" value="{{ request.GET.data_fim }}">
                 </div>
 
+                <div class="col-auto">
+                    <label for="fornecedorFilter">Fornecedor:</label>
+                    <input type="text" id="fornecedorFilter" name="fornecedor" class="form-control form-control-sm" value="{{ request.GET.fornecedor }}">
+                </div>
+                <div class="col-auto">
+                    <label for="itemFilter">Item:</label>
+                    <input type="text" id="itemFilter" name="item" class="form-control form-control-sm" value="{{ request.GET.item }}">
+                </div>
+                <div class="col-auto">
+                    <label for="notaFilter">Nota Fiscal:</label>
+                    <input type="text" id="notaFilter" name="nota" class="form-control form-control-sm" value="{{ request.GET.nota }}">
+                </div>
+                <div class="col-auto">
+                    <label for="unidadeFilter">Unidade:</label>
+                    <input type="text" id="unidadeFilter" name="unidade" class="form-control form-control-sm" value="{{ request.GET.unidade }}">
+                </div>
+
                 <div class="col-auto align-self-end">
                     <button type="submit" class="btn btn-sm btn-success">Gerar Relatório</button>
                 </div>
