@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from django.views.decorators.http import require_POST
 from django.urls import reverse_lazy
 from django.http import HttpResponse,JsonResponse
 from django.db.models import Sum, Q
@@ -8,6 +9,7 @@ from django.views.generic import ListView, CreateView, DeleteView, DetailView, U
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.contrib.auth.decorators import permission_required
 from io import BytesIO
+import ofxparse
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
@@ -16,11 +18,11 @@ from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, 
 from reportlab.lib.pagesizes import landscape
 from reportlab.lib.units import cm
 from accounts.models import UserProfile
-from .models import Client, CostCenter, RevenueCenter, CashInflow, CashOutflow, FinancialClasification, FinancialCategory, ChartOfAccounts, BankAccount
+from .models import Client, CostCenter, RevenueCenter, CashInflow, CashOutflow, FinancialClasification, FinancialCategory, ChartOfAccounts, BankAccount, Transfer
 from .forms import (
     ClientForm, CostCenterForm, RevenueCenterForm, CashOutflowForm,CashOutflowUpdateForm , CashInflowForm, 
-    CashInflowUpdateForm, ReciveInflowForm, PayOutflowForm, FinancialCategoryForm, FinancialClasificationForm, AreaForm, ChartOfAccountsForm, BankAccountForm)
-from .utils import buscar_banco_por_codigo
+    CashInflowUpdateForm, ReciveInflowForm, PayOutflowForm, FinancialCategoryForm, FinancialClasificationForm, AreaForm, ChartOfAccountsForm, BankAccountForm, OFXUploadForm)
+from .utils import buscar_banco_por_codigo, buscar_bankid_no_ofx, formatar_agencia_conta_ofx
 from stock.utils import format_currency
 from stock.forms import SectorForm
 
@@ -405,6 +407,51 @@ class BankAccountDeleteView(DeleteView):
     model = BankAccount
     template_name = 'bank_account_delete.html'
     success_url = '/bank-account/'
+
+
+class ConciliationCarriedOut(ListView):
+
+    model = Transfer
+    template_name = 'conciliation_list.html'
+    context_object_name = 'itens'
+
+    def get_queryset(self):
+        return Transfer.objects.filter(status='efetuada')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['pending'] = Transfer.objects.filter(status='não efetuada').count()
+        return context
+
+
+class ConciliationPending(ListView):
+    model = Transfer
+    template_name = 'conciliation_pending_list.html'
+    context_object_name = 'itens'
+
+    def get_queryset(self):
+        return Transfer.objects.filter(status='não efetuada')
+    
+
+@require_POST
+def add_outflow(request):
+    form = CashOutflowUpdateForm(request.POST)
+    
+    if form.is_valid():
+        conta = form.save()
+        return JsonResponse({'success': True, 'id': conta.id})
+    
+    return JsonResponse({'success': False, 'errors': form.errors})
+
+@require_POST
+def add_inflow(request):
+    form = CashInflowUpdateForm(request.POST)
+    
+    if form.is_valid():
+        conta = form.save()
+        return JsonResponse({'success': True, 'id': conta.id})
+    
+    return JsonResponse({'success': False, 'errors': form.errors})
 
 
 def get_cost_center(request):
@@ -1194,3 +1241,124 @@ def generate_cash_flow_report(request):
     doc.build(elements)
     
     return response
+
+
+def ofx_upload_view(request):
+    transactions = []
+
+    if request.method == 'POST':
+        form = OFXUploadForm(request.POST, request.FILES)
+
+        if 'ofx_file' in request.FILES and form.is_valid():
+
+            ofx_file = request.FILES['ofx_file']
+
+            ofx = ofxparse.OfxParser.parse(ofx_file)
+
+            ofx_file.seek(0)
+
+            bankid = buscar_bankid_no_ofx(ofx_file)
+            for account in ofx.accounts:
+                for transaction in account.statement.transactions:
+                    transactions.append({
+                        'date': transaction.date.strftime('%d-%m-%Y'),
+                        'description': transaction.memo,
+                        'value': str(transaction.amount),
+                        'account_number': account.number,
+                        'bank_code': bankid,
+                        'transaction_id': f"{account.number}__{transaction.date.strftime('%Y-%m-%d')}__{transaction.amount}__{transaction.memo}__{bankid}",
+                    })
+
+            return render(request, 'ofx_upload.html',{
+                'form':form,
+                'transactions':transactions,
+            })
+        
+        elif 'transactions_selected' in request.POST:
+            transactions_selected = request.POST.getlist('transactions_selected')
+            for transaction in transactions_selected:
+                branch = None
+                account_number, date_str, value, description, bank_code = transaction.split('__')
+                branch, account_number = formatar_agencia_conta_ofx(bank_code, branch, account_number)
+                date = datetime.strptime(date_str, '%Y-%m-%d')
+
+                Transfer.objects.get_or_create(
+                    date=date,
+                    value=value,
+                    description=description,
+                    account_number=account_number,
+                    branch=branch,
+                    bank_code=bank_code,
+                )
+            return redirect('conciliation_pending')
+    else:
+        form = OFXUploadForm()
+
+    return render(request, 'ofx_upload.html', {'form': form, 'transactions': transactions})
+
+
+def reconcile_transfer(request, pk):
+    # Obtenção da transferência com base no id
+    transfer = get_object_or_404(Transfer, pk=pk)
+
+    # Consulta as contas a receber e a pagar correspondentes
+    cash_inflow = CashInflow.objects.filter(
+        Q(total_value=transfer.value),
+        Q(payment_date=transfer.date),
+        Q(bank_account__branch=transfer.branch),
+        Q(bank_account__account_number=transfer.account_number),
+        Q(bank_account__bank_id=transfer.bank_code),
+    )
+    cash_outflow = CashOutflow.objects.filter(
+        Q(total_value=abs(transfer.value)),  # valor absoluto para garantir correspondência
+        Q(payment_date=transfer.date),
+        Q(bank_account__branch=transfer.branch),
+        Q(bank_account__account_number=transfer.account_number),
+        Q(bank_account__bank_id=transfer.bank_code),
+    )
+
+    if request.method == "POST":
+        transfer_type = request.POST.get('transfer_type')
+        transfer_id = request.POST.get('transfer_id')
+
+        # Atualiza o status da transferência com base no tipo selecionado
+        if transfer_type == 'receber':
+            conta = CashInflow.objects.get(id=transfer_id)
+            transfer.status = 'efetuada'
+            transfer.cash_inflow = conta
+            transfer.save()
+
+        elif transfer_type == 'pagar':
+            conta = CashOutflow.objects.get(id=transfer_id)
+            transfer.status = 'efetuada'
+            transfer.cash_outflow = conta
+            transfer.save()
+
+        return redirect('conciliation_pending')
+
+    # Consulta a conta bancária associada
+    bank_account = BankAccount.objects.get(
+        bank_id=transfer.bank_code,
+        branch=transfer.branch,
+        account_number=transfer.account_number
+    )
+
+    context = {
+        'transfer': transfer,
+        'cash_inflow': cash_inflow,
+        'cash_outflow': cash_outflow,
+        'inflow_form': CashInflowUpdateForm(initial={
+            'total_value': transfer.value, 
+            'tittle_value': transfer.value, 
+            'description': transfer.description, 
+            'bank_account': bank_account
+        }),
+        'outflow_form': CashOutflowUpdateForm(initial={
+            'total_value': abs(transfer.value), 
+            'tittle_value': abs(transfer.value), 
+            'description': transfer.description, 
+            'bank_account': bank_account
+        }),
+    }
+
+    return render(request, 'reconcile_transaction.html', context)

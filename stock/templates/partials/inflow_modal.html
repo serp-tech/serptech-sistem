@@ -1,0 +1,38 @@
+<div class="modal fade" id="contaReceberModal" tabindex="-1" role="dialog" aria-labelledby="contaReceberModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header" style="background-color: #1e1e1e; color: white;">
+                <h5 class="modal-title" id="contaReceberModalLabel">Adicionar Conta a Receber</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" style="background-color: #101331; color: white;">
+                <form id="contaReceberForm">
+                    {% csrf_token %}
+                    {{ inflow_form.as_p }}
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    const valorDoTituloInput = document.getElementById('id_tittle_value');
+        const multaInput = document.getElementById('id_fine');
+        const descontoInput = document.getElementById('id_discount');
+        const valorTotalAPagarInput = document.getElementById('id_total_value');
+
+        function updateValorTotalAPagar() {
+            const valorDoTitulo = parseFloat(valorDoTituloInput.value) || 0;
+            const multa = parseFloat(multaInput.value) || 0;
+            const desconto = parseFloat(descontoInput.value) || 0;
+            const custoTotal = (valorDoTitulo + multa) - desconto;
+            valorTotalAPagarInput.value = custoTotal.toFixed(2);
+        }
+
+        // Add event listeners for input fields
+        valorDoTituloInput.addEventListener('input', updateValorTotalAPagar);
+        multaInput.addEventListener('input', updateValorTotalAPagar);
+        descontoInput.addEventListener('input', updateValorTotalAPagar);
+</script>

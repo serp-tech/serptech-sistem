@@ -203,11 +203,28 @@ class CashInflowForm(forms.ModelForm):
 
 
 class CashInflowUpdateForm(forms.ModelForm):
-
     class Meta:
-
         model = CashInflow
-        fields = '__all__'
+        fields = [
+            'client', 
+            'chart_of_accounts',
+            'bank_account',
+            'document', 
+            'document_pdf', 
+            'revenue_center', 
+            'proof', 
+            'tittle_value', 
+            'fine', 
+            'discount', 
+            'total_value', 
+            'billing_date', 
+            'due_date', 
+            'payment_date', 
+            'recive_date', 
+            'payment_method', 
+            'status', 
+            'description'
+        ]
         widgets = {
             'billing_date': forms.DateInput(attrs={'type': 'date'}),
             'payment_date': forms.DateInput(attrs={'type': 'date'}),
@@ -216,31 +233,43 @@ class CashInflowUpdateForm(forms.ModelForm):
         }
         labels = {
             'client': 'Cliente',
+            'chart_of_accounts': 'Plano de Contas',
+            'bank_account': 'Conta Bancária',
             'document': 'Documento',
-            'financial_classification': 'Classificação',
-            'financial_category': 'Categoria',
+            'document_pdf': 'Documento PDF',
+            'revenue_center': 'Centro de Receita',
+            'proof': 'Comprovante',
             'tittle_value': 'Valor do Título',
             'fine': 'Multa',
             'discount': 'Desconto',
             'total_value': 'Valor Total',
-            'payment_method': 'Forma de Pagamento',
-            'payment_date': 'Data de Pagamento',
-            'recive_date': 'Data de Recebimento',
             'billing_date': 'Data de Faturamento',
             'due_date': 'Data de Vencimento',
-            'document_pdf': 'Documento PDF',
-            'proof': 'Comprovante',
+            'payment_date': 'Data de Pagamento',
+            'recive_date': 'Data de Recebimento',
+            'payment_method': 'Forma de Pagamento',
+            'status': 'Status',
             'description': 'Descrição',
         }
-
         help_texts = {
             'client': 'Obrigatório',
+            'client_cnpj': 'Obrigatório',
+            'chart_of_accounts': 'Obrigatório',
+            'bank_account': 'Opcional',
             'document': 'Obrigatório',
+            'document_pdf': 'Opcional',
+            'revenue_center': 'Obrigatório',
+            'proof': 'Opcional',
             'tittle_value': 'Obrigatório',
             'fine': 'Opcional',
             'discount': 'Opcional',
+            'total_value': 'Obrigatório',
             'billing_date': 'Obrigatório',
             'due_date': 'Obrigatório',
+            'payment_date': 'Opcional',
+            'recive_date': 'Opcional',
+            'payment_method': 'Obrigatório',
+            'status': 'Obrigatório',
             'description': 'Opcional',
         }
 
@@ -314,11 +343,27 @@ class  CashOutflowForm(forms.ModelForm):
 
 
 class CashOutflowUpdateForm(forms.ModelForm):
-
     class Meta:
-
         model = CashOutflow
-        fields = '__all__'
+        fields = [
+            'recipient',
+            'document',
+            'document_pdf',
+            'cost_center',
+            'chart_of_accounts',
+            'bank_account',
+            'proof',
+            'tittle_value',
+            'fine',
+            'discount',
+            'total_value',
+            'billing_date',
+            'due_date',
+            'payment_date',
+            'payment_method',
+            'status',
+            'description'
+        ]
         widgets = {
             'billing_date': forms.DateInput(attrs={'type': 'date'}),
             'payment_date': forms.DateInput(attrs={'type': 'date'}),
@@ -326,31 +371,42 @@ class CashOutflowUpdateForm(forms.ModelForm):
             'due_date': forms.DateInput(attrs={'type': 'date'}),
         }
         labels = {
-            'client': 'Cliente',
-            'payment_date': 'Data de Pagamento',
+            'recipient': 'Beneficiário',
+            'recipient_cnpj': 'CNPJ do Beneficiário',
             'document': 'Documento',
+            'document_pdf': 'Documento PDF',
+            'cost_center': 'Centro de Custo',
+            'chart_of_accounts': 'Plano de Contas',
+            'bank_account': 'Conta Bancária',
+            'proof': 'Comprovante',
             'tittle_value': 'Valor do Título',
             'fine': 'Multa',
             'discount': 'Desconto',
             'total_value': 'Valor Total',
-            'payment_method': 'Forma de Pagamento',
-            'payment_date': 'Data de Pagamento',
-            'recive_date': 'Data de Recebimento',
             'billing_date': 'Data de Faturamento',
             'due_date': 'Data de Vencimento',
-            'document_pdf': 'Documento PDF',
-            'proof': 'Comprovante',
+            'payment_date': 'Data de Pagamento',
+            'payment_method': 'Forma de Pagamento',
+            'status': 'Status',
             'description': 'Descrição',
         }
-
         help_texts = {
-            'client': 'Obrigatório',
+            'recipient': 'Obrigatório',
             'document': 'Obrigatório',
+            'document_pdf': 'Opcional',
+            'cost_center': 'Obrigatório',
+            'chart_of_accounts': 'Obrigatório',
+            'bank_account': 'Opcional',
+            'proof': 'Opcional',
             'tittle_value': 'Obrigatório',
             'fine': 'Opcional',
             'discount': 'Opcional',
+            'total_value': 'Obrigatório',
             'billing_date': 'Obrigatório',
             'due_date': 'Obrigatório',
+            'payment_date': 'Opcional',
+            'payment_method': 'Obrigatório',
+            'status': 'Obrigatório',
             'description': 'Opcional',
         }
 
@@ -398,3 +454,7 @@ class BankAccountForm(forms.ModelForm):
             'account_number': 'Obrigatório',
             'value': 'Obrigatório',
         }
+
+
+class OFXUploadForm(forms.Form):
+    ofx_file = forms.FileField()

@@ -1,0 +1,47 @@
+<div class="modal fade" id="contaPagarModal" tabindex="-1" role="dialog" aria-labelledby="contaPagarModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header" style="background-color: #1e1e1e; color: white;">
+                <h5 class="modal-title" id="contaPagarModalLabel">Adicionar Conta a Pagar</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" style="background-color: #101331; color: white;">
+                <form id="contaPagarForm">
+                    {% csrf_token %}
+                    {{ outflow_form.as_p }}
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Script para preenchimento automático do valor total -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const valorDoTituloInput = document.getElementById('id_tittle_value');
+        const multaInput = document.getElementById('id_fine');
+        const descontoInput = document.getElementById('id_discount');
+        const valorTotalInput = document.getElementById('id_total_value');
+
+        function calcularValorTotal() {
+            // Pega os valores do título, multa e desconto
+            const valorDoTitulo = parseFloat(valorDoTituloInput.value) || 0;
+            const multa = parseFloat(multaInput.value) || 0;
+            const desconto = parseFloat(descontoInput.value) || 0;
+
+            // Calcula o valor total
+            const valorTotal = (valorDoTitulo + multa) - desconto;
+
+            // Atualiza o campo de valor total
+            valorTotalInput.value = valorTotal.toFixed(2);
+        }
+
+        // Adiciona os event listeners para os campos de entrada
+        valorDoTituloInput.addEventListener('input', calcularValorTotal);
+        multaInput.addEventListener('input', calcularValorTotal);
+        descontoInput.addEventListener('input', calcularValorTotal);
+    });
+</script>

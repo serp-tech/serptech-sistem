@@ -1,0 +1,179 @@
+{% extends 'base.html' %}
+{% load custom_tags %}
+
+{% block content %}
+<div class="container">
+    <h2 class="my-4 text-center">Conciliação de Transação</h2>
+
+    <div class="dropdown mb-4">
+        <button class="btn btn-info dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown"
+            aria-haspopup="true" aria-expanded="false">
+            Adicionar Lançamento
+        </button>
+        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+            <a class="dropdown-item" href="#" id="entrada-option">Entrada</a>
+            <a class="dropdown-item" href="#" id="saida-option">Saída</a>
+        </div>
+    </div>
+
+    <table class="table table-dark table-bordered mt-4">
+        <thead>
+            <tr>
+                <th>Campo</th>
+                <th>Detalhes</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Valor da Conciliação</td>
+                <td>{{ transfer.value|format_currency_filter }}</td>
+            </tr>
+            <tr>
+                <td>Descrição</td>
+                <td>{{ transfer.description }}</td>
+            </tr>
+            <tr>
+                <td>Data</td>
+                <td>{{ transfer.date|date:"d/m/Y" }}</td>
+            </tr>
+            <tr>
+                <td>Banco</td>
+                <td>{{ transfer.bank_code }}</td>
+            </tr>
+            <tr>
+                <td>Agência</td>
+                <td>{{ transfer.branch }}</td>
+            </tr>
+            <tr>
+                <td>Número da Conta</td>
+                <td>{{ transfer.account_number }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <form method="POST">
+        {% csrf_token %}
+        <h4>Selecione o Lançamento Correspondente:</h4>
+
+        {% if cash_inflow %}
+        <h5>Contas a Receber:</h5>
+        <div class="row">
+            {% for conta in cash_inflow %}
+            <div class="col-md-4 mb-4">
+                <div class="card flex-fill mb-4 shadow-sm">
+                    <div class="card-body bg-dark text-light">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="transfer_id" value="{{ conta.id }}"
+                                id="receber-{{ conta.id }}">
+                            <label class="form-check-label" for="receber-{{ conta.id }}">
+                                <strong>Selecionar</strong>
+                            </label>
+                            <input type="hidden" name="transfer_type" value="receber">
+                        </div>
+                        <h5 class="card-title">Cliente: {{ conta.client }}</h5>
+                        <p class="card-text">
+                            <strong>Data de Lançamento:</strong> {{ conta.due_date|date:"d/m/Y" }}<br>
+                            <strong>Valor Total:</strong> {{ conta.total_value|format_currency_filter }}<br>
+                            <strong>Descrição:</strong> {{ conta.description }}<br>
+                            <strong>Data de Vencimento:</strong> {{ conta.payment_date|date:"d/m/Y" }}<br>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if cash_outflow %}
+        <h5>Contas a Pagar:</h5>
+        <div class="row">
+            {% for conta in cash_outflow %}
+            <div class="col-md-4 mb-4">
+                <div class="card flex-fill mb-4 shadow-sm">
+                    <div class="card-body bg-dark text-light">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="transfer_id" value="{{ conta.id }}"
+                                id="pagar-{{ conta.id }}">
+                            <label class="form-check-label" for="pagar-{{ conta.id }}">
+                                <strong>Selecionar</strong>
+                            </label>
+                            <input type="hidden" name="transfer_type" value="pagar">
+                        </div>
+                        <h5 class="card-title">Beneficiário: {{ conta.recipient }}</h5>
+                        <p class="card-text">
+                            <strong>Data de Lançamento:</strong> {{ conta.due_date|date:"d/m/Y" }}<br>
+                            <strong>Valor Total:</strong> {{ conta.total_value|format_currency_filter }}<br>
+                            <strong>Descrição:</strong> {{ conta.description }}<br>
+                            <strong>Data de Pagamento:</strong> {{ conta.payment_date|date:"d/m/Y" }}<br>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <button type="submit" class="btn btn-primary mt-3">Conciliar</button>
+    </form>
+</div>
+
+<!-- Inclui os modais de adicionar contas -->
+{% include 'partials/inflow_modal.html' %}
+{% include 'partials/outflow_modal.html' %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js"
+    integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+    crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js"
+    integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+    crossorigin="anonymous"></script>
+
+<script>
+    $(document).ready(function () {
+        // Abertura dos Modais
+        $('#entrada-option').on('click', function (event) {
+            event.preventDefault();
+            $('#contaReceberModal').modal('show');
+        });
+
+        $('#saida-option').on('click', function (event) {
+            event.preventDefault();
+            $('#contaPagarModal').modal('show');
+        });
+
+        // Script para salvar conta a receber
+        $('#contaReceberForm').on('submit', function (event) {
+            event.preventDefault();
+            $.ajax({
+                url: '{% url "add_inflow" %}',
+                type: 'POST',
+                data: $(this).serialize(),
+                success: function (response) {
+                    $('#contaReceberModal').modal('hide');
+                    location.reload(); // Recarrega a página após adicionar a conta
+                },
+                error: function () {
+                    console.log('Erro ao adicionar conta a receber');
+                }
+            });
+        });
+
+        // Script para salvar conta a pagar
+        $('#contaPagarForm').on('submit', function (event) {
+            event.preventDefault();
+            $.ajax({
+                url: '{% url "add_outflow" %}',
+                type: 'POST',
+                data: $(this).serialize(),
+                success: function (response) {
+                    $('#contaPagarModal').modal('hide');
+                    location.reload(); // Recarrega a página após adicionar a conta
+                },
+                error: function () {
+                    console.log('Erro ao adicionar conta a pagar');
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

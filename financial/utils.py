@@ -1,5 +1,5 @@
 import requests
-
+import re
 
 FORMATO_BANCOS = {
     '341': {
@@ -86,3 +86,84 @@ def buscar_banco_por_codigo(codigo_banco):
         return banco
     else:
         return None
+    
+
+def formatar_agencia_conta_ofx(codigo_banco, agencia, numero_conta):
+    """Aplica formatação à agência e conta com base no banco selecionado."""
+    
+    # Obtém os formatos do banco (formato para agência e conta)
+    formatos = FORMATO_BANCOS.get(codigo_banco)
+    
+    if not formatos:
+        # Se não houver um formato definido, retorna os números sem formatação
+        return agencia, numero_conta
+
+    formato_agencia = formatos['agencia']
+    formato_conta = formatos['conta']
+    
+    # Verifica se o número já está formatado
+    if "-" in numero_conta:
+        # Se já contém um hífen, assumimos que está formatado corretamente
+        return agencia, numero_conta
+
+    # Remove caracteres não numéricos dos formatos para determinar o tamanho esperado
+    tamanho_agencia = len(re.sub(r'[^X]', '', formato_agencia))
+    tamanho_conta = len(re.sub(r'[^X]', '', formato_conta))
+
+    # Verifica se o número da conta/agência tem o tamanho correto
+    if len(numero_conta) != (tamanho_agencia + tamanho_conta):
+        raise ValueError("O número da conta não corresponde ao formato esperado.")
+
+    # Separa a parte da agência e da conta do numero_conta fornecido
+    agencia = numero_conta[:tamanho_agencia]  # Os primeiros dígitos para a agência
+    conta = numero_conta[tamanho_agencia:tamanho_agencia + tamanho_conta]  # O restante para a conta
+
+    # Aplicar a formatação usando as máscaras
+    agencia_formatada = aplicar_mascara(formato_agencia, agencia)
+    conta_formatada = aplicar_mascara(formato_conta, conta)
+
+    # Retorna a agência e a conta formatadas
+    return agencia_formatada, conta_formatada
+
+
+def aplicar_mascara(formato, numero):
+    """Aplica uma máscara de formatação como XXXX-X para um número, se necessário."""
+    
+    if "-" in numero:
+        # Se já estiver formatado, retorna o número diretamente
+        return numero
+
+    resultado = ""
+    indice_numero = 0
+
+    # Itera sobre os caracteres da máscara, substituindo X pelos dígitos do número
+    for char in formato:
+        if char == "X":
+            # Certifique-se de que não estamos fora dos limites da string 'numero'
+            if indice_numero < len(numero):
+                resultado += numero[indice_numero]
+                indice_numero += 1
+            else:
+                raise IndexError("Tamanho do número é menor do que o esperado pelo formato.")
+        else:
+            resultado += char  # Mantém caracteres como '-' ou '.'
+
+    return resultado
+
+
+def buscar_bankid_no_ofx(ofx_file):
+    """
+    Função para buscar o BANKID dentro do arquivo OFX.
+    :param ofx_file: Arquivo OFX (carregado com FILES)
+    :return: O código BANKID encontrado, ou None se não for encontrado
+    """
+    # Lê o conteúdo do arquivo OFX
+    ofx_content = ofx_file.read().decode('utf-8')  # Decodifica o arquivo OFX para string
+
+    # Usando regex para capturar o valor dentro da tag <BANKID>
+    bankid_match = re.search(r'<BANKID>(\d+)', ofx_content)
+
+    if bankid_match:
+        return bankid_match.group(1)  # Retorna o BANKID encontrado
+    else:
+        return None  # Retorna None se o BANKID não for encontrado

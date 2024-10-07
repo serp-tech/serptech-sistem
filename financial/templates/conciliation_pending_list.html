@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% load custom_tags %}
+
+{% block content %}
+<div class="container">
+    <h2 class="my-4 text-center">Conciliações Pendentes</h2>
+    <div class="text-right mb-3">
+        <a href="{% url 'ofx_upload' %}" class="btn btn-primary">Adicionar Conciliação</a>
+    </div>
+    <div class="row">
+        {% for item in itens %}
+        <div class="col-md-4 d-flex">
+            <div class="card flex-fill mb-4 shadow-sm">
+                <div class="card-body bg-dark text-light">
+                    <h5 class="card-title">Data: {{ item.date|date:"d/m/Y" }}</h5>
+                    <p class="card-text">Valor Total: {{ item.value|format_currency_filter }}</p>
+                    <p class="card-text">Descrição: {{ item.description }}</p>
+                    <p class="card-text">Código do Banco: {{ item.bank_code }}</p>
+                    <p class="card-text">Agência: {{ item.branch }}</p>
+                    <p class="card-text">Número da Conta: {{ item.account_number }}</p>
+                    <a href="{% url 'reconcile_transfer' item.pk %}" class="btn btn-primary">Conciliar</a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-md-12">
+            <div class="alert alert-info" role="alert">
+                Nenhuma conciliação pendente encontrada.
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}

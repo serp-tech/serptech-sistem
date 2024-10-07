@@ -6,7 +6,8 @@ from .views import (ClientCreateView, ClientDeleteView, ClientDetailView, Client
                     CostCenterListView, CostCenterCreateView, CostCenterDeleteView, RevenueCenterListView, RevenueCenterCreateView, RevenueCenterDeleteView,
                     FinancialCategoryListView, FinancialCategoryCreateView, FinancialCategoryDeleteView, FinancialClasificationListView, FinancialClasificationCreateView, 
                     FinancialClasificationDeleteView, ChartOfAccountsListView, ChartOfAccountsCreateView, ChartOfAccountsDeleteView, add_area, get_chart_of_accounts, get_cost_center,
-                    BankAccountListView, BankAccountCreateView, BankAccountDetailView, BankAccountUpdateView, BankAccountDeleteView, get_bank_view, get_revenue_center                 
+                    BankAccountListView, BankAccountCreateView, BankAccountDetailView, BankAccountUpdateView, BankAccountDeleteView, get_bank_view, get_revenue_center, ofx_upload_view,
+                    ConciliationCarriedOut, ConciliationPending, reconcile_transfer, add_outflow, add_inflow          
 )
 
 
@@ -26,6 +27,7 @@ urlpatterns = [
     path('cash-inflow/<int:pk>/delete', CashInflowDeleteView.as_view(), name='cash_inflow_delete'),
      path('generate_cash_inflow_report/', generate_cash_inflow_report, name='generate_cashinflow_report'),
     path('conclude-cash-inflow/<int:pk>', conclude_inflow_cash, name='cash_inflow_conclude'),
+    path('add-inflow/', add_inflow, name='add_inflow'),
     
     path('cash-outflow/', CashOutflowListView.as_view(), name='cash_outflow'),
     path('cash-outflow/add', CashOutflowCreateView.as_view(), name='cash_outflow_add'),
@@ -34,6 +36,7 @@ urlpatterns = [
     path('cash-outflow/<int:pk>/delete', CashOutflowDeleteView.as_view(), name='cash_outflow_delete'),
     path('generate_cash_outflow_report/', generate_cash_outflow_report, name='generate_cashoutflow_report'),
     path('make-payment-outflow/<int:pk>', make_payment, name='cash_outflow_conclude'),
+    path('add-outflow/', add_outflow, name='add_outflow'),
 
 
     path('costcenter/', CostCenterListView.as_view(), name='costcenter'),
@@ -66,6 +69,11 @@ urlpatterns = [
     path('get_cost_center/',get_cost_center, name='get_cost_center'),
     path('get_revenue_center/',get_revenue_center, name='get_revenue_center'),
     path('get-bank/<str:code_bank>/', get_bank_view , name='get_bank'),
+
+    path('ofx-upload/', ofx_upload_view, name='ofx_upload'),
+    path('conciliation-carried-out/', ConciliationCarriedOut.as_view(), name='conciliation_carried_out'),
+    path('conciliation-pending/', ConciliationPending.as_view(), name='conciliation_pending'),
+    path('reconcile/<int:pk>/', reconcile_transfer, name='reconcile_transfer'),
 
     path('cash-flow/', cash_flow_view, name='cash_flow'),
     path('generate_cash_flow_report/', generate_cash_flow_report, name='generate_cash_flow_report'),

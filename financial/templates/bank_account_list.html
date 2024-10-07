@@ -12,6 +12,7 @@
     <h2>Contas Bancárias</h2>
     {% if perms.financial.add_bankaccount %}
     <a href="{% url 'bank_account_add' %}" class="btn btn-primary mb-2">Nova Conta</a>
+    <a href="{% url 'conciliation_carried_out' %}" class="btn btn-primary mb-2">Conciliação Bancária</a>
     {% endif %}
     <form method="get" action="">
         <div class="row mb-3">

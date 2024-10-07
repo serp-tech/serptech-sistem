@@ -3,7 +3,7 @@ from django.utils import timezone
 from django.core.validators import EmailValidator, RegexValidator
 from localflavor.br.models import BRCNPJField
 from stock.models import Supplier, Sector
-from .utils import formatar_agencia_conta
+from .utils import formatar_agencia_conta, formatar_agencia_conta_ofx
 
 
 PAYMENT_METHOD = (
@@ -291,3 +291,18 @@ class CashFlowControl(models.Model):
         ]
 
 
+class Transfer(models.Model):
+
+    date = models.DateField()
+    value = models.FloatField()
+    description = models.TextField(max_length=200)
+    bank_code = models.CharField(max_length=20)
+    branch = models.CharField(max_length=20, blank=True, null=True)
+    account_number = models.CharField(max_length=50)
+    status = models.CharField(max_length=50,  choices=STATUS_CHOICES, default='não efetuada')
+
+    class Meta:
+        ordering = ['date', 'value']
+
+    def __str__(self):
+        return f"{self.date} - {self.description} - {self.value}"
