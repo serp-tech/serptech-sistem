@@ -108,14 +108,14 @@ class ItemForm(forms.ModelForm):
     class Meta:
         model = Item
         fields = [
-            'name', 'nomenclature', 'presentation', 'supplier', 'sector', 'purchase_frequency',
+            'name', 'nomenclature', 'presentation', 'suppliers', 'sector', 'purchase_frequency',
             'outflow_frequency', 'description'
         ]
         labels = {
             'name': 'Nome',
             'nomenclature': 'Nomenclatura',
             'description': 'Descrição',
-            'supplier': 'Fornecedor',  # Corrigido de "Forncecedor"
+            'suppliers': 'Fornecedores',  # Corrigido de "Forncecedor"
             'sector': 'Setor', 
             'presentation': 'Apresentação',
             'purchase_frequency': 'Frequência de Compra',
@@ -123,11 +123,12 @@ class ItemForm(forms.ModelForm):
         }
         widgets = {
             'sector': forms.CheckboxSelectMultiple(),
+            'suppliers': forms.CheckboxSelectMultiple(),
         }
         help_texts = {
             'name': 'Obrigatório',
             'nomenclature': 'Obrigatório',
-            'supplier': 'Obrigatório',
+            'suppliers': 'Obrigatório',
             'purchase_frequency': 'Obrigatório',
         }
 

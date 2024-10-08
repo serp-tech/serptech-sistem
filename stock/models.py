@@ -114,8 +114,7 @@ class Item(models.Model):
     name = models.CharField(max_length=200)
     nomenclature = models.CharField(max_length=200)
     description = models.TextField(max_length=500, blank=True, null=True)
-    supplier = models.ForeignKey(Supplier, on_delete=models.PROTECT, related_name='item_supplier')
-    ## if the user deletes the supplier this camp will be shown 
+    suppliers = models.ManyToManyField(Supplier, related_name='suppliers_item')
     supplier_cnpj = BRCNPJField(blank=True, null=True)
     sector = models.ManyToManyField(Sector, related_name='sector_item')
     presentation = models.ForeignKey(Presentation, on_delete=models.PROTECT, related_name='presentation_item')
@@ -137,6 +136,7 @@ class Inflow(models.Model):
     date = models.DateField(default=timezone.now)
     item = models.ForeignKey(Item, on_delete=models.PROTECT, related_name='inflow_item')
     item_name = models.CharField(max_length=200, blank=True, null=True)
+    supplier = models.ForeignKey(Supplier, on_delete=models.PROTECT, blank=True, null=True)
     validity = models.DateField(blank=True, null=True)
     invoice = models.CharField(max_length=200)
     invoice_pdf = models.FileField(upload_to='pdfs/inflow/invoice', blank=True, null=True)
