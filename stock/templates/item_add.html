@@ -12,7 +12,23 @@
             <label class="col-sm-3 col-form-label">{{ field.label }}</label>
             <div class="col-sm-9">
                 <div class="d-flex align-items-center">
-                    {% if field.name == 'sector' %}
+                    {% if field.name == 'suppliers' %}
+                    <div class="dropdown">
+                        <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Selecionar Setores
+                        </button>
+                        <div class="dropdown-menu" id="supplier" aria-labelledby="dropdownMenuButton">
+                            <div class="dropdown-item">
+                                <input type="checkbox" id="select_all_supplier"> Selecionar Todos
+                            </div>
+                            {% for checkbox in field %}
+                                <div class="dropdown-item">
+                                    {{ checkbox.tag }} {{ checkbox.choice_label }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% elif field.name == 'sector' %}
                     <div class="dropdown">
                         <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             Selecionar Setores
@@ -31,7 +47,7 @@
                     {% else %}
                     {{ field }}
                     {% endif %}
-                    {% if field.name == 'supplier' %}
+                    {% if field.name == 'suppliers' %}
                     <button type="button" class="btn btn-primary ml-2" id="addSupplierBtn" data-toggle="modal" data-target="#supplierModal">Adicionar</button>
                     {% elif field.name == 'sector'  %}
                     <button type="button" class="btn btn-primary ml-2" id="addSectorBtn" data-toggle="modal" data-target="#sectorModal">Adicionar</button>
@@ -123,6 +139,49 @@
                         dropdownMenu.append(`
                             <div class="dropdown-item">
                                 <input type="checkbox" name="sector" value="${option.id}"> ${option.text}
+                            </div>
+                        `);
+                    });
+
+                    // Reconfigura o evento para "Selecionar Todos"
+                    updateCheckboxes();
+                },
+                error: function() {
+                    console.log('Erro ao recarregar os setores');
+                }
+            });
+        }
+        function updateCheckboxes() {
+            const checkboxes = document.querySelectorAll('#suppliersDropdown input[type="checkbox"]:not(#select_all_suppliers)');
+            const selectAllCheckbox = document.getElementById('select_all_suppliers');
+
+            selectAllCheckbox.addEventListener('change', function() {
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = selectAllCheckbox.checked;
+                });
+            });
+        }
+
+        function reloadCheckboxes(updateUrl) {
+            $.ajax({
+                url: updateUrl,
+                type: 'GET',
+                success: function(response) {
+                    const dropdownMenu = $('#suppliersDropdown');
+                    dropdownMenu.empty();  // Limpa os checkboxes existentes
+
+                    // Adiciona o checkbox para selecionar todos
+                    dropdownMenu.append(`
+                        <div class="dropdown-item">
+                            <input type="checkbox" id="select_all_suppliers"> Selecionar Todos
+                        </div>
+                    `);
+
+                    // Adiciona os checkboxes para cada setor
+                    response.options.forEach(option => {
+                        dropdownMenu.append(`
+                            <div class="dropdown-item">
+                                <input type="checkbox" name="suppliers" value="${option.id}"> ${option.text}
                             </div>
                         `);
                     });
