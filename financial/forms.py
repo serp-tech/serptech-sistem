@@ -169,7 +169,7 @@ class CashInflowForm(forms.ModelForm):
     class Meta:
 
         model = CashInflow
-        fields = ['client', 'revenue_center', 'chart_of_accounts', 'document',  'tittle_value', 'fine', 'discount', 
+        fields = ['client', 'revenue_center', 'chart_of_accounts', 'document',  'tittle_value', 'fine', 'tax',  'fees','discount', 
                   'total_value', 'billing_date', 'due_date', 'document_pdf', 'description']
         widgets = {
             'billing_date': forms.DateInput(attrs={'type': 'date'}),
@@ -182,6 +182,8 @@ class CashInflowForm(forms.ModelForm):
             'document': 'Documento',
             'tittle_value': 'Valor do Título',
             'fine': 'Multa',
+            'tax':'Encargos', 
+            'fees':'Juros',
             'discount': 'Desconto',
             'total_value': 'Valor Total',
             'billing_date': 'Data de Faturamento',
@@ -215,6 +217,8 @@ class CashInflowUpdateForm(forms.ModelForm):
             'proof', 
             'tittle_value', 
             'fine', 
+            'tax', 
+            'fees', 
             'discount', 
             'total_value', 
             'billing_date', 
@@ -241,6 +245,8 @@ class CashInflowUpdateForm(forms.ModelForm):
             'proof': 'Comprovante',
             'tittle_value': 'Valor do Título',
             'fine': 'Multa',
+            'tax':'Encargos', 
+            'fees':'Juros',
             'discount': 'Desconto',
             'total_value': 'Valor Total',
             'billing_date': 'Data de Faturamento',
@@ -279,7 +285,7 @@ class ReciveInflowForm(forms.ModelForm):
     class Meta:
 
         model = CashInflow
-        fields = ['bank_account', 'tittle_value', 'fine', 'discount', 'total_value','chart_of_accounts', 
+        fields = ['bank_account', 'tittle_value', 'fine', 'tax', 'fees', 'discount', 'total_value','chart_of_accounts', 
                   'payment_method', 'payment_date', 'recive_date', 'proof']
         widgets = {
             'payment_date': forms.DateInput(attrs={'type': 'date'}),
@@ -290,6 +296,8 @@ class ReciveInflowForm(forms.ModelForm):
             'bank_account': 'Conta Bancária',
             'tittle_value': 'Valor do Título',
             'fine': 'Multa',
+            'tax':'Encargos', 
+            'fees':'Juros',
             'chart_of_accounts': 'Plano de Contas',
             'discount': 'Desconto',
             'total_value': 'Valor Total',
@@ -305,7 +313,7 @@ class  CashOutflowForm(forms.ModelForm):
     class Meta:
 
         model = CashOutflow
-        fields = ['recipient', 'cost_center', 'chart_of_accounts', 'document', 'tittle_value', 'fine', 'discount',
+        fields = ['recipient', 'cost_center', 'chart_of_accounts', 'document', 'tittle_value', 'fine', 'tax', 'fees', 'discount',
                   'total_value', 'billing_date', 'due_date', 'document_pdf', 'description']
         
         widgets = {
@@ -322,6 +330,8 @@ class  CashOutflowForm(forms.ModelForm):
             'document': 'Documento',
             'tittle_value': 'Valor do Título',
             'fine': 'Multa',
+            'tax':'Encargos', 
+            'fees':'Juros',
             'discount': 'Desconto',
             'total_value': 'Valor Total',
             'billing_date': 'Data de Faturamento',

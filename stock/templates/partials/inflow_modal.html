@@ -18,21 +18,28 @@
     </div>
 </div>
 <script>
-    const valorDoTituloInput = document.getElementById('id_tittle_value');
-        const multaInput = document.getElementById('id_fine');
-        const descontoInput = document.getElementById('id_discount');
-        const valorTotalAPagarInput = document.getElementById('id_total_value');
+        const tittleValueInput = document.getElementById('id_tittle_value');
+        const fineInput = document.getElementById('id_fine');
+        const taxInput = document.getElementById('id_tax');
+        const feesInput = document.getElementById('id_fees');
+        const discountInput = document.getElementById('id_discount');
+        const totalValueInput = document.getElementById('id_total_value');
+        const checkboxes = document.querySelectorAll('.form-check input[type="checkbox"]:not(#select_all_setor)');
 
-        function updateValorTotalAPagar() {
-            const valorDoTitulo = parseFloat(valorDoTituloInput.value) || 0;
-            const multa = parseFloat(multaInput.value) || 0;
-            const desconto = parseFloat(descontoInput.value) || 0;
-            const custoTotal = (valorDoTitulo + multa) - desconto;
-            valorTotalAPagarInput.value = custoTotal.toFixed(2);
+
+        function updateTotalValue() {
+            const tittleValue = parseFloat(tittleValueInput.value) || 0;
+            const fine = parseFloat(fineInput.value) || 0;
+            const tax = parseFloat(taxInput.value) || 0;
+            const fees = parseFloat(feesInput.value) || 0;
+            const discount = parseFloat(discountInput.value) || 0;
+            const totalValue = (tittleValue + fine + tax + (tittleValue * (fees/100))) - discount;
+            totalValueInput.value = totalValue.toFixed(2);
         }
 
-        // Add event listeners for input fields
-        valorDoTituloInput.addEventListener('input', updateValorTotalAPagar);
-        multaInput.addEventListener('input', updateValorTotalAPagar);
-        descontoInput.addEventListener('input', updateValorTotalAPagar);
+        tittleValueInput.addEventListener('input', updateTotalValue);
+        fineInput.addEventListener('input', updateTotalValue);
+        taxInput.addEventListener('input', updateTotalValue);
+        feesInput.addEventListener('input', updateTotalValue);
+        discountInput.addEventListener('input', updateTotalValue);
 </script>

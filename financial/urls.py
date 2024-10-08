@@ -5,7 +5,7 @@ from .views import (ClientCreateView, ClientDeleteView, ClientDetailView, Client
                     cash_flow_view, make_payment, generate_cash_outflow_report, generate_cash_inflow_report, generate_cash_flow_report,
                     CostCenterListView, CostCenterCreateView, CostCenterDeleteView, RevenueCenterListView, RevenueCenterCreateView, RevenueCenterDeleteView,
                     FinancialCategoryListView, FinancialCategoryCreateView, FinancialCategoryDeleteView, FinancialClasificationListView, FinancialClasificationCreateView, 
-                    FinancialClasificationDeleteView, ChartOfAccountsListView, ChartOfAccountsCreateView, ChartOfAccountsDeleteView, add_area, get_chart_of_accounts, get_cost_center,
+                    FinancialClasificationDeleteView, ChartOfAccountsListView, ChartOfAccountsCreateView, ChartOfAccountesUpdateView, ChartOfAccountsDeleteView, add_area, get_chart_of_accounts, get_cost_center,
                     BankAccountListView, BankAccountCreateView, BankAccountDetailView, BankAccountUpdateView, BankAccountDeleteView, get_bank_view, get_revenue_center, ofx_upload_view,
                     ConciliationCarriedOut, ConciliationPending, reconcile_transfer, add_outflow, add_inflow          
 )
@@ -57,6 +57,7 @@ urlpatterns = [
 
     path('chart-of-accounts/', ChartOfAccountsListView.as_view(), name='chart_of_accounts'),
     path('chart-of-accounts/add', ChartOfAccountsCreateView.as_view(), name='chart_of_accounts_add'),
+    path('chart-of-accounts/<int:pk>/update', ChartOfAccountesUpdateView.as_view(), name='chart_of_accounts_update'),
     path('chart-of-accounts/<int:pk>/delete', ChartOfAccountsDeleteView.as_view(), name='chart_of_accounts_delete'),
 
     path('bank-account/', BankAccountListView.as_view(), name='bank_account'),

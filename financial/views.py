@@ -211,6 +211,13 @@ class ChartOfAccountsCreateView(CreateView):
         context['financial_category_form'] = FinancialCategoryForm()
         context['financial_classification_form'] = FinancialClasificationForm()
         return context
+    
+
+class ChartOfAccountesUpdateView(UpdateView):
+    model = ChartOfAccounts
+    template_name = 'chartofaccounts_update.html'
+    form_class = ChartOfAccountsForm
+    success_url = '/chart-of-accounts/'
 
 
 class ChartOfAccountsDeleteView(DeleteView):
