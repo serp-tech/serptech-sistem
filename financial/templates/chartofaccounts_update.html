@@ -1,10 +1,10 @@
 {% extends 'base.html' %}
 
-{% block title %}Adicionar Plano de Contas{% endblock %}
+{% block title %}Editar Plano de Contas{% endblock %}
 
 {% block content %}
 <div class="container">
-    <h2>Adicionar Plano de Contas</h2>
+    <h2>Editar Plano de Contas</h2>
     <form method="post" class="form-horizontal">
         {% csrf_token %}
         {% for field in form %}
