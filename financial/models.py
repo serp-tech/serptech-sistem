@@ -192,6 +192,10 @@ class ChartOfAccounts(models.Model):
     category = models.ForeignKey(FinancialCategory, on_delete=models.PROTECT, related_name='category_accounts')
     id_plan = models.CharField(max_length=30)
 
+    class Meta:
+        ordering = ['id_plan']
+
+        
     def __str__(self) -> str:
         return f'{self.id_plan}-{self.classification}-{self.category}'
     
