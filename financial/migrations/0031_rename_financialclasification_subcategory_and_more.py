@@ -22,7 +22,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='chartofaccounts',
             name='subcategory',
-            field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.PROTECT, related_name='subcategory_accounts', to='financial.subcategory'),
-            preserve_default=False,
+            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='subcategory_accounts', to='financial.subcategory'),
         ),
     ]
