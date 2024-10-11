@@ -1,5 +1,5 @@
 from django import forms
-from .models import Client, Area, CostCenter, RevenueCenter, CashInflow, CashOutflow, FinancialCategory, FinancialClasification, ChartOfAccounts, BankAccount
+from .models import Client, Area, CostCenter, RevenueCenter, CashInflow, CashOutflow, FinancialAccounting, FinancialCategory, FinancialSubcategory, ChartOfAccounts, BankAccount
 
 
 class ClientForm(forms.ModelForm):
@@ -125,6 +125,17 @@ class RevenueCenterForm(forms.ModelForm):
 
         return revenue_center
 
+class FinancialAccountingForm(forms.ModelForm):
+
+    class Meta:
+        model = FinancialAccounting
+        fields = ['name']
+        labels ={
+            'name': 'Nome',
+        }
+        help_text = {'name': 'Obrigatório',}
+
+
 class FinancialCategoryForm(forms.ModelForm):
 
     class Meta:
@@ -135,11 +146,10 @@ class FinancialCategoryForm(forms.ModelForm):
         }
         help_text = {'name': 'Obrigatório',}
 
-
-class FinancialClasificationForm(forms.ModelForm):
+class FinancialSubcategoryForm(forms.ModelForm):
 
     class Meta:
-        model = FinancialClasification
+        model = FinancialSubcategory
         fields = ['name']
         labels ={
             'name': 'Nome',
@@ -150,15 +160,16 @@ class FinancialClasificationForm(forms.ModelForm):
 class ChartOfAccountsForm(forms.ModelForm):
     class Meta:
         model = ChartOfAccounts
-        fields = ['classification', 'category', 'id_plan']
+        fields = ['category', 'subcategory', 'accounting', 'id_plan']
         labels = {
-            'classification': 'Classificação',
             'category': 'Categoria',
+            'subcategory': 'Subcategoria',
+            'accounting': 'Contábil',
             'id_plan': 'ID',
         }
         help_texts = {
-            'classification': 'Obrigatório',
-            'category': 'Obrigatório',
+            'subcategory': 'Obrigatório',
+            'accounting': 'Obrigatório',
             'id_plan': 'Obrigatório',
         }
 

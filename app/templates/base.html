@@ -253,11 +253,14 @@
                 {% if perms.financial.view_revenuecenter %}
                 <a href="{% url 'revenuecenter' %}">Centro de Receita</a>
                 {% endif %}
+                {% if perms.financial.view_financialaccounting %}
+                <a href="{% url 'financial_accounting' %}">Contábil</a>
+                {% endif %}
                 {% if perms.financial.view_financialcategory %}
                 <a href="{% url 'financial_category' %}">Categorias</a>
                 {% endif %}
-                {% if perms.financial.view_financialcategory %}
-                <a href="{% url 'financial_clasification' %}">Classificação</a>
+                {% if perms.financial.view_financialsubcategory %}
+                <a href="{% url 'financial_subcategory' %}">Subcategorias</a>
                 {% endif %}
                 {% if perms.financial.view_chartofaccounts %}
                 <a href="{% url 'chart_of_accounts' %}">Plano de Contas</a>

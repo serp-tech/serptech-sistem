@@ -163,7 +163,7 @@ class RevenueCenter(models.Model):
             return f'{self.id_center}-{self.sector}-{self.area}'
 
 
-class FinancialCategory(models.Model):
+class FinancialAccounting(models.Model):
 
     name = models.CharField(max_length=200)
 
@@ -174,7 +174,19 @@ class FinancialCategory(models.Model):
         return self.name
     
 
-class FinancialClasification(models.Model):
+class FinancialCategory(models.Model):
+
+    name = models.CharField(max_length=200)
+
+
+    class Meta:
+        ordering = ['name']
+
+    def __str__(self) :
+        return self.name
+    
+
+class FinancialSubcategory(models.Model):
 
     name = models.CharField(max_length=200)
 
@@ -188,8 +200,9 @@ class FinancialClasification(models.Model):
 
 class ChartOfAccounts(models.Model):
 
-    classification = models.ForeignKey(FinancialClasification, on_delete=models.PROTECT, related_name='classification_accounts')
-    category = models.ForeignKey(FinancialCategory, on_delete=models.PROTECT, related_name='category_accounts')
+    category = models.ForeignKey(FinancialCategory, on_delete=models.CASCADE, related_name='category_accounts', blank=True, null=True)
+    subcategory = models.ForeignKey(FinancialSubcategory, on_delete=models.CASCADE, related_name='subcategory_accounts')
+    accounting = models.ForeignKey(FinancialAccounting, on_delete=models.CASCADE, related_name='accounting_accounts')
     id_plan = models.CharField(max_length=30)
 
     class Meta:
@@ -197,7 +210,7 @@ class ChartOfAccounts(models.Model):
 
         
     def __str__(self) -> str:
-        return f'{self.id_plan}-{self.classification}-{self.category}'
+        return f'{self.id_plan}-{self.category}-{self.subcategory}-{self.accounting}'
     
     
 class BankAccount(models.Model):

@@ -18,10 +18,11 @@ from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, 
 from reportlab.lib.pagesizes import landscape
 from reportlab.lib.units import cm
 from accounts.models import UserProfile
-from .models import Client, CostCenter, RevenueCenter, CashInflow, CashOutflow, FinancialClasification, FinancialCategory, ChartOfAccounts, BankAccount, Transfer
+from .models import Client, CostCenter, RevenueCenter, CashInflow, CashOutflow, FinancialCategory, FinancialSubcategory, FinancialAccounting, ChartOfAccounts, BankAccount, Transfer
 from .forms import (
-    ClientForm, CostCenterForm, RevenueCenterForm, CashOutflowForm,CashOutflowUpdateForm , CashInflowForm, 
-    CashInflowUpdateForm, ReciveInflowForm, PayOutflowForm, FinancialCategoryForm, FinancialClasificationForm, AreaForm, ChartOfAccountsForm, BankAccountForm, OFXUploadForm)
+    ClientForm, CostCenterForm, RevenueCenterForm, CashOutflowForm, CashOutflowUpdateForm , CashInflowForm, 
+    CashInflowUpdateForm, ReciveInflowForm, PayOutflowForm, FinancialAccountingForm, FinancialCategoryForm, 
+    FinancialSubcategoryForm, AreaForm, ChartOfAccountsForm, BankAccountForm, OFXUploadForm)
 from .utils import buscar_banco_por_codigo, buscar_bankid_no_ofx, formatar_agencia_conta_ofx
 from stock.utils import format_currency
 from stock.forms import SectorForm
@@ -150,28 +151,6 @@ class RevenueCenterDeleteView(DeleteView):
     success_url = '/revenuecenter/'
 
 
-class FinancialClasificationListView(ListView):
-
-    model = FinancialClasification
-    template_name = 'financial_clasification_list.html'
-    context_object_name = 'itens'
-
-
-class FinancialClasificationCreateView(CreateView):
-
-    model = FinancialClasification
-    template_name = 'financial_classification_create.html'
-    form_class = FinancialClasificationForm
-    success_url = '/financial-classification/'
-
-
-class FinancialClasificationDeleteView(DeleteView):
-
-    model = FinancialClasification
-    template_name = 'financial_classification_delete.html'
-    success_url = '/financial-classification/'
-
-    
 class FinancialCategoryListView(ListView):
 
     model = FinancialCategory
@@ -194,6 +173,50 @@ class FinancialCategoryDeleteView(DeleteView):
     success_url = '/financial-category/'
 
 
+class FinancialSubcategoryListView(ListView):
+
+    model = FinancialSubcategory
+    template_name = 'financial_subcategory_list.html'
+    context_object_name = 'itens'
+
+
+class FinancialSubcategoryCreateView(CreateView):
+
+    model = FinancialSubcategory
+    template_name = 'financial_subcategory_create.html'
+    form_class = FinancialSubcategoryForm
+    success_url = '/financial-subcategory/'
+
+
+class FinancialSubcategoryDeleteView(DeleteView):
+
+    model = FinancialSubcategory
+    template_name = 'financial_subcategory_delete.html'
+    success_url = '/financial-subcategory/'
+
+    
+class FinancialAccountingListView(ListView):
+
+    model = FinancialAccounting
+    template_name = 'financial_accounting_list.html'
+    context_object_name = 'itens'
+
+
+class FinancialAccountingCreateView(CreateView):
+
+    model = FinancialAccounting
+    template_name = 'financial_accounting_create.html'
+    form_class = FinancialAccountingForm
+    success_url = '/financial-accounting/'
+
+
+class FinancialAccountingDeleteView(DeleteView):
+
+    model = FinancialAccounting
+    template_name = 'financial_accounting_delete.html'
+    success_url = '/financial-accounting/'
+
+
 class ChartOfAccountsListView(ListView):
     model = ChartOfAccounts
     template_name = 'chartofaccounts_list.html'
@@ -208,8 +231,9 @@ class ChartOfAccountsCreateView(CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['financial_accounting_form'] = FinancialAccountingForm()
+        context['financial_subcategory_form'] = FinancialSubcategoryForm()
         context['financial_category_form'] = FinancialCategoryForm()
-        context['financial_classification_form'] = FinancialClasificationForm()
         return context
     
 
@@ -218,6 +242,12 @@ class ChartOfAccountesUpdateView(UpdateView):
     template_name = 'chartofaccounts_update.html'
     form_class = ChartOfAccountsForm
     success_url = '/chart-of-accounts/'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['financial_accounting_form'] = FinancialAccountingForm()
+        context['financial_subcategory_form'] = FinancialCategoryForm()
+        return context
 
 
 class ChartOfAccountsDeleteView(DeleteView):
@@ -515,7 +545,7 @@ def get_chart_of_accounts(request):
     results = [
         {
             'id': chart.id,
-            'text': f"{chart.id_plan}-{chart.classification.name}-{chart.category.name}",
+            'text': f"{chart.id_plan}-{chart.Subcategory.name}-{chart.category.name}",
         } for chart in charts
     ]
     return JsonResponse({'results': results})

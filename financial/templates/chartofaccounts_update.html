@@ -15,10 +15,10 @@
             <div class="col-sm-9">
                 <div class="d-flex align-items-center">
                     {{ field }}
-                    {% if field.name == 'classification' %}
-                        <button type="button" class="btn btn-primary ml-2" id="addClassificationBtn" data-toggle="modal" data-target="#classificationModal">Adicionar Classificação</button>
-                    {% elif field.name == 'category' %}
-                        <button type="button" class="btn btn-primary ml-2" id="addCategoryBtn" data-toggle="modal" data-target="#categoryModal">Adicionar Categoria</button>
+                    {% if field.name == 'subcategory' %}
+                        <button type="button" class="btn btn-primary ml-2" id="addsubcategoryBtn" data-toggle="modal" data-target="#subcategoryModal">Adicionar Subcategoria</button>
+                    {% elif field.name == 'accounting' %}
+                        <button type="button" class="btn btn-primary ml-2" id="addaccountingBtn" data-toggle="modal" data-target="#accountingModal">Adicionar Categoria</button>
                     {% endif %}
                 </div>
                 {% if field.help_text %}
@@ -40,16 +40,16 @@
 </div>
 
 
-{% include 'partials/financial_classification_modal.html' %}
-{% include 'partials/financial_category_modal.html' %}
+{% include 'partials/financial_subcategory_modal.html' %}
+{% include 'partials/financial_accounting_modal.html' %}
 <script src="https://code.jquery.com/jquery-3.2.1.min.js" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" crossorigin="anonymous"></script>
 
 <script>
-$('#addClassificationBtn').on('click', function() {
+$('#addsubcategoryBtn').on('click', function() {
     // Exibe o modal de classificação
-    $('#classificationModal').modal('show');
+    $('#subcategoryModal').modal('show');
 });
 
 $('#addCategoryBtn').on('click', function() {
@@ -58,15 +58,15 @@ $('#addCategoryBtn').on('click', function() {
 });
 
 // AJAX para adicionar classificação financeira
-$('#classification-form').on('submit', function(event) {
+$('#subcategory-form').on('submit', function(event) {
     event.preventDefault(); // Impede o envio padrão do formulário
 
     $.ajax({
-        url: '{% url "financial_clasification_add" %}', // URL para adicionar classificação
+        url: '{% url "financial_subcategory_add" %}', // URL para adicionar classificação
         type: 'POST',
         data: $(this).serialize(), // Serializa os dados do formulário
         success: function(response) {
-            $('#classificationModal').modal('hide'); // Fecha o modal após sucesso
+            $('#subcategoryModal').modal('hide'); // Fecha o modal após sucesso
             location.reload(); // Recarrega a página para atualizar a lista de classificações
         },
         error: function() {
@@ -76,15 +76,15 @@ $('#classification-form').on('submit', function(event) {
 });
 
 // AJAX para adicionar categoria financeira
-$('#category-form').on('submit', function(event) {
+$('#accounting-form').on('submit', function(event) {
     event.preventDefault(); // Impede o envio padrão do formulário
 
     $.ajax({
-        url: '{% url "financial_category_add" %}', // URL para adicionar categoria
+        url: '{% url "financial_accounting_add" %}', // URL para adicionar categoria
         type: 'POST',
         data: $(this).serialize(), // Serializa os dados do formulário
         success: function(response) {
-            $('#categoryModal').modal('hide'); // Fecha o modal após sucesso
+            $('#accountingModal').modal('hide'); // Fecha o modal após sucesso
             location.reload(); // Recarrega a página para atualizar a lista de categorias
         },
         error: function() {

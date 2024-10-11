@@ -12,9 +12,10 @@
         <thead>
             <tr>
                 <th>ID do Plano</th>
-                <th>Classificação Financeira</th>
-                <th>Categoria Financeira</th>
-                {% if perms.financial.delete_planodecontas %}  {# Permission for deleting PlanoDeContas #}
+                <th>Categoria</th>
+                <th>Subcategoria</th>
+                <th>Contábil</th>
+                {% if perms.financial.delete_chartofaccounts %} 
                 <th>Ações</th>
                 {% endif %}
             </tr>
@@ -22,9 +23,10 @@
         <tbody>
             {% for item in itens %}
             <tr>
-                <td>{{ item.id_plan }}</td>  {# Show the ID of the PlanoDeContas #}
-                <td>{{ item.classification.name }}</td>  {# Show the related ClassificacaoFinanceiras #}
-                <td>{{ item.category.name }}</td>  {# Show the related CategoriasFinanceiras #}
+                <td>{{ item.id_plan }}</td>  
+                <td>{{ item.category.name }}</td> 
+                <td>{{ item.subcategory.name }}</td> 
+                <td>{{ item.accounting.name }}</td> 
                 {% if perms.financial.delete_chartofaccounts %}
                 <td>
                     <div class="btn-group">
