@@ -25,6 +25,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='chartofaccounts',
             name='subcategory',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='subcategory_accounts', to='financial.financialsubcategory'),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='subcategory_accounts', to='financial.financialsubcategory'),
         ),
     ]
