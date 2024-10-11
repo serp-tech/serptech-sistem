@@ -201,7 +201,7 @@ class FinancialSubcategory(models.Model):
 class ChartOfAccounts(models.Model):
 
     category = models.ForeignKey(FinancialCategory, on_delete=models.CASCADE, related_name='category_accounts', blank=True, null=True)
-    subcategory = models.ForeignKey(FinancialSubcategory, on_delete=models.CASCADE, related_name='subcategory_accounts')
+    subcategory = models.ForeignKey(FinancialSubcategory, on_delete=models.CASCADE, related_name='subcategory_accounts', blank=True, null=True)
     accounting = models.ForeignKey(FinancialAccounting, on_delete=models.CASCADE, related_name='accounting_accounts')
     id_plan = models.CharField(max_length=30)
 
