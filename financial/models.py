@@ -168,7 +168,7 @@ class FinancialAccounting(models.Model):
     name = models.CharField(max_length=200)
 
     class Meta:
-        ordering = ['name']
+        ordering = ['id']
     
     def __str__(self) :
         return f"{self.pk}-{self.name}"
@@ -192,7 +192,7 @@ class FinancialSubcategory(models.Model):
 
 
     class Meta:
-        ordering = ['name']
+        ordering = ['id']
 
     def __str__(self) :
         return f"{self.pk}-{self.name}"
