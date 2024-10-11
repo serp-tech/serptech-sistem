@@ -171,7 +171,7 @@ class FinancialAccounting(models.Model):
         ordering = ['name']
     
     def __str__(self) :
-        return self.name
+        return f"{self.pk}-{self.name}"
     
 
 class FinancialCategory(models.Model):
@@ -195,7 +195,7 @@ class FinancialSubcategory(models.Model):
         ordering = ['name']
 
     def __str__(self) :
-        return self.name
+        return f"{self.pk}-{self.name}"
 
 
 class ChartOfAccounts(models.Model):
