@@ -15,10 +15,12 @@
             <div class="col-sm-9">
                 <div class="d-flex align-items-center">
                     {{ field }}
-                    {% if field.name == 'subcategory' %}
+                    {% if field.name == 'category' %}
+                        <button type="button" class="btn btn-primary ml-2" id="addcategoryBtn" data-toggle="modal" data-target="#categoryModal">Adicionar Categoria</button>
+                    {% elif field.name == 'subcategory' %}
                         <button type="button" class="btn btn-primary ml-2" id="addsubcategoryBtn" data-toggle="modal" data-target="#subcategoryModal">Adicionar Subcategoria</button>
                     {% elif field.name == 'accounting' %}
-                        <button type="button" class="btn btn-primary ml-2" id="addaccountingBtn" data-toggle="modal" data-target="#accountingModal">Adicionar Categoria</button>
+                        <button type="button" class="btn btn-primary ml-2" id="addaccountingBtn" data-toggle="modal" data-target="#accountingModal">Adicionar Contábil</button>
                     {% endif %}
                 </div>
                 {% if field.help_text %}
@@ -40,6 +42,7 @@
 </div>
 
 
+{% include 'partials/financial_category_modal.html' %}
 {% include 'partials/financial_subcategory_modal.html' %}
 {% include 'partials/financial_accounting_modal.html' %}
 <script src="https://code.jquery.com/jquery-3.2.1.min.js" crossorigin="anonymous"></script>
@@ -58,6 +61,23 @@ $('#addCategoryBtn').on('click', function() {
 });
 
 // AJAX para adicionar classificação financeira
+$('#category-form').on('submit', function(event) {
+    event.preventDefault(); // Impede o envio padrão do formulário
+
+    $.ajax({
+        url: '{% url "financial_category_add" %}', // URL para adicionar classificação
+        type: 'POST',
+        data: $(this).serialize(), // Serializa os dados do formulário
+        success: function(response) {
+            $('#categoryModal').modal('hide'); // Fecha o modal após sucesso
+            location.reload(); // Recarrega a página para atualizar a lista de classificações
+        },
+        error: function() {
+            console.log('Erro ao adicionar classificação');
+        }
+    });
+});
+
 $('#subcategory-form').on('submit', function(event) {
     event.preventDefault(); // Impede o envio padrão do formulário
 

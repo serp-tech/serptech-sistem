@@ -245,6 +245,7 @@ class ChartOfAccountesUpdateView(UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['financial_category_form'] = FinancialCategoryForm()
         context['financial_accounting_form'] = FinancialAccountingForm()
         context['financial_subcategory_form'] = FinancialCategoryForm()
         return context
