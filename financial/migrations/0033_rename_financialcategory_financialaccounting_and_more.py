@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='chartofaccounts',
             name='accounting',
-            field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.PROTECT, related_name='accounting_accounts', to='financial.financialaccounting'),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.PROTECT, related_name='accounting_accounts', to='financial.financialaccounting'),
             preserve_default=False,
         ),
     ]
