@@ -1,10 +1,10 @@
 {% extends 'base.html' %}
 
-{% block title %}Adicionar Centro de Receita{% endblock %}
+{% block title %}Editar Centro de Receita{% endblock %}
 
 {% block content %}
 <div class="container">
-    <h2>Adicionar Centro de Receita</h2>
+    <h2>Editar Centro de Receita</h2>
     <form method="post" class="form-horizontal">
         {% csrf_token %}
         {% for field in form %}

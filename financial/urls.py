@@ -3,11 +3,11 @@ from .views import (ClientCreateView, ClientDeleteView, ClientDetailView, Client
                     CashInflowListView, CashInflowDetailView, CashInflowDeleteView, CashInflowCreateView, CashInflowUpdateView, 
                     conclude_inflow_cash, CashOutflowListView, CashOutflowDetailView, CashOutflowCreateView, CashOutflowUpdateView, CashOutflowDeleteView, 
                     cash_flow_view, make_payment, generate_cash_outflow_report, generate_cash_inflow_report, generate_cash_flow_report,
-                    CostCenterListView, CostCenterCreateView, CostCenterDeleteView, RevenueCenterListView, RevenueCenterCreateView, RevenueCenterDeleteView,
-                    FinancialAccountingListView, FinancialAccountingCreateView, FinancialAccountingDeleteView, FinancialSubcategoryListView, FinancialSubcategoryCreateView, 
+                    CostCenterListView, CostCenterCreateView, CostCenterUpdateView, CostCenterDeleteView, RevenueCenterListView, RevenueCenterCreateView, RevenueCenterUpdateView, RevenueCenterDeleteView,
+                    FinancialAccountingListView, FinancialAccountingCreateView, FinancialAccountingUpdateView, FinancialAccountingDeleteView, FinancialSubcategoryListView, FinancialSubcategoryCreateView, FinancialSubcategoryUpdateView,
                     FinancialSubcategoryDeleteView, ChartOfAccountsListView, ChartOfAccountsCreateView, ChartOfAccountesUpdateView, ChartOfAccountsDeleteView, add_area, get_chart_of_accounts, get_cost_center,
                     BankAccountListView, BankAccountCreateView, BankAccountDetailView, BankAccountUpdateView, BankAccountDeleteView, get_bank_view, get_revenue_center, ofx_upload_view,
-                    ConciliationCarriedOut, ConciliationPending, reconcile_transfer, add_outflow, add_inflow, FinancialCategoryListView, FinancialCategoryCreateView, FinancialCategoryDeleteView          
+                    ConciliationCarriedOut, ConciliationPending, reconcile_transfer, add_outflow, add_inflow, FinancialCategoryListView, FinancialCategoryCreateView, FinancialCategoryUpdateView, FinancialCategoryDeleteView          
 )
 
 
@@ -41,22 +41,27 @@ urlpatterns = [
 
     path('costcenter/', CostCenterListView.as_view(), name='costcenter'),
     path('costcenter/add', CostCenterCreateView.as_view(), name='costcenter_add'),
+    path('costcenter/<int:pk>/update', CostCenterUpdateView.as_view(), name='costcenter_update'),
     path('costcenter/<int:pk>/delete', CostCenterDeleteView.as_view(), name='costcenter_delete'),
 
     path('revenuecenter/', RevenueCenterListView.as_view(), name='revenuecenter'),
     path('revenuecenter/add', RevenueCenterCreateView.as_view(), name='revenuecenter_add'),
+    path('revenuecenter/<int:pk>/update', RevenueCenterUpdateView.as_view(), name='revenuecenter_update'),
     path('revenuecenter/<int:pk>/delete', RevenueCenterDeleteView.as_view(), name='revenuecenter_delete'),
     
     path('financial-accounting/', FinancialAccountingListView.as_view(), name='financial_accounting'),
     path('financial-accounting/add', FinancialAccountingCreateView.as_view(), name='financial_accounting_add'),
+    path('financial-accounting/<int:pk>/update', FinancialAccountingUpdateView.as_view(), name='financial_accounting_update'),
     path('financial-accounting/<int:pk>/delete', FinancialAccountingDeleteView.as_view(), name='financial_accounting_delete'),
 
     path('financial-category/', FinancialCategoryListView.as_view(), name='financial_category'),
     path('financial-category/add', FinancialCategoryCreateView.as_view(), name='financial_category_add'),
+    path('financial-category/<int:pk>/update', FinancialCategoryUpdateView.as_view(), name='financial_category_update'),
     path('financial-category/<int:pk>/delete', FinancialCategoryDeleteView.as_view(), name='financial_category_delete'),
 
     path('financial-subcategory/', FinancialSubcategoryListView.as_view(), name='financial_subcategory'),
     path('financial-subcategory/add', FinancialSubcategoryCreateView.as_view(), name='financial_subcategory_add'),
+    path('financial-subcategory/<int:pk>/update', FinancialSubcategoryUpdateView.as_view(), name='financial_subcategory_update'),
     path('financial-subcategory/<int:pk>/delete', FinancialSubcategoryDeleteView.as_view(), name='financial_subcategory_delete'),
 
     path('chart-of-accounts/', ChartOfAccountsListView.as_view(), name='chart_of_accounts'),

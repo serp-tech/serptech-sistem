@@ -1,10 +1,10 @@
 {% extends 'base.html' %}
 
-{% block title %}Adicionar Centro de Receita{% endblock %}
+{% block title %}Editar Centro de Custo{% endblock %}
 
 {% block content %}
 <div class="container">
-    <h2>Adicionar Centro de Receita</h2>
+    <h2>Editar Centro de Custo</h2>
     <form method="post" class="form-horizontal">
         {% csrf_token %}
         {% for field in form %}
@@ -31,7 +31,7 @@
         <div class="form-group row">
             <div class="col-sm-12">
                 <button type="submit" class="btn btn-primary">Salvar</button>
-                <a href="{% url 'revenuecenter' %}" class="btn btn-primary">Cancelar</a>
+                <a href="{% url 'costcenter' %}" class="btn btn-primary">Cancelar</a>
             </div>
         </div>
     </form>

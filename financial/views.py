@@ -22,7 +22,7 @@ from .models import Client, CostCenter, RevenueCenter, CashInflow, CashOutflow, 
 from .forms import (
     ClientForm, CostCenterForm, RevenueCenterForm, CashOutflowForm, CashOutflowUpdateForm , CashInflowForm, 
     CashInflowUpdateForm, ReciveInflowForm, PayOutflowForm, FinancialAccountingForm, FinancialCategoryForm, 
-    FinancialSubcategoryForm, AreaForm, ChartOfAccountsForm, BankAccountForm, OFXUploadForm)
+    FinancialSubcategoryForm, AreaForm, ChartOfAccountsForm, BankAccountForm, OFXUploadForm, CostCenterUpdateForm, RevenueCenterUpdateForm)
 from .utils import buscar_banco_por_codigo, buscar_bankid_no_ofx, formatar_agencia_conta_ofx
 from stock.utils import format_currency
 from stock.forms import SectorForm
@@ -116,6 +116,20 @@ class CostCenterCreateView(CreateView):
         
         return context
 
+class CostCenterUpdateView(UpdateView):
+
+    model = CostCenter
+    template_name = 'cost_center_update.html'
+    form_class = CostCenterUpdateForm
+    success_url = '/costcenter/'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['area_form'] = AreaForm
+        context['sector_form'] = SectorForm
+        
+        return context
+
 
 class CostCenterDeleteView(DeleteView):
 
@@ -136,6 +150,18 @@ class RevenueCenterCreateView(CreateView):
     model = RevenueCenter
     template_name = 'Revenue_center_create.html'
     form_class = RevenueCenterForm
+    success_url = '/revenuecenter/'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['sector_form'] = SectorForm
+        return context
+    
+class RevenueCenterUpdateView(UpdateView):
+
+    model = RevenueCenter
+    template_name = 'revenue_center_update.html'
+    form_class = RevenueCenterUpdateForm
     success_url = '/revenuecenter/'
 
     def get_context_data(self, **kwargs):
@@ -165,6 +191,13 @@ class FinancialCategoryCreateView(CreateView):
     form_class = FinancialCategoryForm
     success_url = '/financial-category/'
 
+class FinancialCategoryUpdateView(UpdateView):
+
+    model = FinancialCategory
+    template_name = 'financial_category_update.html'
+    form_class = FinancialCategoryForm
+    success_url = '/financial-category/'
+
 
 class FinancialCategoryDeleteView(DeleteView):
 
@@ -187,6 +220,13 @@ class FinancialSubcategoryCreateView(CreateView):
     form_class = FinancialSubcategoryForm
     success_url = '/financial-subcategory/'
 
+class FinancialSubcategoryUpdateView(UpdateView):
+
+    model = FinancialSubcategory
+    template_name = 'financial_subcategory_update.html'
+    form_class = FinancialSubcategoryForm
+    success_url = '/financial-subcategory/'
+
 
 class FinancialSubcategoryDeleteView(DeleteView):
 
@@ -206,6 +246,13 @@ class FinancialAccountingCreateView(CreateView):
 
     model = FinancialAccounting
     template_name = 'financial_accounting_create.html'
+    form_class = FinancialAccountingForm
+    success_url = '/financial-accounting/'
+
+class FinancialAccountingUpdateView(UpdateView):
+
+    model = FinancialAccounting
+    template_name = 'financial_accounting_update.html'
     form_class = FinancialAccountingForm
     success_url = '/financial-accounting/'
 

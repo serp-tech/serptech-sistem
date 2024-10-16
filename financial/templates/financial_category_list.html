@@ -23,7 +23,14 @@
                 <td>{{ item.name }}</td>
                 {% if perms.financial.delete_financialcategory %}
                 <td>
-                    <a href="{% url 'financial_category_delete' item.pk %}" class="btn btn-confirm-excluir">Excluir</a>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">Ações</button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item btn btn-info" href="{% url 'financial_category_update' item.pk %}">Editar</a></li>
+                            <li><a href="{% url 'financial_category_delete' item.pk %}" class="dropdown-item btn btn-info">Excluir</a></li>
+                            
+                        </ul>
+                    </div>
                 </td>
                 {% endif %}
             </tr>

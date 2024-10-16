@@ -80,6 +80,24 @@ class CostCenterForm(forms.ModelForm):
         return cost_center
 
 
+class CostCenterUpdateForm(forms.ModelForm):
+    
+    class Meta:
+        model = CostCenter
+        fields = ['sector', 'area', 'final_area']
+        labels = {
+            'sector': 'Setor',
+            'area': 'Área',
+            'final_area': 'Área Final',
+        }
+        help_texts = {
+            'sector': 'Obrigatório',
+            'area': 'Obrigatório',
+            'final_area': 'Opcional',
+        }
+
+
+
 class RevenueCenterForm(forms.ModelForm):
     area_name = forms.CharField(max_length=100, label="Área", required=True)
     final_area_name = forms.CharField(max_length=100, label="Área Final", required=False)
@@ -124,6 +142,24 @@ class RevenueCenterForm(forms.ModelForm):
             revenue_center.save()  # Salva o objeto com a lógica de ID center no modelo
 
         return revenue_center
+    
+
+class RevenueCenterUpdateForm(forms.ModelForm):
+
+    class Meta:
+        model = RevenueCenter
+        fields = ['sector', 'area', 'final_area']
+        labels = {
+            'sector': 'Setor',
+            'area': 'Área',
+            'final_area': 'Área Final',
+        }
+        help_texts = {
+            'sector': 'Obrigatório',
+            'area': 'Obrigatório',
+            'final_area': 'Opcional',
+        }
+
 
 class FinancialAccountingForm(forms.ModelForm):
 
