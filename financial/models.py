@@ -17,7 +17,7 @@ PAYMENT_METHOD = (
     ('cheque', 'Cheque'),
 )
 STATUS_CHOICES = (
-    ('efetuado', 'Efetuado'),
+    ('Efetuado', 'Efetuado'),
     ('não efetuado', 'Não Efetuado'),
 )
 
