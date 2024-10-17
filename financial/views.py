@@ -584,8 +584,9 @@ def get_chart_of_accounts(request):
     if query:
         charts = ChartOfAccounts.objects.filter(
             Q(id_plan__icontains=query) |
-            Q(classification__name__icontains=query) |
-            Q(category__name__icontains=query)
+            Q(subcategory__name__icontains=query) |
+            Q(category__name__icontains=query)|
+            Q(accounting__name__icontains=query)
         ).distinct().order_by('id')[:10]  # added order_by for consistent ordering
     else:
         charts = ChartOfAccounts.objects.all().order_by('id')[:10]
@@ -593,7 +594,7 @@ def get_chart_of_accounts(request):
     results = [
         {
             'id': chart.id,
-            'text': f"{chart.id_plan}-{chart.Subcategory.name}-{chart.category.name}",
+            'text': f"{chart.id_plan}-{chart.category.name}-{chart.subcategory.name}-{chart.accounting.name}",
         } for chart in charts
     ]
     return JsonResponse({'results': results})
