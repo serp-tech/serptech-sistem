@@ -31,11 +31,11 @@
     </p>
     <p><strong>Descrição:</strong> {{ object.descricao }}</p>
     
-    {% if perms.financial.change_contas_receber %}
+    {% if perms.financial.change_cashoutflow %}
     <a href="{% url 'cash_outflow_update' object.pk %}" class="btn btn-primary">Editar</a>
     {% endif %}
     <a href="{% url 'cash_outflow' %}" class="btn btn-primary">Voltar</a>
-    {% if perms.financial.delete_contas_receber %}
+    {% if perms.financial.delete_cashoutflow %}
     <a href="{% url 'cash_outflow_delete' object.pk %}" class="btn btn-danger">Excluir</a>
     {% endif %}
 </div>

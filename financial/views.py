@@ -417,11 +417,11 @@ class CashOutflowCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateV
     permission_required = 'financial.add_cashoutflow'
 
 
-class CashOutflowDetailView(LoginRequiredMixin, PermissionRequiredMixin, DetailView):
+class CashOutflowDetailView(LoginRequiredMixin, DetailView):
 
     model = CashOutflow
     template_name = 'cash_outflow_detail.html'
-    permission_required = 'financial.view_cashoutflow'
+
 
 
 class CashOutflowUpdateView(LoginRequiredMixin, PermissionRequiredMixin,UpdateView):
