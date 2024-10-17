@@ -359,7 +359,7 @@ class CashInflowDetailView(LoginRequiredMixin, PermissionRequiredMixin, DetailVi
     permission_required =' financial.view_cashinflow'
 
 
-class CashInflowUpdateView(LoginRequiredMixin, UpdateView):
+class CashInflowUpdateView( UpdateView):
 
     model = CashInflow
     template_name = 'cash_inflow_update.html'
