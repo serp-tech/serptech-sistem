@@ -352,20 +352,19 @@ class CashInflowCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateVi
         return context
 
 
-class CashInflowDetailView(LoginRequiredMixin, PermissionRequiredMixin, DetailView):
+class CashInflowDetailView(LoginRequiredMixin, DetailView):
 
     model = CashInflow
     template_name = 'cash_inflow_detail.html'
-    permission_required =' financial.view_cashinflow'
 
 
-class CashInflowUpdateView( UpdateView):
+class CashInflowUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
 
     model = CashInflow
     template_name = 'cash_inflow_update.html'
     form_class = CashInflowUpdateForm
     success_url = reverse_lazy('cash_inflow')
-    
+    permission_required = 'financial.change_cashinflow'
 
 
 class CashInflowDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
