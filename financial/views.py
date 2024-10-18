@@ -710,9 +710,11 @@ def cash_flow_view(request):
         transacao.total_value = format_currency(transacao.total_value)
 
     transacoes.sort(key=lambda x: x.payment_date or datetime.min.date(), reverse=True)
-
+    print(saldo_acumulado)
+    print(total_inflows)
+    print(total_outflows)
     # Formatar valores e saldo
-    saldo_final = saldo_acumulado + (total_inflows - total_outflows)
+    saldo_final = saldo_acumulado
     total_outflows = total_outflows * -1
     saldo_final = format_currency(saldo_final)
     total_outflows = format_currency(total_outflows)
@@ -730,6 +732,7 @@ def cash_flow_view(request):
         'mes': mes,
         'dia': dia,
     }
+    
     context['user_profile'] = UserProfile.objects.get(user=request.user)
     # Renderiza a página HTML padrão
     return render(request, 'cash_flow.html', context)
