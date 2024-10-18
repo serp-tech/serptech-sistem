@@ -44,12 +44,6 @@
     }
 
 
-    function applyMaskTelefone(telefone) {
-        telefone = telefone.replace(/\D/g, ''); // Remove caracteres não numéricos
-        return telefone.replace(/(\d{2})(\d)/, "($1) $2") // (00) 0...
-                       .replace(/(\d{5})(\d)/, "$1-$2"); // (00) 00000-0000
-    }
-
     // Aplica máscara de CNPJ ao digitar ou ao perder o foco
     const cnpjInput = document.querySelector('input[name="cnpj"]');
     cnpjInput.addEventListener('input', function() {
@@ -59,14 +53,6 @@
         this.value = applyMaskCNPJ(this.value);
     });
 
-    // Aplica máscara de telefone ao digitar ou ao perder o foco
-    const phoneInput = document.querySelector('input[name="phone_number"]');
-    phoneInput.addEventListener('input', function() {
-        this.value = applyMaskTelefone(this.value);
-    });
-    phoneInput.addEventListener('blur', function() {
-        this.value = applyMaskTelefone(this.value);
-    });
 
     document.getElementById('request-cnpj').addEventListener('click', function() {
         const cnpj = cnpjInput.value.replace(/\D/g, ''); // Retira qualquer formatação
@@ -84,10 +70,7 @@
                         document.querySelector('input[name="email"]').value = data.email;
                     }
                 })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Ocorreu um erro ao consultar o CNPJ.');
-                });
+                
         } else {
             alert('Por favor, insira um CNPJ.');
         }

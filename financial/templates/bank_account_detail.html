@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% load custom_tags %}
+
+{% block title %}Conta Bancária{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Detalhes da Conta Bancária</h2>
+    <p><strong>ID do Banco:</strong> {{ object.bank_id }}</p>
+    <p><strong>Banco:</strong> {{ object.bank }}</p>
+    <p><strong>Agência:</strong> {{ object.branch }}</p>
+    <p><strong>Número da Conta:</strong> {{ object.account_number }}</p>
+    <p><strong>Tipo de Conta:</strong> {{ object.tpe }}</p>
+    <p><strong>Valor Atual:</strong> {{ object.value|format_currency_filter }}</p>
+    
+    <a href="{% url 'bank_account' %}" class="btn btn-primary">Voltar</a>
+    {% if perms.financial.delete_bankaccount %}
+    <a href="{% url 'bank_account_delete' object.pk %}" class="btn btn-danger">Excluir</a>
+    {% endif %}
+</div>
+{% endblock %}

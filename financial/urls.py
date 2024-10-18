@@ -72,7 +72,6 @@ urlpatterns = [
     path('bank-account/', BankAccountListView.as_view(), name='bank_account'),
     path('bank-account/add', BankAccountCreateView.as_view(), name='bank_account_add'),
     path('bank-account/<int:pk>', BankAccountDetailView.as_view(), name='bank_account_detail'),
-    path('bank-account/<int:pk>/update', BankAccountUpdateView.as_view(), name='bank_account_update'),
     path('bank-account/<int:pk>/delete', BankAccountDeleteView.as_view(), name='bank_account_delete'),
 
     path('get_chart_of_accounts/', get_chart_of_accounts, name='get_chart_of_accounts'),
