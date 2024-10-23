@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Financeiro - Saída{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Saídas Pendentes</h2>
+
+    <form method="get" action="">
+        <div class="row mb-3">
+            <div class="col-md-4 mb-2">
+                <input type="text" class="form-control" id="beneficiarioFilter" name="beneficiario" placeholder="Beneficiário" value="{{ request.GET.beneficiario }}">
+            </div>
+            <div class="col-md-4 mb-2">
+                <input type="date" class="form-control" name="data" placeholder="Data" value="{{ request.GET.data }}">
+            </div>
+            <div class="col-md-4 d-flex align-items-start">
+                <button type="submit" class="btn btn-primary me-2">
+                    <i class="bi bi-search"></i> Filtrar
+                </button>
+            </div>
+        </div>
+    </form>
+
+    <div class="row">
+        <div class="col-md-12">
+            <table class="table table-dark table-striped">
+                <thead>
+                    <tr>
+                        <th>Data de Lançamento</th>
+                        <th>Beneficiário</th>
+                        <th>CNPJ Beneficiário</th>
+                        <th>Documento</th>
+                        <th>Valor do Título</th>
+                        <th>Multa</th>
+                        <th>Desconto</th>
+                        <th>Data de Faturamento</th>
+                        <th>Data de Vencimento</th>
+                        <th>Data de Pagamento</th>
+                        <th>Forma de Pagamento</th>
+                        <th>Valor Total</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in itens %}
+                    <tr>
+                        <td class="text-center">{{ item.date|date:"d/m/Y" }}</td>
+                        <td class="text-center">{{ item.recipient }}</td>
+                        <td class="telefone">{{ item.recipient_cnpj }}</td>
+                        <td class="telefone">{{ item.document }}</td>
+                        <td class="telefone">{{ item.tittle_value }}</td>
+                        <td class="telefone">{{ item.fine }}</td>
+                        <td class="telefone">{{ item.discount }}</td>
+                        <td class="text-center">{{ item.billing_date|date:"d/m/Y" }}</td>
+                        <td class="text-center">{{ item.due_date|date:"d/m/Y" }}</td>
+                        <td class="text-center">{{ item.payment_date|date:"d/m/Y" }}</td>
+                        <td class="text-center">{{ item.payment_method }}</td>
+                        <td class="telefone">{{ item.total_value }}</td>
+                        <td class="text-center">{{ item.status }}</td>
+                        <td>
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">Ações</button>
+                                <ul class="dropdown-menu">
+                                <li><a class="dropdown-item btn btn-info" href="{% url 'cash_outflow_detail' item.pk %}">Detalhes</a></li>
+                                {% if item.status != 'Efetuado' and user_profile.position == 'Gerente' or user_profile.position == 'Diretor' %}
+                                <li><a class="dropdown-item btn btn-info" href="{% url 'cash_outflow_update' item.pk %}">Editar</a></li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

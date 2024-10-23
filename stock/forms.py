@@ -108,7 +108,7 @@ class ItemForm(forms.ModelForm):
     class Meta:
         model = Item
         fields = [
-            'name', 'nomenclature', 'presentation', 'suppliers', 'sector', 'purchase_frequency',
+            'name', 'nomenclatures', 'presentation', 'suppliers', 'sector', 'purchase_frequency',
             'outflow_frequency', 'description'
         ]
         labels = {

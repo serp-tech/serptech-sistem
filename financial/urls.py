@@ -1,13 +1,14 @@
 from django.urls import path
 from .views import (ClientCreateView, ClientDeleteView, ClientDetailView, ClientListView, ClientUpdateView,
                     CashInflowListView, CashInflowDetailView, CashInflowDeleteView, CashInflowCreateView, CashInflowUpdateView, 
-                    conclude_inflow_cash, CashOutflowListView, CashOutflowDetailView, CashOutflowCreateView, CashOutflowUpdateView, CashOutflowDeleteView, 
+                    conclude_inflow_cash, CashOutflowListView, CashOutflowPendingListView, CashOutflowDetailView, CashOutflowCreateView, CashOutflowUpdateView, CashOutflowDeleteView, 
                     cash_flow_view, make_payment, generate_cash_outflow_report, generate_cash_inflow_report, generate_cash_flow_report,
                     CostCenterListView, CostCenterCreateView, CostCenterUpdateView, CostCenterDeleteView, RevenueCenterListView, RevenueCenterCreateView, RevenueCenterUpdateView, RevenueCenterDeleteView,
                     FinancialAccountingListView, FinancialAccountingCreateView, FinancialAccountingUpdateView, FinancialAccountingDeleteView, FinancialSubcategoryListView, FinancialSubcategoryCreateView, FinancialSubcategoryUpdateView,
                     FinancialSubcategoryDeleteView, ChartOfAccountsListView, ChartOfAccountsCreateView, ChartOfAccountesUpdateView, ChartOfAccountsDeleteView, add_area, get_chart_of_accounts, get_cost_center,
                     BankAccountListView, BankAccountCreateView, BankAccountDetailView, BankAccountUpdateView, BankAccountDeleteView, get_bank_view, get_revenue_center, ofx_upload_view,
-                    ConciliationCarriedOut, ConciliationPending, reconcile_transfer, add_outflow, add_inflow, FinancialCategoryListView, FinancialCategoryCreateView, FinancialCategoryUpdateView, FinancialCategoryDeleteView          
+                    ConciliationCarriedOut, ConciliationPending, reconcile_transfer, add_outflow, add_inflow, FinancialCategoryListView, FinancialCategoryCreateView, FinancialCategoryUpdateView, FinancialCategoryDeleteView, upload_nfe_view, process_unreconciled_items,
+                    Invoice        
 )
 
 
@@ -30,6 +31,7 @@ urlpatterns = [
     path('add-inflow/', add_inflow, name='add_inflow'),
     
     path('cash-outflow/', CashOutflowListView.as_view(), name='cash_outflow'),
+    path('cash-outflow/pending/', CashOutflowPendingListView.as_view(), name='cash_outflow_pending'),
     path('cash-outflow/add', CashOutflowCreateView.as_view(), name='cash_outflow_add'),
     path('cash-outflow/<int:pk>', CashOutflowDetailView.as_view(), name='cash_outflow_detail'),
     path('cash-outflow/<int:pk>/update', CashOutflowUpdateView.as_view(), name='cash_outflow_update'),
@@ -86,4 +88,8 @@ urlpatterns = [
 
     path('cash-flow/', cash_flow_view, name='cash_flow'),
     path('generate_cash_flow_report/', generate_cash_flow_report, name='generate_cash_flow_report'),
+
+    path('invoice/', Invoice.as_view(), name='invoice'),
+    path('upload-nfe/', upload_nfe_view, name='upload_nfe'),
+    path('process-unreconciled-items/', process_unreconciled_items, name='process_unreconciled_items'),
 ]

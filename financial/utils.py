@@ -1,5 +1,9 @@
 import requests
 import re
+import xml.etree.ElementTree as ET
+from datetime import datetime
+from stock.models import Supplier, Item, Inflow, Nomenclature
+
 
 FORMATO_BANCOS = {
     '341': {
@@ -167,3 +171,109 @@ def buscar_bankid_no_ofx(ofx_file):
         return bankid_match.group(1)  # Retorna o BANKID encontrado
     else:
         return None  # Retorna None se o BANKID não for encontrado
+    
+
+
+def process_nfe(xml_file, unit):
+    namespace = {'ns': 'http://www.portalfiscal.inf.br/nfe'}
+    tree = ET.parse(xml_file)
+    root = tree.getroot()
+
+    # Extrai informações da nota fiscal
+    nfe_info = {}
+    nfe_info['key'] = root.find('.//ns:chNFe', namespace).text
+    nfe_info['protocol'] = root.find('.//ns:nProt', namespace).text
+    nfe_info['issue_date'] = root.find('.//ns:dhEmi', namespace).text
+    nfe_info['due_date'] = root.find('.//ns:dVenc', namespace).text
+    nfe_info['description'] = root.find('.//ns:natOp', namespace).text
+
+    # Extrai o valor total da nota
+    total = root.find('.//ns:total/ns:ICMSTot', namespace)
+    nfe_info['total_value'] = float(total.find('ns:vNF', namespace).text)
+
+    # Pega as informações do fornecedor (emitente)
+    emit = root.find('.//ns:emit', namespace)
+    supplier = {}
+    supplier['name'] = emit.find('ns:xNome', namespace).text
+    supplier['cnpj'] = CNPJ_mask(emit.find('ns:CNPJ', namespace).text)
+
+    # Verifica o telefone, email e outros detalhes do fornecedor (emitente)
+    ender_emit = emit.find('ns:enderEmit', namespace)
+    supplier['phone'] = ender_emit.find('ns:fone', namespace).text if ender_emit.find('ns:fone', namespace) is not None else ''
+    supplier['phone'] = phone_mask(supplier['phone'])
+    supplier['email'] = emit.find('ns:email', namespace).text if emit.find('ns:email', namespace) is not None else ''
+    supplier['contact'] = emit.find('ns:xContato', namespace).text if emit.find('ns:xContato', namespace) is not None else ''
+    supplier['address'] = ender_emit.find('ns:xLgr', namespace).text
+    supplier['number'] = ender_emit.find('ns:nro', namespace).text
+    supplier['neighborhood'] = ender_emit.find('ns:xBairro', namespace).text
+    supplier['city'] = ender_emit.find('ns:xMun', namespace).text
+    supplier['state'] = ender_emit.find('ns:UF', namespace).text
+
+    # Tenta encontrar ou criar o fornecedor no banco de dados
+    try:
+        supplier_model = Supplier.objects.get(cnpj=supplier['cnpj'])
+    except Supplier.DoesNotExist:
+        supplier_model = Supplier.objects.create(
+            name=supplier['name'],
+            cnpj=supplier['cnpj'],
+            address=f"{supplier['address']}, {supplier['number']}, {supplier['neighborhood']}, {supplier['city']}, {supplier['state']}",
+            contact=supplier['contact'],
+            email=supplier['email'],
+            phone_number=supplier['phone']
+        )
+
+    nfe_info['supplier'] = supplier_model
+
+    # Extração de itens da NF-e
+    unreconciled_items = []
+    reconciled_items = []
+
+    for det in root.findall('.//ns:det', namespace):
+        item = {}
+        item['description'] = det.find('.//ns:xProd', namespace).text
+        item['quantity'] = int(float(det.find('.//ns:qCom', namespace).text))
+        item['unit_cost'] = float(det.find('.//ns:vUnCom', namespace).text)
+        item['total_value'] = float(det.find('.//ns:vProd', namespace).text)
+        item['unit'] = det.find('.//ns:uCom', namespace).text
+
+        try:
+            # Tenta encontrar o item no estoque pelo nome (nomenclatura)
+            nomenclature, created = Nomenclature.objects.get_or_create(name=item['description'])
+            exist_item = Item.objects.get(nomenclatures=nomenclature)
+            reconciled_items.append(exist_item)
+
+            # Cria a entrada no estoque
+            inflow = Inflow.objects.create(
+                item=exist_item,
+                invoice=nfe_info['key'],
+                date=datetime.now(),
+                supplier=supplier_model,
+                unit=unit,
+                target_stock=unit,
+                unit_cost=item['unit_cost'],
+                quantity=item['quantity'],
+                total_cost=item['total_value'],
+            )
+        except Item.DoesNotExist:
+            # Se o item não existe no estoque, adiciona à lista de itens não conciliados
+            unreconciled_items.append(item)
+
+    nfe_info['reconciled_items'] = reconciled_items
+    nfe_info['unreconciled_items'] = unreconciled_items
+
+    return nfe_info
+
+
+def CNPJ_mask(cnpj):
+    cnpj = ''.join(filter(str.isdigit, cnpj))
+    return f"{cnpj[:2]}.{cnpj[2:5]}.{cnpj[5:8]}/{cnpj[8:12]}-{cnpj[12:14]}"
+
+
+def phone_mask(phone):
+    phone = ''.join(filter(str.isdigit, phone))
+    if len(phone) == 10:  # Ex: (99) 9999-9999
+        return f"({phone[:2]}) {phone[2:6]}-{phone[6:]}"
+    elif len(phone) == 11:  # Ex: (99) 99999-9999
+        return f"({phone[:2]}) {phone[2:7]}-{phone[7:]}"
+    else:
+        return phone

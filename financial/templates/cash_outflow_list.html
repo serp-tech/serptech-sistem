@@ -10,6 +10,7 @@
     <div class="mb-2">
         {% if perms.financial.add_cashoutflow or user_profile.position == 'Gerente' or user_profile.position == 'Diretor' %}
         <a href="{% url 'cash_outflow_add' %}" class="btn btn-primary">Adicionar Saída</a>
+        <a href="{% url 'cash_outflow_pending' %}" class="btn btn-primary">Pendentes ({{ outflow_pending }})</a>
         {% endif %}
         {% if user_profile.position == 'Gerente' or user_profile.position == 'Diretor'  or user_profile.position == 'Contador' %}
         <button type="button" id="toggleRelatorioBtn" class="btn btn-success ms-3">

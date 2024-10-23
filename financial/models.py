@@ -277,8 +277,8 @@ class CashOutflow(models.Model):
     recipient_cnpj = BRCNPJField()
     document = models.CharField(max_length=50)
     document_pdf = models.FileField(upload_to='pdf/document/cash-outflow', blank=True, null=True)
-    cost_center = models.ForeignKey(CostCenter, on_delete=models.PROTECT, related_name='cost_cente_cashoutflow')
-    chart_of_accounts = models.ForeignKey(ChartOfAccounts, on_delete=models.PROTECT, related_name='chart_cash_outflow', default=None)
+    cost_center = models.ForeignKey(CostCenter, on_delete=models.PROTECT, related_name='cost_cente_cashoutflow', blank=True, null=True)
+    chart_of_accounts = models.ForeignKey(ChartOfAccounts, on_delete=models.PROTECT, related_name='chart_cash_outflow', default=None, blank=True, null=True)
     bank_account = models.ForeignKey(BankAccount, on_delete=models.CASCADE, blank=True, null=True)
     proof = models.FileField(upload_to='pdf/proof/cash-outflow', blank=True, null=True)
     tittle_value = models.FloatField()
@@ -287,7 +287,7 @@ class CashOutflow(models.Model):
     fine = models.FloatField(default=0, null=True, blank=True)
     discount = models.FloatField(default=0, null=True, blank=True)
     total_value = models.FloatField()
-    billing_date = models.DateField()
+    billing_date = models.DateField(blank=True, null=True)
     due_date = models.DateField()
     payment_date = models.DateField(blank=True, null=True)
     payment_method = models.CharField(max_length=45, choices=PAYMENT_METHOD)
@@ -327,3 +327,17 @@ class Transfer(models.Model):
 
     def __str__(self):
         return f"{self.date} - {self.description} - {self.value}"
+    
+
+class Invoice(models.Model):
+
+    number = models.CharField(max_length=50)
+    xml_file = models.FileField(upload_to='nfe_xmls/')
+    total_value = models.FloatField(blank=True, null=True)
+    issue_date = models.DateField()
+
+    class Meta:
+        ordering = ['issue_date']
+
+    def __str__(self) -> str:
+        return self.number

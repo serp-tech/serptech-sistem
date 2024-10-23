@@ -9,6 +9,7 @@
         {% if perms.stock.add_inflow %}
         <a href="{% url 'inflow_add' %}" class="btn btn-primary">Novo Item</a>
     {% endif %}
+    <a href="{% url 'upload_nfe' %}" class="btn btn-primary mb-2">Upload NF-e</a>
     <button id="toggleRelatorioBtn" class="btn btn-success">
         <i class="bi bi-file-earmark-text"></i> Relatório
     </button>

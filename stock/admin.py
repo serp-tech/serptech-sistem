@@ -42,7 +42,7 @@ class SupplierAdmin(admin.ModelAdmin):
 @admin.register(Item)
 class ItemAdmin(admin.ModelAdmin):
 
-    list_display = ('name', 'nomenclature', 'date', 'presentation',
+    list_display = ('name', 'date', 'presentation',
                     'purchase_frequency', 'outflow_frequency')
     search_fields = ('name',)
 

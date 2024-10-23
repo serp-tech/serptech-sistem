@@ -1,7 +1,9 @@
+import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta
 from django.views.decorators.http import require_POST
 from django.urls import reverse_lazy
 from django.http import HttpResponse,JsonResponse
+from django.contrib import messages
 from django.db.models import Sum, Q
 from django.utils import timezone
 from django.shortcuts import get_object_or_404, redirect, render
@@ -18,14 +20,18 @@ from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, 
 from reportlab.lib.pagesizes import landscape
 from reportlab.lib.units import cm
 from accounts.models import UserProfile
-from .models import Client, CostCenter, RevenueCenter, CashInflow, CashOutflow, FinancialCategory, FinancialSubcategory, FinancialAccounting, ChartOfAccounts, BankAccount, Transfer
+from .models import (Client, CostCenter, RevenueCenter, CashInflow, CashOutflow, FinancialCategory,
+                    FinancialSubcategory, FinancialAccounting, ChartOfAccounts, BankAccount, Transfer,
+                    Invoice)
 from .forms import (
     ClientForm, CostCenterForm, RevenueCenterForm, CashOutflowForm, CashOutflowUpdateForm , CashInflowForm, 
     CashInflowUpdateForm, ReciveInflowForm, PayOutflowForm, FinancialAccountingForm, FinancialCategoryForm, 
-    FinancialSubcategoryForm, AreaForm, ChartOfAccountsForm, BankAccountForm, OFXUploadForm, CostCenterUpdateForm, RevenueCenterUpdateForm)
-from .utils import buscar_banco_por_codigo, buscar_bankid_no_ofx, formatar_agencia_conta_ofx
+    FinancialSubcategoryForm, AreaForm, ChartOfAccountsForm, BankAccountForm, OFXUploadForm, CostCenterUpdateForm, 
+    RevenueCenterUpdateForm, XMLUploadForm)
+from .utils import buscar_banco_por_codigo, buscar_bankid_no_ofx, formatar_agencia_conta_ofx, process_nfe
 from stock.utils import format_currency
 from stock.forms import SectorForm
+from stock.models import Item, Supplier, Unit, Nomenclature, Inflow, Presentation
 
 
 def add_area(request):
@@ -386,6 +392,7 @@ class CashOutflowListView(LoginRequiredMixin, PermissionRequiredMixin, ListView)
         context = super().get_context_data(**kwargs)
         itens = context['itens']
         context['user_profile'] = UserProfile.objects.get(user=self.request.user)
+        context['outflow_pending'] = CashOutflow.objects.filter(chart_of_accounts__isnull=True, cost_center__isnull=True, billing_date__isnull=True).count()
         for item in itens:
             item.tittle_value = format_currency(item.tittle_value)
             item.fine = format_currency(item.fine if item.fine is not None else 0)
@@ -396,6 +403,40 @@ class CashOutflowListView(LoginRequiredMixin, PermissionRequiredMixin, ListView)
 
     def get_queryset(self):
         querySet = super().get_queryset()
+        querySet = querySet.filter(chart_of_accounts__isnull=False, cost_center__isnull=False, billing_date__isnull=False)
+        recipient = self.request.GET.get('recipient')
+        date = self.request.GET.get('date')
+        status = self.request.GET.get('status')
+        if recipient:
+            querySet = querySet.filter(recipient=recipient)
+        if date:
+            querySet = querySet.filter(date=date)
+        if status:
+            querySet = querySet.filter(status=status)
+        return querySet
+    
+class CashOutflowPendingListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
+
+    model = CashOutflow
+    template_name = 'cash_outflow_pending_list.html'
+    context_object_name = 'itens'
+    permission_required = 'financial.view_cashoutflow'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        itens = context['itens']
+        context['user_profile'] = UserProfile.objects.get(user=self.request.user)
+        for item in itens:
+            item.tittle_value = format_currency(item.tittle_value)
+            item.fine = format_currency(item.fine if item.fine is not None else 0)
+            item.discount = format_currency(item.discount if item.discount is not None else 0)
+            item.total_value = format_currency(item.total_value)
+        return context
+
+
+    def get_queryset(self):
+        querySet = super().get_queryset()
+        querySet = querySet.filter(chart_of_accounts__isnull=True, cost_center__isnull=True, billing_date__isnull=True)
         recipient = self.request.GET.get('recipient')
         date = self.request.GET.get('date')
         status = self.request.GET.get('status')
@@ -516,6 +557,13 @@ class ConciliationPending(ListView):
     def get_queryset(self):
         return Transfer.objects.filter(status='não efetuada')
     
+
+class Invoice(PermissionRequiredMixin,ListView):
+
+    model = Invoice
+    template_name = 'invoice_list.html'
+    context_object_name = 'itens'
+    permission_required = 'financial.view_invoice'
 
 @require_POST
 def add_outflow(request):
@@ -1450,3 +1498,128 @@ def reconcile_transfer(request, pk):
     }
 
     return render(request, 'reconcile_transaction.html', context)
+
+
+def upload_nfe_view(request):
+    if request.method == 'POST':
+        form = XMLUploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            xml_file = request.FILES['xml_file']
+            unit = form.cleaned_data['unit']
+            nfe_data = process_nfe(xml_file, unit)
+
+            try:
+                invoice = Invoice.objects.get(number=nfe_data['key'])
+            except Invoice.DoesNotExist:
+                issue_date_str = nfe_data['issue_date']
+                try:
+                    issue_date = datetime.fromisoformat(issue_date_str).date()  # Extrai apenas a data
+                except ValueError:
+                    messages.error(request, "Formato de data inválido.")
+                    return render(request, 'nfe_upload.html', {'form': form})
+                invoice = Invoice.objects.create(
+                    number=nfe_data['key'],
+                    xml_file=xml_file,
+                    total_value=nfe_data['total_value'],
+                    issue_date=issue_date,
+                )
+
+            if nfe_data['unreconciled_items']:
+                # Armazena os itens não conciliados na sessão
+                request.session['unreconciled_items'] = nfe_data['unreconciled_items']
+                request.session['nfe_key'] = nfe_data['key']
+
+                # Renderiza a página de conciliação
+                return render(request, 'reconcile_items.html', {
+                    'nfe_data': nfe_data,
+                    'unreconciled_items': nfe_data['unreconciled_items'],
+                    'existing_items': Item.objects.all(),
+                    'unit': unit,
+                })
+
+            # Se não houver itens não conciliados, redireciona para a entrada
+            return redirect('inflow')
+    else:
+        form = XMLUploadForm()
+
+    return render(request, 'nfe_upload.html', {'form': form})
+    
+
+
+def process_unreconciled_items(request):
+    if request.method == 'POST':
+        nfe_key = request.session.get('nfe_key')
+        unreconciled_items = request.session.get('unreconciled_items')
+
+        if not unreconciled_items:
+            messages.error(request, "Nenhum item não cadastrado foi encontrado.")
+            return redirect('inflow')
+        
+        unit = request.POST.get('unit')
+        supplier_model = request.POST.get('supplier')
+        supplier_model = Supplier.objects.filter(name=supplier_model).first()
+        unit = Unit.objects.filter(name=unit).first()
+
+        invoice = get_object_or_404(Invoice, number=nfe_key)
+
+        for index, item in enumerate(unreconciled_items, start=1):
+            exist_item_id = request.POST.get(f'item_existente_{index}')
+            new_item = request.POST.get(f'novo_item_{index}', False)
+
+            if exist_item_id:
+                exist_item = Item.objects.get(id=exist_item_id)
+                nomenclature, created = Nomenclature.objects.get_or_create(
+                    name=item['description'],
+                )
+                exist_item.nomenclatures.add(nomenclature)
+                inflow, created = Inflow.objects.get_or_create(
+                    item=exist_item,
+                    invoice=invoice,
+                    defaults={
+                        'date': datetime.now(),
+                        'unit': unit,
+                        'target_stock': unit,
+                        'unit_cost': item['unit_cost'],
+                        'quantity': item['quantity'],
+                        'total_cost': item['quantity'] * item['unit_cost'],
+                    }
+                )
+                messages.success(request, f'O item "{exist_item.name}" foi conciliado com sucesso.')
+            elif new_item:
+                presentation, created = Presentation.objects.get_or_create(
+                    name=item['unit'],
+                )
+                nomenclature = Nomenclature.objects.create(
+                    name=item['description'],
+                )
+                new_item = Item.objects.create(
+                    name=item['description'],
+                    date=datetime.now(),
+                    presentation=presentation,
+                    purchase_frequency='Irregular',
+                    outflow_frequency='Irregular',
+                )
+                new_item.suppliers.add(supplier_model)
+                new_item.nomenclatures.add(nomenclature)
+
+                inflow = Inflow.objects.create(
+                    item=new_item,
+                    invoice=invoice,
+                    date=datetime.now(),
+                    supplier=supplier_model,
+                    target_stock=unit,
+                    unit_cost=item['unit_cost'],
+                    quantity=item['quantity'],
+                    total_cost=item['quantity'] * item['unit_cost'],
+                )
+
+                messages.success(request, f'O novo item "{new_item.name}" foi cadastrado com sucesso.')
+                
+        # Limpa a sessão após processar
+        request.session.pop('unreconciled_items', None)
+        request.session.pop('nfe_key', None)
+
+        return redirect('inflow')
+
+    messages.error(request, "Método inválido para processar os itens.")
+    return redirect('inflow')

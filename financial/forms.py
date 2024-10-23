@@ -1,6 +1,6 @@
 from django import forms
 from .models import Client, Area, CostCenter, RevenueCenter, CashInflow, CashOutflow, FinancialAccounting, FinancialCategory, FinancialSubcategory, ChartOfAccounts, BankAccount
-
+from stock.models import Unit
 
 class ClientForm(forms.ModelForm):
 
@@ -444,7 +444,7 @@ class CashOutflowUpdateForm(forms.ModelForm):
             'due_date': 'Data de Vencimento',
             'payment_date': 'Data de Pagamento',
             'payment_method': 'Forma de Pagamento',
-            'status': 'Status',
+            'status': 'Status do Pagamento',
             'description': 'Descrição',
         }
         help_texts = {
@@ -515,3 +515,9 @@ class BankAccountForm(forms.ModelForm):
 
 class OFXUploadForm(forms.Form):
     ofx_file = forms.FileField()
+
+
+class XMLUploadForm(forms.Form):
+    unit = forms.ModelChoiceField(queryset=Unit.objects.all(), label='Unidade')
+    xml_file = forms.FileField(label='Selecione o arquivo XML')
+    

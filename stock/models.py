@@ -89,6 +89,13 @@ class Presentation(models.Model):
         return self.name
 
 
+class Nomenclature(models.Model):
+    name = models.CharField(max_length=100)
+
+    def __str__(self) -> str:
+        return super().__str__()
+    
+
 class Supplier(models.Model):
 
     name = models.CharField(max_length=200)
@@ -112,7 +119,7 @@ class Supplier(models.Model):
 class Item(models.Model):
 
     name = models.CharField(max_length=200)
-    nomenclature = models.CharField(max_length=200)
+    nomenclatures = models.ManyToManyField(Nomenclature, related_name='nomenclatures_item')
     description = models.TextField(max_length=500, blank=True, null=True)
     suppliers = models.ManyToManyField(Supplier, related_name='suppliers_item')
     supplier_cnpj = BRCNPJField(blank=True, null=True)

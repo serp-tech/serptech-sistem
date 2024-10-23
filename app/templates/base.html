@@ -311,6 +311,9 @@
             {% if perms.financial.view_cashflow %}
             <a href="{% url 'cash_flow' %}">Fluxo de Caixa</a>
             {% endif %}
+            {% if perms.financial.view_invoice %}
+            <a href="{% url 'invoice' %}">XML</a>
+            {% endif %}
         </div>
         {% if perms.accounts.add_userprofile %}
         <a href="{% url 'register' %}">Novo Usuário</a>
