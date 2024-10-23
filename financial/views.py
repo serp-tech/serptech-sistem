@@ -1560,7 +1560,6 @@ def process_unreconciled_items(request):
         supplier_model = Supplier.objects.filter(name=supplier_model).first()
         unit = Unit.objects.filter(name=unit).first()
 
-        invoice = get_object_or_404(Invoice, number=nfe_key)
 
         for index, item in enumerate(unreconciled_items, start=1):
             exist_item_id = request.POST.get(f'item_existente_{index}')
@@ -1574,7 +1573,7 @@ def process_unreconciled_items(request):
                 exist_item.nomenclatures.add(nomenclature)
                 inflow, created = Inflow.objects.get_or_create(
                     item=exist_item,
-                    invoice=invoice,
+                    invoice=nfe_key,
                     defaults={
                         'date': datetime.now(),
                         'unit': unit,
@@ -1604,7 +1603,7 @@ def process_unreconciled_items(request):
 
                 inflow = Inflow.objects.create(
                     item=new_item,
-                    invoice=invoice,
+                    invoice=nfe_key,
                     date=datetime.now(),
                     supplier=supplier_model,
                     target_stock=unit,
