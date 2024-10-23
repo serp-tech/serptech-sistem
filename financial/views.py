@@ -21,8 +21,7 @@ from reportlab.lib.pagesizes import landscape
 from reportlab.lib.units import cm
 from accounts.models import UserProfile
 from .models import (Client, CostCenter, RevenueCenter, CashInflow, CashOutflow, FinancialCategory,
-                    FinancialSubcategory, FinancialAccounting, ChartOfAccounts, BankAccount, Transfer,
-                    Invoice)
+                    FinancialSubcategory, FinancialAccounting, ChartOfAccounts, BankAccount, Transfer, Invoice)
 from .forms import (
     ClientForm, CostCenterForm, RevenueCenterForm, CashOutflowForm, CashOutflowUpdateForm , CashInflowForm, 
     CashInflowUpdateForm, ReciveInflowForm, PayOutflowForm, FinancialAccountingForm, FinancialCategoryForm, 
@@ -1501,6 +1500,7 @@ def reconcile_transfer(request, pk):
 
 
 def upload_nfe_view(request):
+    from .models import Invoice
     if request.method == 'POST':
         form = XMLUploadForm(request.POST, request.FILES)
         if form.is_valid():
