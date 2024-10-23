@@ -217,7 +217,7 @@ def process_nfe(xml_file, unit):
             name=supplier['name'],
             cnpj=supplier['cnpj'],
             address=f"{supplier['address']}, {supplier['number']}, {supplier['neighborhood']}, {supplier['city']}, {supplier['state']}",
-            contact=supplier['contact'],
+            seller=supplier['contact'],
             email=supplier['email'],
             phone_number=supplier['phone']
         )
