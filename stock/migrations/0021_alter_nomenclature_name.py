@@ -10,10 +10,12 @@ def remove_duplicates(apps, schema_editor):
 
     # Para cada valor duplicado, mantém o primeiro registro e remove os restantes
     for duplicate in duplicates:
-        # Recupera todos os registros duplicados exceto o primeiro
-        duplicate_records = Nomenclature.objects.filter(name=duplicate['name']).order_by('id')[1:]
-        # Remove os registros duplicados
-        duplicate_records.delete()
+        # Recupera todos os registros duplicados
+        duplicate_records = Nomenclature.objects.filter(name=duplicate['name']).order_by('id')
+        
+        # Mantém o primeiro registro e exclui os outros
+        for record in duplicate_records[1:]:
+            record.delete()
 
 
 class Migration(migrations.Migration):
