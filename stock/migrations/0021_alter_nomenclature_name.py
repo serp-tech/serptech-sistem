@@ -1,4 +1,14 @@
-from django.db import migrations, models, transaction
+from django.db import migrations, models, connection
+
+def disable_triggers(apps, schema_editor):
+    # Desativa triggers na tabela 'stock_nomenclature'
+    with connection.cursor() as cursor:
+        cursor.execute('ALTER TABLE stock_nomenclature DISABLE TRIGGER ALL;')
+
+def enable_triggers(apps, schema_editor):
+    # Reativa triggers na tabela 'stock_nomenclature'
+    with connection.cursor() as cursor:
+        cursor.execute('ALTER TABLE stock_nomenclature ENABLE TRIGGER ALL;')
 
 def remove_duplicates(apps, schema_editor):
     # Obtenha o modelo Nomenclature
@@ -20,15 +30,16 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        # Agrupa tudo em uma transação atômica para garantir que pendências sejam resolvidas
+        # Desativa os triggers antes de qualquer modificação
+        migrations.RunPython(disable_triggers),
+        # Remove duplicatas antes de alterar o campo
         migrations.RunPython(remove_duplicates),
+        # Altera o campo 'name' para ser único
         migrations.AlterField(
             model_name='nomenclature',
             name='name',
             field=models.CharField(max_length=100, unique=True),
         ),
+        # Reativa os triggers após as alterações
+        migrations.RunPython(enable_triggers),
     ]
-
-    @transaction.atomic  # Use o atomic para garantir que as operações sejam agrupadas em uma transação
-    def apply(self, project_state, schema_editor, collect_sql=False):
-        super().apply(project_state, schema_editor, collect_sql)
