@@ -175,13 +175,14 @@ def buscar_bankid_no_ofx(ofx_file):
 
 
 def process_nfe(xml_file, unit):
+    from .models import CashOutflow
     namespace = {'ns': 'http://www.portalfiscal.inf.br/nfe'}
     tree = ET.parse(xml_file)
     root = tree.getroot()
 
     # Extrai informações da nota fiscal
     nfe_info = {}
-    nfe_info['key'] = root.find('.//ns:chNFe', namespace).text
+    nfe_info['key'] = root.find('.//ns:nNF', namespace).text
     nfe_info['protocol'] = root.find('.//ns:nProt', namespace).text
     nfe_info['issue_date'] = root.find('.//ns:dhEmi', namespace).text
     nfe_info['due_date'] = root.find('.//ns:dVenc', namespace).text
@@ -223,6 +224,21 @@ def process_nfe(xml_file, unit):
         )
 
     nfe_info['supplier'] = supplier_model
+    try:
+        cashoutflow = CashOutflow.objects.get(
+            total_value=nfe_info['total_value'],
+            recipient__cnpj=supplier['cnpj'],
+        )
+    except CashOutflow.DoesNotExist:
+        cashoutflow = CashOutflow.objects.create(
+            date=datetime.now(),
+            recipient=supplier_model,
+            document=nfe_info['key'],
+            tittle_value=nfe_info['total_value'],
+            total_value=nfe_info['total_value'],
+            due_date=nfe_info['due_date'],
+            description=nfe_info['description'],
+        )
 
     # Extração de itens da NF-e
     unreconciled_items = []
@@ -237,9 +253,7 @@ def process_nfe(xml_file, unit):
         item['unit'] = det.find('.//ns:uCom', namespace).text
 
         try:
-            # Tenta encontrar o item no estoque pelo nome (nomenclatura)
-            nomenclature, created = Nomenclature.objects.get_or_create(name=item['description'])
-            exist_item = Item.objects.get(nomenclatures=nomenclature)
+            exist_item = Item.objects.get(nomenclatures__name=item['description'])
             reconciled_items.append(exist_item)
 
             # Cria a entrada no estoque
@@ -248,7 +262,6 @@ def process_nfe(xml_file, unit):
                 invoice=nfe_info['key'],
                 date=datetime.now(),
                 supplier=supplier_model,
-                unit=unit,
                 target_stock=unit,
                 unit_cost=item['unit_cost'],
                 quantity=item['quantity'],

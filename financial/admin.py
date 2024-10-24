@@ -2,9 +2,14 @@ from django.contrib import admin
 from .models import (
     Client, Area, CostCenter, RevenueCenter, FinancialAccounting,
     FinancialCategory, FinancialSubcategory, ChartOfAccounts, BankAccount,
-    CashInflow, CashOutflow, CashFlowControl, Transfer
+    CashInflow, CashOutflow, CashFlowControl, Transfer, Invoice
 )
 
+
+class InvoiceAdmin(admin.ModelAdmin):
+    list_display = ('number', 'issue_date', 'total_value')  # Campos existentes no modelo
+    search_fields = ('number',)  # Pesquisar pelo número da fatura
+    list_filter = ('issue_date',)
 
 @admin.register(Client)
 class ClientAdmin(admin.ModelAdmin):

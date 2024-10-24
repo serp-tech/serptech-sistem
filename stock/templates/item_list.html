@@ -47,7 +47,10 @@
             <tr>
                 <td>{{ item.id }}</td>
                 <td>{{ item.date|date:"d/m/Y" }}</td>
-                <td class="text-center">{{ item.nomenclature }}</td>
+                <td class="text-center">
+                    {% for nomenclature in item.nomenclatures.all %}
+                    {{ nomenclature }}<br>
+                    {% endfor %}</td>
                 <td class="text-center">{{ item.name }}</td>
                 <td class="text-center">{{ item.presentation }}</td>
                 <td>

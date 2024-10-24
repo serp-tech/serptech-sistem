@@ -1588,7 +1588,7 @@ def process_unreconciled_items(request):
                 presentation, created = Presentation.objects.get_or_create(
                     name=item['unit'],
                 )
-                nomenclature = Nomenclature.objects.create(
+                nomenclature,created = Nomenclature.objects.get_or_create(
                     name=item['description'],
                 )
                 new_item = Item.objects.create(
