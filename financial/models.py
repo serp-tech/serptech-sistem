@@ -288,7 +288,7 @@ class CashOutflow(models.Model):
     discount = models.FloatField(default=0, null=True, blank=True)
     total_value = models.FloatField()
     billing_date = models.DateField(blank=True, null=True)
-    due_date = models.DateField()
+    due_date = models.DateField(blank=True, null=True)
     payment_date = models.DateField(blank=True, null=True)
     payment_method = models.CharField(max_length=45, choices=PAYMENT_METHOD)
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='Não Efetuado')

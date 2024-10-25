@@ -185,7 +185,7 @@ def process_nfe(xml_file, unit):
     nfe_info['key'] = root.find('.//ns:nNF', namespace).text
     nfe_info['protocol'] = root.find('.//ns:nProt', namespace).text
     nfe_info['issue_date'] = root.find('.//ns:dhEmi', namespace).text
-    nfe_info['due_date'] = root.find('.//ns:dVenc', namespace).text
+    nfe_info['due_date'] = root.find('.//ns:dVenc', namespace).text if root.find('.//ns:dVenc', namespace) is not None else root.find('.//ns:dVenc', namespace)
     nfe_info['description'] = root.find('.//ns:natOp', namespace).text
 
     # Extrai o valor total da nota
