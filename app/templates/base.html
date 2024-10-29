@@ -267,6 +267,9 @@
                 {% if perms.financial.view_financialcategory %}
                 <a href="{% url 'financial_category' %}">Categorias</a>
                 {% endif %}
+                {% if perms.stock.view_supplier %}
+                <a href="{% url 'supplier' %}">Fornecedores</a>
+                {% endif %}
                 {% if perms.financial.view_financialsubcategory %}
                 <a href="{% url 'financial_subcategory' %}">Subcategorias</a>
                 {% endif %}
