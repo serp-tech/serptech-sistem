@@ -7,9 +7,10 @@ class ClientForm(forms.ModelForm):
     class Meta:
 
         model = Client
-        fields = ['cnpj', 'name', 'address', 'email', 'phone_number']
+        fields = ['cnpj', 'cpf','name', 'address', 'email', 'phone_number']
         labels = {
             'cnpj': 'CNPJ',
+            'cpf': 'CPF',
             'name': 'Nome',
             'address': 'Endereço',
             'email': 'Email',

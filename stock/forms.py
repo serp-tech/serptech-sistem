@@ -71,12 +71,13 @@ class SupplierForm(forms.ModelForm):
     class Meta:
         model = Supplier
         fields = [
-            'cnpj', 'name', 'corporate_reason', 'address', 'seller',
+            'cnpj', 'cpf', 'name', 'corporate_reason', 'address', 'seller',
             'email', 'phone_number',
     ]
         labels = {
             'name': 'Nome',
             'cnpj': 'CNPJ',
+            'cpf': 'CPF',
             'corporate_reason': 'Razão Social',
             'address': 'Endereço',
             'seller': 'Vendedor',

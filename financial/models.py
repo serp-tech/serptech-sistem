@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils import timezone
 from django.core.validators import EmailValidator, RegexValidator
-from localflavor.br.models import BRCNPJField
+from localflavor.br.models import BRCNPJField, BRCPFField
 from stock.models import Supplier, Sector
 from .utils import formatar_agencia_conta, formatar_agencia_conta_ofx
 
@@ -32,7 +32,8 @@ ACCOUNT_TYPES = (
 class Client(models.Model):
 
     name = models.CharField(max_length=200)
-    cnpj = BRCNPJField()
+    cnpj = BRCNPJField(unique=True, blank=True, null=True)
+    cpf = BRCPFField(unique=True, blank=True, null=True)
     address = models.TextField()
     email = models.EmailField(validators=[EmailValidator()])
     phone_number = models.CharField(max_length=15, validators=[RegexValidator(

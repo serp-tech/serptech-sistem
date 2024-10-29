@@ -41,7 +41,12 @@
                     {% for item in itens %}
                     <tr>
                         <td>{{ item.name }}</td>
-                        <td class="telefone">{{ item.cnpj }}</td>
+                        <td class="telefone">
+                            {% if item.cnpj %}
+                            {{ item.cnpj }}
+                            {% else %}
+                            {{item.cpf}}
+                            {% endif %}</td>
                         <td>{{ item.email}}</td>
                         <td class="telefone">{{ item.phone_number }}</td>
                         <td>

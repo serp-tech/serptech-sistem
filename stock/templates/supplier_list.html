@@ -29,7 +29,7 @@
         <thead>
             <tr>
                 <th>Fornecedor</th>
-                <th>CNPJ</th>
+                <th>CNPJ/CPF</th>
                 <th>Razão Social</th>
                 <th>Vendedor</th>
                 <th>Email</th>
@@ -43,7 +43,12 @@
             {% for item in itens %}
             <tr>
                 <td class="text-left">{{ item.name }}</td>
-                <td class="telefone">{{ item.cnpj }}</td>
+                <td class="telefone">
+                    {% if item.cnpj %}
+                    {{ item.cnpj }}</td>
+                    {% else %}
+                    {{item.cpf}}
+                    {% endif %}
                 <td class="text-left">{{ item.corporate_reason}}</td>
                 <td class="text-left">{{ item.seller }}</td>
                 <td class="text-left">{{ item.email }}</td>
