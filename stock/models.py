@@ -139,32 +139,7 @@ class Item(models.Model):
         return self.name
     
 
-class Inflow(models.Model):
 
-    date = models.DateField(default=timezone.now)
-    item = models.ForeignKey(Item, on_delete=models.PROTECT, related_name='inflow_item')
-    item_name = models.CharField(max_length=200, blank=True, null=True)
-    supplier = models.ForeignKey(Supplier, on_delete=models.PROTECT, blank=True, null=True)
-    validity = models.DateField(blank=True, null=True)
-    invoice = models.CharField(max_length=200)
-    invoice_pdf = models.FileField(upload_to='pdfs/inflow/invoice', blank=True, null=True)
-    source_stock = models.ForeignKey(Unit, on_delete=models.PROTECT, related_name='inflow_source', blank=True, null=True)
-    source_stock_name = models.CharField(max_length=200, blank=True, null=True)
-    target_stock = models.ForeignKey(Unit, on_delete=models.PROTECT, related_name='inflow_target')
-    target_stock_name = models.CharField(max_length=200, blank=True, null=True)
-    unit_cost = models.FloatField()
-    quantity = models.IntegerField()
-    total_cost = models.FloatField(blank=True, null=True)
-    observation = models.TextField(max_length=300, blank=True, null=True)
-
-
-    class Meta: 
-        ordering = ['-date', 'item']
-
-
-    def __str__(self):
-        return self.item.name
-    
 
 class Outflow(models.Model):
     
@@ -189,6 +164,34 @@ class Outflow(models.Model):
     def __str__(self):
         return self.item.name
 
+
+class Inflow(models.Model):
+
+    outflow = models.OneToOneField(Outflow, on_delete=models.CASCADE, related_name='outflow_inflwo', blank=True, null=True)
+    date = models.DateField(default=timezone.now)
+    item = models.ForeignKey(Item, on_delete=models.PROTECT, related_name='inflow_item')
+    item_name = models.CharField(max_length=200, blank=True, null=True)
+    supplier = models.ForeignKey(Supplier, on_delete=models.PROTECT, blank=True, null=True)
+    validity = models.DateField(blank=True, null=True)
+    invoice = models.CharField(max_length=200)
+    invoice_pdf = models.FileField(upload_to='pdfs/inflow/invoice', blank=True, null=True)
+    source_stock = models.ForeignKey(Unit, on_delete=models.PROTECT, related_name='inflow_source', blank=True, null=True)
+    source_stock_name = models.CharField(max_length=200, blank=True, null=True)
+    target_stock = models.ForeignKey(Unit, on_delete=models.PROTECT, related_name='inflow_target')
+    target_stock_name = models.CharField(max_length=200, blank=True, null=True)
+    unit_cost = models.FloatField()
+    quantity = models.IntegerField()
+    total_cost = models.FloatField(blank=True, null=True)
+    observation = models.TextField(max_length=300, blank=True, null=True)
+
+
+    class Meta: 
+        ordering = ['-date', 'item']
+
+
+    def __str__(self):
+        return self.item.name
+    
 
 class Request(models.Model):
     

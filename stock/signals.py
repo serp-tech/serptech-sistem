@@ -123,3 +123,51 @@ def update_requester_delete(sender, instance, **kwargs):
                 k.save()
             except ValueError as e:
                 print(f"Erro ao atualizar RequisicaoSetor: {e}")
+
+
+@receiver(post_save, sender=Outflow)
+def stock_transfer(sender, instance, created, **kwargs):
+
+    if instance.target_stock is not None and instance.target_stock != instance.source_stock:
+        if created:
+                Inflow.objects.create(
+                    outflow=instance,
+                    date=instance.date,
+                    item=instance.item,
+                    invoice='0000',
+                    source_stock=instance.source_stock,
+                    target_stock=instance.target_stock,
+                    unit_cost=0,
+                    quantity=instance.quantity,
+                    total_cost=0,
+                    observation='Transferência de Estoque',
+                )
+        else:
+
+            previous = getattr(instance, '_pre_save_instance', None)
+            if previous:
+                important_camps = ['date', 'target_stock', 'source_stock','quantity', 'item']
+                changed_camps = any(getattr(instance, camp) != getattr(previous, camp) for camp in important_camps )
+
+                if changed_camps:
+                    try:
+                        inflow = instance.inflow
+                        inflow.data = instance.data
+                        inflow.item = instance.item
+                        inflow.source_stock = instance.source_stock
+                        inflow.target_stock = instance.target_stock
+                        inflow.quantity = instance.quantity
+                        inflow.save()
+                    except Inflow.DoesNotExist:
+                            Inflow.objects.create(
+                                outflow=instance,
+                                date=instance.date,
+                                item=instance.item,
+                                invoice='0000',
+                                source_stock=instance.source_stock,
+                                target_stock=instance.target_stock,
+                                unit_cost=0,
+                                quantity=instance.quantity,
+                                total_cost=0,
+                                observation='Transferência de Estoque',
+                            )
