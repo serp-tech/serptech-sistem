@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Aprovar Requisição{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Aprovar Requisição</h2>
+    <hr>
+    <div class="card">
+        <div class="card-body bg-dark text-light">
+            <h5>Detalhes da Requisição</h5>
+            <p><strong>Requisitante:</strong> {{ requisition.requester }}</p>
+            <p><strong>Unidade:</strong> {{ requisition.unit }}</p>
+            <p><strong>Setor:</strong> {{ requisition.sector }}</p>
+            <p><strong>Data da Requisição:</strong> {{ requisition.date|date:"d/m/Y" }}</p>
+            <p><strong>Status Atual:</strong> {{ requisition.status }}</p>
+            <hr>
+            <h5>Itens da Requisição</h5>
+            <form method="post">
+                {% csrf_token %}
+                {{ formset.management_form }}
+                <table class="table table-bordered text-white">
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>Quantidade Requisitada</th>
+                            <th>Quantidade Aprovada</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for form in formset %}
+                        <tr>
+                            <td>{{ form.instance.item }}</td>
+                            <td>{{ form.instance.quantity }}</td>
+                            <td>
+                                <!-- Campo de quantidade aprovada -->
+                                {{ form.approve_quantity }}
+                                {{ form.id }}
+                                <!-- Campo oculto para armazenar o ID do item -->
+                                <input type="hidden" name="form-{{ forloop.counter0 }}-item_id" value="{{ form.instance.item.id }}">
+                                
+                                <div class="quantity-erro text-danger"></div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% if formset.non_form_errors %}
+                    <div class="text-danger">
+                        {{ formset.non_form_errors }}
+                    </div>
+                {% endif %}
+                <button type="submit" class="btn btn-primary">Aprovar Requisição</button>
+                <a href="{% url 'request' %}" class="btn btn-secondary">Cancelar</a>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript para verificar disponibilidade de quantidade -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('input[name$="-approve_quantity"]').on('input', function() {
+            var $approveQuantity = $(this);
+            var quantity = parseInt($approveQuantity.val()) || 0;
+
+            // Obtém o índice do form atual
+            var formIndex = $approveQuantity.attr('name').match(/form-(\d+)-approve_quantity/)[1];
+
+            // Obtém o ID do item correspondente no formset
+            var item_id = $('input[name="form-' + formIndex + '-item_id"]').val();
+            var unit_id = "{{ requisition.unit.id }}";
+
+            var $erroDisplay = $approveQuantity.closest('tr').find('.quantity-erro');
+
+            if (item_id && unit_id) {
+                $.ajax({
+                    url: '/check_quantity_available/' + item_id + '/' + unit_id + '/',
+                    method: 'GET',
+                    dataType: 'json',
+                    success: function(data) {
+                        var quantity_available = data.quantity_available;
+
+                        console.log("Quantidade disponível para o item " + item_id + ": " + quantity_available);
+
+                        if (quantity > quantity_available) {
+                            $erroDisplay.text('Quantidade insuficiente. Disponível: ' + quantity_available);
+                            $approveQuantity.val(quantity_available);
+                        } else {
+                            $erroDisplay.text('');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Erro ao verificar a quantidade disponível:", error);
+                    }
+                });
+            }
+        });
+    });
+</script>
+{% endblock %}

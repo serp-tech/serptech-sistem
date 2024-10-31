@@ -79,10 +79,10 @@
                     <div class="btn-group">
                         <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">Ações</button>
                         <ul class="dropdown-menu">
-                            {% if item.status == 'Análise' %}
+                            {% if item.status == 'Análise' and user_profile.position == 'Gerente' or user_profile.position == 'Diretor' %}
 
                             <li>
-                                <a class="dropdown-item" href="#" onclick="approveRequest({{ item.pk }}); return false;" title="Aprovar">Aprovar</a>
+                                <a href="{% url 'approve_request' item.pk %}" class="dropdown-item">Aprovar</a>
                             </li>
                             <li>
                                 <a class="dropdown-item" href="#" onclick="denyRequest({{ item.pk }}); return false;" title="Negar">Negar</a>
@@ -107,27 +107,7 @@
 </div>
 
 <script>
-function approveRequest(pk) {
-    const url = "{% url 'approve_request' '0' %}".replace('0', pk);
-    fetch(url, {
-        method: 'POST',
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest',
-            'X-CSRFToken': '{{ csrf_token }}'
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            location.reload();
-        } else {
-            alert(data.message || 'Erro ao aprovar a requisição.');
-        }
-    })
-    .catch(error => {
-        console.error('Error approving request:', error);
-    });
-}
+
 
 function denyRequest(pk) {
     const url = "{% url 'denied_request' '0' %}".replace('0', pk);
@@ -176,6 +156,4 @@ function abrirPopup() {
     window.open('{% url "report_request_pdf" %}', 'popupRelatorio', 'width=800,height=600');
 }
 </script>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 {% endblock %}

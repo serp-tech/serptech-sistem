@@ -556,6 +556,11 @@ class ConciliationPending(ListView):
     def get_queryset(self):
         return Transfer.objects.filter(status='não efetuada')
     
+class ConciliationPendingDeleteView(DeleteView):
+    model = Transfer
+    template_name = 'conciliation_pending_delete.html'
+    success_url = '/conciliation-pending/'
+    
 
 class Invoice(PermissionRequiredMixin,ListView):
 

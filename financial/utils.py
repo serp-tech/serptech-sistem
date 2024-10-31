@@ -216,6 +216,7 @@ def process_nfe(xml_file, unit):
     except Supplier.DoesNotExist:
         supplier_model = Supplier.objects.create(
             name=supplier['name'],
+            corporate_reason=supplier['name'],
             cnpj=supplier['cnpj'],
             address=f"{supplier['address']}, {supplier['number']}, {supplier['neighborhood']}, {supplier['city']}, {supplier['state']}",
             seller=supplier['contact'],

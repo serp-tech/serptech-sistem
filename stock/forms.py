@@ -1,5 +1,5 @@
 from django import forms
-from django.forms import inlineformset_factory
+from django.forms import inlineformset_factory,modelformset_factory
 from .models import (
     Sector, Unit, Requester, Presentation, Supplier, Item, Inventory, Inflow, Outflow,
     Request, RequestItem, PurchaseOrder, ServiceOrder 
@@ -245,6 +245,31 @@ class RequestItemForm(forms.ModelForm):
         }
 
 RequestItemFormSet = inlineformset_factory(Request, RequestItem, form=RequestItemForm, extra=5, can_delete=True)
+
+
+class RequestItemApproveForm(forms.ModelForm):
+    
+    class Meta:
+        model = RequestItem
+        fields = ['approve_quantity']
+        widgets = {
+            'approve_quantity': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': '0',
+                'required': True,
+            })
+        }
+    
+    def clean_approve_quantity(self):
+        approve_quantity = self.cleaned_data.get('approve_quantity')
+        if self.instance.item is None or self.instance.quantity is None:
+            raise forms.ValidationError("Item ou quantidade não estão definidos para este item da requisição.")
+        reques_quantity = self.instance.quantity
+        if approve_quantity is None or approve_quantity < 0:
+            raise forms.ValidationError("A quantidade aprovada deve ser um número positivo.")
+        if approve_quantity > reques_quantity:
+            raise forms.ValidationError("A quantidade aprovada não pode exceder a quantidade requisitada.")
+        return  approve_quantity
 
 
 class PurchaseOrderForm(forms.ModelForm):

@@ -19,6 +19,7 @@
                     <p class="card-text">Agência: {{ item.branch }}</p>
                     <p class="card-text">Número da Conta: {{ item.account_number }}</p>
                     <a href="{% url 'reconcile_transfer' item.pk %}" class="btn btn-primary">Conciliar</a>
+                    <a href="{% url 'conciliation_delete' item.pk %}" class="btn btn-danger">Excluir</a>
                 </div>
             </div>
         </div>

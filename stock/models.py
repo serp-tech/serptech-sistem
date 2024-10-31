@@ -219,6 +219,7 @@ class RequestItem(models.Model):
     request = models.ForeignKey(Request, on_delete=models.CASCADE, related_name='request_item_request')
     item = models.ForeignKey(Item, on_delete=models.PROTECT, related_name='request_item')
     quantity = models.IntegerField()
+    approve_quantity = models.IntegerField(blank=True, null=True)
 
 
     class Meta:

@@ -10,7 +10,7 @@ from .views import (
     request_cnpj_view, sector_autocomplete, unit_autocomplete, requester_autocomplete, presentation_autocomplete,
     supplier_autocomplete, item_autocomplete, inflow_autocomplete, outflow_autocomplete, inventory_autocomplete, PurchaseOrderListView,
     PurchaseOrderDetailView, PurchaseOrderCreateView, PurchaseOrderDeleteView, PurchaseOrderUpdateView, ServiceOrderListView, ServiceOrderCreateView,
-    ServiceOrderDetailView, ServiceOrderUpdateView, ServiceOrderDeleteView, approve_request, denied_request, delivery_request, approve_purchase, denied_purchase, submit_feedback, get_purchase,
+    ServiceOrderDetailView, ServiceOrderUpdateView, ServiceOrderDeleteView, ApproveRequestView,  denied_request, delivery_request, approve_purchase, denied_purchase, submit_feedback, get_purchase,
     purchase_made, delivery_purchase, reorder_order, start_service, finish_service, check_quantity_available,report_request_pdf, report_purchase_pdf, generate_outflow_report, generate_inflow_report             
 )
 
@@ -93,7 +93,7 @@ urlpatterns = [
     path('outflow-autocomplete/', outflow_autocomplete,name='outflow_autocomplete'),
     path('inventory-autocomplete/', inventory_autocomplete,name='inventory_autocomplete'),
 
-    path('approve-request/<int:pk>/',approve_request, name='approve_request'),
+    path('approve-request/<int:pk>/', ApproveRequestView.as_view(), name='approve_request'),
     path('denied-request/<int:pk>/', denied_request, name='denied_request'),
     path('delivery-request/<int:pk>/', delivery_request, name='delivery_request'),
     path('approve-purchase/<int:pk>/', approve_purchase, name='approve_purchase'),

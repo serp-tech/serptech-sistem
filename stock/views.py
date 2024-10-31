@@ -1,10 +1,13 @@
 from datetime import datetime, timedelta
 from django.http import JsonResponse
 from django.db.models import Sum
+from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import redirect, get_object_or_404, redirect, render
 from django.utils import timezone
+from django.forms import modelformset_factory
+from django.views import View
 from django.views.generic import ListView, CreateView, DeleteView, DetailView, UpdateView
 from django.http import HttpResponse
 from reportlab.lib import colors
@@ -21,7 +24,7 @@ from .models import (Sector, Unit, Requester, Presentation, Supplier, Item, Infl
                     Inventory, Request, PurchaseOrder, ServiceOrder)
 from .forms import (SectorForm, UnitForm, UnitFilterForm, RequesterForm, PresentationForm, SupplierForm, 
                     ItemForm, InflowForm, OutflowForm, RequestForm, RequestItemFormSet, PurchaseOrderForm,
-                    PurchaseOrderDeniedForm, PurchaseOrderUpdateForm, ServiceOrderForm, ServiceOrderStartForm, ServiceOrderFinishForm)
+                    PurchaseOrderDeniedForm, PurchaseOrderUpdateForm, ServiceOrderForm, ServiceOrderStartForm, ServiceOrderFinishForm, RequestItem, RequestItemApproveForm)
 from .utils import format_currency
 
 class SectorListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
@@ -509,6 +512,72 @@ class RequestDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView)
     permission_required = 'stock.delete_request'
 
 
+class ApproveRequestView(LoginRequiredMixin, View):
+    template_name = 'approve_request.html'
+    success_url = '/request/'
+
+    def get(self, request, pk, *args, **kwargs):
+        # Renomeie a variável aqui para evitar sobrescrever 'request'
+        requisition = get_object_or_404(Request, pk=pk)
+        ItemFormSet = modelformset_factory(RequestItem, form=RequestItemApproveForm, extra=0)
+        formset = ItemFormSet(queryset=requisition.request_item_request.all())
+
+        context = {
+            'requisition': requisition,  # Use um nome diferente no contexto
+            'formset': formset
+        }
+        return render(request, self.template_name, context)
+
+    def post(self, request, pk, *args, **kwargs):
+        # Renomeie a variável aqui também
+        requisition = get_object_or_404(Request, pk=pk)
+        ItemFormSet = modelformset_factory(RequestItem, form=RequestItemApproveForm, extra=0)
+
+        # Verifique o formset com o queryset correto para itens da requisição
+        formset = ItemFormSet(request.POST, queryset=requisition.request_item_request.all())
+        if formset.is_valid():
+            all_available = True
+            errors = []
+
+            for form in formset:
+                # Verifique se `instance` está corretamente carregado
+                item = form.instance
+                if item.item is None or item.quantity is None:
+                    errors.append("Item ou quantidade não estão definidos para alguns itens.")
+                    all_available = False
+                    continue
+
+                inventory = Inventory.objects.filter(item=item.item, unit=requisition.unit).first()
+
+                if not inventory or inventory.quantity_available < item.approve_quantity:
+                    all_available = False
+                    errors.append(f'Não há quantidade suficiente para o item {item.item}.')
+
+                if item.approve_quantity > item.quantity:
+                    all_available = False
+                    errors.append(f'A quantidade aprovada para o item {item.item} não pode exceder a quantidade requisitada.')
+
+            if all_available:
+                formset.save()
+                requisition.status = 'Aprovado'
+                requisition.approval_date = timezone.now()
+                requisition.manager = request.user
+                requisition.save()
+                messages.success(request, 'Requisição aprovada com sucesso.')
+                return redirect(self.success_url)
+            else:
+                for error in errors:
+                    messages.error(request, error)
+        else:
+            messages.error(request, 'Erro ao aprovar a requisição. Verifique os campos preenchidos.')
+
+        context = {
+            'requisition': requisition,  # Use o mesmo nome aqui
+            'formset': formset
+        }
+        return render(request, self.template_name, context)
+
+
 class InventoryListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
 
     model = Inventory
@@ -743,35 +812,6 @@ def inventory_autocomplete(request):
         return JsonResponse(names, safe=False)
     return JsonResponse([], safe=False)
 
-
-def approve_request(request, pk):
-    if request.method == 'POST':
-        request_sector = get_object_or_404(Request, pk=pk)
-        
-        # Verificar disponibilidade dos itens
-        all_available = True
-        for item in request_sector.request_item_request.all():
-            try:
-                inventory = Inventory.objects.get(item=item.item, unit=request_sector.unit)
-                if inventory.quantity_available < item.quantity:
-                    all_available = False
-                    break
-            except Inventory.DoesNotExist:
-                all_available = False
-                break
-        
-        if not all_available:
-            return JsonResponse({'success': False, 'message': 'Não há quantidade suficiente no inventário para alguns itens.'})
-        
-        # Aprovar a requisição
-        request_sector.status = 'Aprovado'
-        request_sector.approval_date = timezone.now().date()
-        request_sector.manager = request.user
-        request_sector.save()
-
-        return JsonResponse({'success': True})
-
-    return JsonResponse({'success': False}, status=400)
 
 
 def denied_request(request, pk):

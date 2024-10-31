@@ -4,10 +4,10 @@
 
 {% block content %}
 <h1>Confirmar Exclusão</h1>
-<p>Você tem certeza que deseja excluir "{{ object.date|date:"d/m/Y"}} {{object.recipient}}"?</p>
+<p>Você tem certeza que deseja excluir "{{ object }}"?</p>
 <form method="post">
     {% csrf_token %}
     <button type="submit" class="btn btn-confirm-excluir">Confirmar Exclusão</button>
-    <a href="{% url 'cash_outflow' %}" class="btn btn-primary">Cancelar</a>
+    <a href="{% url 'conciliation_pending' %}" class="btn btn-primary">Cancelar</a>
 </form>
 {% endblock %}

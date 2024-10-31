@@ -6,8 +6,8 @@ from .views import (ClientCreateView, ClientDeleteView, ClientDetailView, Client
                     CostCenterListView, CostCenterCreateView, CostCenterUpdateView, CostCenterDeleteView, RevenueCenterListView, RevenueCenterCreateView, RevenueCenterUpdateView, RevenueCenterDeleteView,
                     FinancialAccountingListView, FinancialAccountingCreateView, FinancialAccountingUpdateView, FinancialAccountingDeleteView, FinancialSubcategoryListView, FinancialSubcategoryCreateView, FinancialSubcategoryUpdateView,
                     FinancialSubcategoryDeleteView, ChartOfAccountsListView, ChartOfAccountsCreateView, ChartOfAccountesUpdateView, ChartOfAccountsDeleteView, add_area, get_chart_of_accounts, get_cost_center,
-                    BankAccountListView, BankAccountCreateView, BankAccountDetailView, BankAccountUpdateView, BankAccountDeleteView, get_bank_view, get_revenue_center, ofx_upload_view,
-                    ConciliationCarriedOut, ConciliationPending, reconcile_transfer, add_outflow, add_inflow, FinancialCategoryListView, FinancialCategoryCreateView, FinancialCategoryUpdateView, FinancialCategoryDeleteView, upload_nfe_view, process_unreconciled_items,
+                    BankAccountListView, BankAccountCreateView, BankAccountDetailView, BankAccountDeleteView, get_bank_view, get_revenue_center, ofx_upload_view,
+                    ConciliationCarriedOut, ConciliationPending, ConciliationPendingDeleteView, reconcile_transfer, add_outflow, add_inflow, FinancialCategoryListView, FinancialCategoryCreateView, FinancialCategoryUpdateView, FinancialCategoryDeleteView, upload_nfe_view, process_unreconciled_items,
                     Invoice        
 )
 
@@ -85,6 +85,7 @@ urlpatterns = [
     path('conciliation-carried-out/', ConciliationCarriedOut.as_view(), name='conciliation_carried_out'),
     path('conciliation-pending/', ConciliationPending.as_view(), name='conciliation_pending'),
     path('reconcile/<int:pk>/', reconcile_transfer, name='reconcile_transfer'),
+    path('conciliation/<int:pk>/delete', ConciliationPendingDeleteView.as_view(), name='conciliation_delete'),
 
     path('cash-flow/', cash_flow_view, name='cash_flow'),
     path('generate_cash_flow_report/', generate_cash_flow_report, name='generate_cash_flow_report'),
