@@ -69,7 +69,7 @@ WSGI_APPLICATION = 'app.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'esj',
+        'NAME': 'serptech',
         'USER': 'postgres',
         'PASSWORD': 'KigxgW044#A1',
         'HOST': 'localhost',
