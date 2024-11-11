@@ -221,32 +221,31 @@
         <a href="#">Dashboard</a>
         <a href="{% url 'home' %}">Home</a>
 
-        <!-- Dropdown de Estoque -->
-        <a href="#" class="dropdown-btn">Estoque</a>
-        <div class="dropdown-container">
-            {% if perms.stock.view_inflow %}
-            <a href="{% url 'inflow' %}">Entradas</a>
-            {% endif %}
-            {% if perms.stock.view_inventory %}
-            <a href="{% url 'inventory' %}">Inventário</a>
-            {% endif %}
-            {% if perms.stock.view_outflow %}
-            <a href="{% url 'outflow' %}">Saídas</a>
-            {% endif %}
-            {% if perms.stock.view_purchase %}
-            <a href="{% url 'purchase' %}">Ordem de Compra</a>
-            {% endif %}
-            {% if perms.stock.view_service %}
-            <a href="{% url 'service' %}">Ordem de Serviço</a>
-            {% endif %}
-            {% if perms.stock.view_request %}
-            <a href="{% url 'request' %}">Requisições</a>
-            {% endif %}
-        </div>
-
         <!-- Dropdown de Cadastro -->
         <a href="#" class="dropdown-btn-laboratorio">Cadastro</a>
         <div class="dropdown-container">
+            <a href="#" class="dropdown-btn-estoque">Estoque</a>
+            <div class="dropdown-container">
+                {% if perms.stock.view_presentation %}
+                <a href="{% url 'presentation' %}">Formas de Apresentações</a>
+                {% endif %}
+                {% if perms.stock.view_supplier %}
+                <a href="{% url 'supplier' %}">Fornecedores</a>
+                {% endif %}
+                {% if perms.stock.view_item %}
+                <a href="{% url 'item' %}">Itens</a>
+                {% endif %}
+                {% if perms.stock.view_requester %}
+                <a href="{% url 'requester' %}">Requisitantes</a>
+                {% endif %}
+                {% if perms.stock.view_sector %}
+                <a href="{% url 'sector' %}">Setores</a>
+                {% endif %}
+                {% if perms.stock.view_unit %}
+                <a href="{% url 'unit' %}">Unidades</a>
+                {% endif %}
+            </div>
+            
             <a href="#" class="dropdown-btn-financeiro">Financeiro</a>
             <div class="dropdown-container">
                 {% if perms.financial.view_bankaccount %}
@@ -279,28 +278,32 @@
             </div>
 
             <!-- Cadastro de Estoque -->
-            <a href="#" class="dropdown-btn-estoque">Estoque</a>
-            <div class="dropdown-container">
-                {% if perms.stock.view_presentation %}
-                <a href="{% url 'presentation' %}">Formas de Apresentações</a>
-                {% endif %}
-                {% if perms.stock.view_supplier %}
-                <a href="{% url 'supplier' %}">Fornecedores</a>
-                {% endif %}
-                {% if perms.stock.view_item %}
-                <a href="{% url 'item' %}">Itens</a>
-                {% endif %}
-                {% if perms.stock.view_requester %}
-                <a href="{% url 'requester' %}">Requisitantes</a>
-                {% endif %}
-                {% if perms.stock.view_sector %}
-                <a href="{% url 'sector' %}">Setores</a>
-                {% endif %}
-                {% if perms.stock.view_unit %}
-                <a href="{% url 'unit' %}">Unidades</a>
-                {% endif %}
-            </div>
+            
         </div>
+        
+        <!-- Dropdown de Estoque -->
+        <a href="#" class="dropdown-btn">Estoque</a>
+        <div class="dropdown-container">
+            {% if perms.stock.view_inflow %}
+            <a href="{% url 'inflow' %}">Entradas</a>
+            {% endif %}
+            {% if perms.stock.view_inventory %}
+            <a href="{% url 'inventory' %}">Inventário</a>
+            {% endif %}
+            {% if perms.stock.view_outflow %}
+            <a href="{% url 'outflow' %}">Saídas</a>
+            {% endif %}
+            {% if perms.stock.view_purchase %}
+            <a href="{% url 'purchase' %}">Ordem de Compra</a>
+            {% endif %}
+            {% if perms.stock.view_service %}
+            <a href="{% url 'service' %}">Ordem de Serviço</a>
+            {% endif %}
+            {% if perms.stock.view_request %}
+            <a href="{% url 'request' %}">Requisições</a>
+            {% endif %}
+        </div>
+
 
         <!-- Dropdown Financeiro -->
         <a href="#" class="dropdown-btn-financial">Financeiro</a>
