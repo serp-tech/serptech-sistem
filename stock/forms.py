@@ -1,8 +1,8 @@
 from django import forms
-from django.forms import inlineformset_factory,modelformset_factory
+from django.forms import inlineformset_factory
 from .models import (
     Sector, Unit, Requester, Presentation, Supplier, Item, Inventory, Inflow, Outflow,
-    Request, RequestItem, PurchaseOrder, ServiceOrder 
+    Request, RequestItem, PurchaseOrder, ServiceOrder, Nomenclature
 )
 from .cnpj_api.cnpj_api import request_cnpj
 
@@ -21,6 +21,14 @@ class UnitForm(forms.ModelForm):
     
     class Meta:
         model = Unit
+        fields = ['name']
+        help_texts = {
+            'name': 'Obrigatório'
+        }
+class NomenclatureForm(forms.ModelForm):
+    
+    class Meta:
+        model = Nomenclature
         fields = ['name']
         help_texts = {
             'name': 'Obrigatório'
@@ -125,6 +133,7 @@ class ItemForm(forms.ModelForm):
         widgets = {
             'sector': forms.CheckboxSelectMultiple(),
             'suppliers': forms.CheckboxSelectMultiple(),
+            'nomenclatures': forms.CheckboxSelectMultiple(),
         }
         help_texts = {
             'name': 'Obrigatório',

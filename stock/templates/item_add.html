@@ -12,14 +12,32 @@
             <label class="col-sm-3 col-form-label">{{ field.label }}</label>
             <div class="col-sm-9">
                 <div class="d-flex align-items-center">
-                    {% if field.name == 'suppliers' %}
+                    {% if field.name == 'nomenclatures' %}
                     <div class="dropdown">
-                        <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            Selecionar Setores
+                        <button class="btn btn-primary dropdown-toggle" type="button" id="nomenclatureDropdownButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Selecionar Nomenclaturas
                         </button>
-                        <div class="dropdown-menu" id="supplier" aria-labelledby="dropdownMenuButton">
+                        <div class="dropdown-menu" id="nomenclatureDropdown" aria-labelledby="nomenclatureDropdownButton">
+                            <!-- Checkbox para selecionar todos -->
                             <div class="dropdown-item">
-                                <input type="checkbox" id="select_all_supplier"> Selecionar Todos
+                                <input type="checkbox" id="select_all_nomenclature"> Selecionar Todos
+                            </div>
+                            <!-- Lista dinâmica de checkboxes para nomenclaturas -->
+                            {% for checkbox in field %}
+                                <div class="dropdown-item">
+                                    {{ checkbox.tag }} {{ checkbox.choice_label }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% elif field.name == 'suppliers' %}
+                    <div class="dropdown">
+                        <button class="btn btn-primary dropdown-toggle" type="button" id="suppliersDropdownButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Selecionar Fornecedores
+                        </button>
+                        <div class="dropdown-menu" id="suppliersDropdown" aria-labelledby="suppliersDropdownButton">
+                            <div class="dropdown-item">
+                                <input type="checkbox" id="select_all_suppliers"> Selecionar Todos
                             </div>
                             {% for checkbox in field %}
                                 <div class="dropdown-item">
@@ -30,10 +48,10 @@
                     </div>
                     {% elif field.name == 'sector' %}
                     <div class="dropdown">
-                        <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <button class="btn btn-primary dropdown-toggle" type="button" id="sectorDropdownButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             Selecionar Setores
                         </button>
-                        <div class="dropdown-menu" id="sectorDropdown" aria-labelledby="dropdownMenuButton">
+                        <div class="dropdown-menu" id="sectorDropdown" aria-labelledby="sectorDropdownButton">
                             <div class="dropdown-item">
                                 <input type="checkbox" id="select_all_sector"> Selecionar Todos
                             </div>
@@ -49,7 +67,9 @@
                     {% endif %}
                     {% if field.name == 'suppliers' %}
                     <button type="button" class="btn btn-primary ml-2" id="addSupplierBtn" data-toggle="modal" data-target="#supplierModal">Adicionar</button>
-                    {% elif field.name == 'sector'  %}
+                    {% elif field.name == 'nomenclatures' %}
+                    <button type="button" class="btn btn-primary ml-2" id="addNomenclatureBtn" data-toggle="modal" data-target="#nomenclatureCreateModal">Adicionar</button>
+                    {% elif field.name == 'sector' %}
                     <button type="button" class="btn btn-primary ml-2" id="addSectorBtn" data-toggle="modal" data-target="#sectorModal">Adicionar</button>
                     {% elif field.name == 'presentation' %}
                     <button type="button" class="btn btn-primary ml-2" id="addPresentationBtn" data-toggle="modal" data-target="#presentationModal">Adicionar</button>
@@ -73,6 +93,7 @@
     </form>
 </div>
 
+{% include 'partials/nomenclature_create_modal.html' %}
 {% include 'partials/supplier_modal.html' %}
 {% include 'partials/sector_modal.html' %}
 {% include 'partials/presentation_modal.html' %}
@@ -108,99 +129,30 @@
     $(document).ready(function() {
         restoreFormData();
 
-        function updateCheckboxes() {
-            const checkboxes = document.querySelectorAll('#sectorDropdown input[type="checkbox"]:not(#select_all_sector)');
-            const selectAllCheckbox = document.getElementById('select_all_sector');
+        // Função para atualizar checkboxes
+        function setupSelectAll(selectAllId, checkboxesSelector) {
+            const selectAllCheckbox = document.getElementById(selectAllId);
+            const checkboxes = document.querySelectorAll(checkboxesSelector);
 
-            selectAllCheckbox.addEventListener('change', function() {
-                checkboxes.forEach(checkbox => {
-                    checkbox.checked = selectAllCheckbox.checked;
-                });
-            });
-        }
-
-        function reloadCheckboxes(updateUrl) {
-            $.ajax({
-                url: updateUrl,
-                type: 'GET',
-                success: function(response) {
-                    const dropdownMenu = $('#sectorDropdown');
-                    dropdownMenu.empty();  // Limpa os checkboxes existentes
-
-                    // Adiciona o checkbox para selecionar todos
-                    dropdownMenu.append(`
-                        <div class="dropdown-item">
-                            <input type="checkbox" id="select_all_sector"> Selecionar Todos
-                        </div>
-                    `);
-
-                    // Adiciona os checkboxes para cada setor
-                    response.options.forEach(option => {
-                        dropdownMenu.append(`
-                            <div class="dropdown-item">
-                                <input type="checkbox" name="sector" value="${option.id}"> ${option.text}
-                            </div>
-                        `);
+            if (selectAllCheckbox) {
+                selectAllCheckbox.addEventListener('change', function() {
+                    checkboxes.forEach(checkbox => {
+                        checkbox.checked = selectAllCheckbox.checked;
                     });
-
-                    // Reconfigura o evento para "Selecionar Todos"
-                    updateCheckboxes();
-                },
-                error: function() {
-                    console.log('Erro ao recarregar os setores');
-                }
-            });
-        }
-        function updateCheckboxes() {
-            const checkboxes = document.querySelectorAll('#suppliersDropdown input[type="checkbox"]:not(#select_all_suppliers)');
-            const selectAllCheckbox = document.getElementById('select_all_suppliers');
-
-            selectAllCheckbox.addEventListener('change', function() {
-                checkboxes.forEach(checkbox => {
-                    checkbox.checked = selectAllCheckbox.checked;
                 });
-            });
+            }
         }
 
-        function reloadCheckboxes(updateUrl) {
-            $.ajax({
-                url: updateUrl,
-                type: 'GET',
-                success: function(response) {
-                    const dropdownMenu = $('#suppliersDropdown');
-                    dropdownMenu.empty();  // Limpa os checkboxes existentes
-
-                    // Adiciona o checkbox para selecionar todos
-                    dropdownMenu.append(`
-                        <div class="dropdown-item">
-                            <input type="checkbox" id="select_all_suppliers"> Selecionar Todos
-                        </div>
-                    `);
-
-                    // Adiciona os checkboxes para cada setor
-                    response.options.forEach(option => {
-                        dropdownMenu.append(`
-                            <div class="dropdown-item">
-                                <input type="checkbox" name="suppliers" value="${option.id}"> ${option.text}
-                            </div>
-                        `);
-                    });
-
-                    // Reconfigura o evento para "Selecionar Todos"
-                    updateCheckboxes();
-                },
-                error: function() {
-                    console.log('Erro ao recarregar os setores');
-                }
-            });
-        }
+        setupSelectAll('select_all_sector', '#sectorDropdown input[type="checkbox"]:not(#select_all_sector)');
+        setupSelectAll('select_all_suppliers', '#suppliersDropdown input[type="checkbox"]:not(#select_all_suppliers)');
+        setupSelectAll('select_all_nomenclature', '#nomenclatureDropdown input[type="checkbox"]:not(#select_all_nomenclature)');
 
         // Salvar os dados do formulário antes de abrir o modal
         $('#addSupplierBtn, #addSectorBtn, #addPresentationBtn').on('click', function() {
             saveFormData();
         });
 
-        // AJAX para adicionar fornecedor
+        // AJAX para envio dos formulários modais
         $('#supplier-form').on('submit', function(event) {
             event.preventDefault();
             saveFormData();
@@ -218,7 +170,6 @@
             });
         });
 
-        // AJAX para adicionar setor
         $('#sector-form').on('submit', function(event) {
             event.preventDefault();
             saveFormData();
@@ -236,27 +187,71 @@
             });
         });
 
-        // AJAX para adicionar forma de apresentação
         $('#presentation-form').on('submit', function(event) {
             event.preventDefault();
-            saveFormData();  // Salvando os dados do formulário principal no LocalStorage
-
+            saveFormData();
             $.ajax({
-                url: $(this).attr('action'),  // Usar a URL do action no form
+                url: $(this).attr('action'),
                 type: 'POST',
                 data: $(this).serialize(),
                 success: function(response) {
                     $('#presentationModal').modal('hide');
-                    location.reload();  // Atualizar a lista de opções ou recarregar a página
+                    location.reload();
                 },
                 error: function() {
-                    console.log('Erro ao adicionar forma de apresentação');
+                    console.log('Erro ao adicionar apresentação');
                 }
             });
         });
 
-        updateCheckboxes();
+        $(document).ready(function() {
+    // Função para enviar a nomenclatura via AJAX
+    function saveNomenclature() {
+        const nomenclatureName = $('#nomenclatureName').val().trim();
+        if (nomenclatureName === '') {
+            alert('Por favor, insira um nome.');
+            return;
+        }
+
+        $.ajax({
+            url: '{% url "nomenclature-create" %}',
+            type: 'POST',
+            data: {
+                'name': nomenclatureName,
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            success: function(response) {
+                if (response.success) {
+                    $('#nomenclatureCreateModal').modal('hide');
+                    location.reload();  // Recarregar para atualizar a lista de itens
+                } else {
+                    alert('Erro ao adicionar nomenclatura.');
+                }
+            },
+            error: function() {
+                alert('Erro no envio do formulário.');
+            }
+        });
+    }
+
+    // Evento de envio para o formulário (Enter ou botão "Salvar")
+    $('#createNomenclatureForm').on('submit', function(event) {
+        event.preventDefault(); // Previne o envio padrão do formulário
+        saveNomenclature(); // Chama a função para salvar via AJAX
     });
+
+    // Evento de clique no botão "Salvar"
+    $(document).on('click', '#saveNomenclatureBtn', function(event) {
+        event.preventDefault();
+        saveNomenclature();
+    });
+
+    // Foco automático no campo de entrada quando o modal é aberto
+    $('#nomenclatureCreateModal').on('shown.bs.modal', function() {
+        $('#nomenclatureName').focus();
+    });
+});
+});
 </script>
 
 {% endblock %}

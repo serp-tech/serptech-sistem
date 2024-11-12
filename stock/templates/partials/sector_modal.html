@@ -1,20 +1,30 @@
-<div class="modal fade" id="sectorModal" tabindex="-1" role="dialog" aria-labelledby="sectorModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
+<!-- Modal para Criar Nomenclatura -->
+<div class="modal fade" id="nomenclatureCreateModal" tabindex="-1" role="dialog" aria-labelledby="nomenclatureCreateModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
       <div class="modal-content">
-        <div class="modal-header" style="background-color: #1e1e1e; color: white;">
-          <h5 class="modal-title" id="sectorModalLabel">Adicionar Setor</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body" style="background-color: #101331; color: white;">
-          <form id="sector-form">
-            {% csrf_token %}
-            {{ sector_form.as_p }}
-            <button type="submit" class="btn btn-primary">Salvar</button>
-          </form>
-        </div>
+          <!-- Cabeçalho do Modal -->
+          <div class="modal-header" style="background-color: #1e1e1e; color: white;">
+              <h5 class="modal-title" id="nomenclatureCreateModalLabel">Adicionar Nomenclatura</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+              </button>
+          </div>
+
+          <!-- Corpo do Modal -->
+          <div class="modal-body" style="background-color: #101331; color: white;">
+              <form id="createNomenclatureForm">
+                  {% csrf_token %}
+                  
+                  <div class="form-group">
+                      <label for="nomenclatureName">Nome da Nomenclatura</label>
+                      <input type="text" class="form-control" id="nomenclatureName" name="name" required placeholder="Digite o nome da nomenclatura">
+                  </div>
+
+                  <div class="form-group">
+                      <button type="button" class="btn btn-primary" id="saveNomenclatureBtn">Salvar</button>
+                  </div>
+              </form>
+          </div>
       </div>
-    </div>
   </div>
-  
+</div>

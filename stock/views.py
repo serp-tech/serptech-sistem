@@ -21,11 +21,23 @@ from datetime import datetime
 from accounts.models import UserProfile
 from .cnpj_api.cnpj_api import request_cnpj
 from .models import (Sector, Unit, Requester, Presentation, Supplier, Item, Inflow, Outflow, Request,
-                    Inventory, Request, PurchaseOrder, ServiceOrder)
+                    Inventory, Request, PurchaseOrder, ServiceOrder, Nomenclature)
 from .forms import (SectorForm, UnitForm, UnitFilterForm, RequesterForm, PresentationForm, SupplierForm, 
                     ItemForm, InflowForm, OutflowForm, RequestForm, RequestItemFormSet, PurchaseOrderForm,
-                    PurchaseOrderDeniedForm, PurchaseOrderUpdateForm, ServiceOrderForm, ServiceOrderStartForm, ServiceOrderFinishForm, RequestItem, RequestItemApproveForm)
+                    PurchaseOrderDeniedForm, PurchaseOrderUpdateForm, ServiceOrderForm, ServiceOrderStartForm, ServiceOrderFinishForm, RequestItem, RequestItemApproveForm, NomenclatureForm)
 from .utils import format_currency
+
+class NomenclatureCreateView(CreateView):
+    model = Nomenclature
+    form_class = NomenclatureForm
+    template_name = None  # Não precisa de template específico para o modal
+
+    def form_valid(self, form):
+        self.object = form.save()
+        return JsonResponse({'success': True, 'name': self.object.name})
+
+    def form_invalid(self, form):
+        return JsonResponse({'success': False, 'errors': form.errors})
 
 class SectorListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
 
@@ -255,6 +267,7 @@ class ItemCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
         context['supplier_form'] = SupplierForm
         context['sector_form'] = SectorForm
         context['presentation_form'] = PresentationForm
+        context['nomemclature_form'] = NomenclatureForm
         return context
 
 

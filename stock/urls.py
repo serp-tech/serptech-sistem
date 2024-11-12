@@ -11,11 +11,13 @@ from .views import (
     supplier_autocomplete, item_autocomplete, inflow_autocomplete, outflow_autocomplete, inventory_autocomplete, PurchaseOrderListView,
     PurchaseOrderDetailView, PurchaseOrderCreateView, PurchaseOrderDeleteView, PurchaseOrderUpdateView, ServiceOrderListView, ServiceOrderCreateView,
     ServiceOrderDetailView, ServiceOrderUpdateView, ServiceOrderDeleteView, ApproveRequestView,  denied_request, delivery_request, approve_purchase, denied_purchase, submit_feedback, get_purchase,
-    purchase_made, delivery_purchase, reorder_order, start_service, finish_service, check_quantity_available,report_request_pdf, report_purchase_pdf, generate_outflow_report, generate_inflow_report             
+    purchase_made, delivery_purchase, reorder_order, start_service, finish_service, check_quantity_available,report_request_pdf, report_purchase_pdf, generate_outflow_report, generate_inflow_report, NomenclatureCreateView             
 )
 
 
 urlpatterns = [
+    path('nomenclature/create/', NomenclatureCreateView.as_view(), name='nomenclature-create'),
+
     path('sector/', SectorListView.as_view(), name='sector'),
     path('sector/add', SectorCreateView.as_view(), name='sector_add'),
     path('sector/<int:pk>/delete', SectorDeleteView.as_view(), name='sector_delete'),
